@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -20,6 +19,19 @@ jobs:
       - name: Build
         run: gradle build
 
+  publish:
+    name: Publish Artifacts
+    needs: [build]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
       - name: Publish
         run: gradle publishMaven
         env:
@@ -30,6 +42,12 @@ jobs:
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGKEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGPASSWORD }}
 
+  docs:
+    name: Update docs
+    needs: [publish]
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Update live specs
         run: sh .utility/update-gh-pages.sh
         env:
