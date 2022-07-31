@@ -22,7 +22,7 @@ publishing {
             pom {
                 name = project.name
                 description = 'Extension for Concordion BDD Framework'
-                url = 'https://github.com/Adven27/Exam'
+                url = 'https://github.com/toronik/exam'
 
                 licenses {
                     license {
@@ -32,15 +32,15 @@ publishing {
                 }
                 developers {
                     developer {
-                        id = "Adven27"
+                        id = "toronik"
                         name = "Nikolai Toropanov"
-                        email = "n.toropanov@gmail.com"
+                        email = "me@toropanov.ru"
                     }
                 }
                 scm {
-                    url = "https://github.com/Adven27/Exam"
-                    connection = 'scm:git:git://github.com/Adven27/Exam.git'
-                    developerConnection = 'scm:git:git://github.com/Adven27/Exam.git'
+                    url = "https://github.com/toronik/exam"
+                    connection = 'scm:git:git://github.com/toronik/exam.git'
+                    developerConnection = 'scm:git:git://github.com/toronik/exam.git'
                 }
             }
             repositories {

@@ -114,8 +114,7 @@ private val engine = embeddedServer(Netty, port = System.getProperty("server.por
         put("/widgets") {
             val widget = call.receive<NewWidget>()
             val updated = widgetService.update(widget)
-            if (updated == null) call.respond(HttpStatusCode.NotFound)
-            else call.respond(HttpStatusCode.OK, updated)
+            call.respond(HttpStatusCode.OK, updated)
         }
 
         delete("/widgets/{id}") {

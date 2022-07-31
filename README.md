@@ -4,8 +4,8 @@
 >[![Exam](docs/atdd.png)](#attributions)
 
 [![Stability: Active](https://masterminds.github.io/stability/active.svg)](https://masterminds.github.io/stability/active.html)
-![CI](https://github.com/Adven27/Exam/workflows/CI/badge.svg)
-[![](https://jitpack.io/v/Adven27/Exam.svg)](https://jitpack.io/#Adven27/Exam)
+![CI](https://github.com/toronik/exam/workflows/CI/badge.svg)
+[![](https://jitpack.io/v/toronik/exam.svg)](https://jitpack.io/#toronik/exam)
 
 
 **Exam** is oriented on **declarative end-to-end black\graybox** application testing in a way a manual tester would do it: send request, verify response\database\message queue etc.
@@ -14,22 +14,22 @@
 
 - **Declarative glue-code free** approach
 - **Attractive, flexible documentation** thanks to Concordion
-- **Widly used set of testing tools** under the hood: *dbunit, rest-assured, xml-unit, json-unit*
+- **Widely used set of testing tools** under the hood: *dbunit, rest-assured, xml-unit, json-unit*
 
 ## Getting started
 ### 1) Install
 
 ```groovy
 // Typical microservices setup (Web API + DB + MQ) testing:
-testImplementation "io.github.adven27:exam-ms:6.0.0-alpha-3"
+testImplementation "io.github.adven27:exam-ms:<version>"
 
 //same as:
-//testImplementation "io.github.adven27:exam-ws:6.0.0-alpha-3"
-//testImplementation "io.github.adven27:exam-db:6.0.0-alpha-3"
-//testImplementation "io.github.adven27:exam-mq:6.0.0-alpha-3"
+//testImplementation "io.github.adven27:exam-ws:<version>"
+//testImplementation "io.github.adven27:exam-db:<version>"
+//testImplementation "io.github.adven27:exam-mq:<version>"
 
 // UI testing
-testImplementation "io.github.adven27:exam-ui:6.0.0-alpha-3"
+testImplementation "io.github.adven27:exam-ui:<version>"
 ```
 ### 2) Use
 
@@ -82,6 +82,7 @@ public class UserCreation extends Specs {
 <body>
     <h1>User creation</h1>
     <e:example name="My dummy user creation example">
+        
         <e:given>
           Given users:
           <e:db-set table="user" cols="name, age, id=1..10">
@@ -89,8 +90,10 @@ public class UserCreation extends Specs {
               <e:row>Bob   , 30</e:row>
           </e:db-set>
         </e:given>
+        
         <e:post url="users">
-          <e:case desc="When name and age was posted user should be created and id should be returned">        
+          
+            <e:case desc="When name and age was posted user should be created and id should be returned">        
             <e:body> {"name": "Carl", "age": 40} </e:body>
             <e:expected> {"id": "{{number}}"} </e:expected>
             <e:check>
@@ -100,7 +103,8 @@ public class UserCreation extends Specs {
                   <e:row>Carl  , 40</e:row>
                 </e:db-check>
             </e:check>
-          </e:case>      
+          </e:case>
+            
           <e:case desc="Age is optional">
             <e:body> {"name": "Don"} </e:body>
             <e:expected> {"id": "{{number}}"} </e:expected>
@@ -110,7 +114,9 @@ public class UserCreation extends Specs {
                 </e:db-check>
             </e:check>
           </e:case>
+            
         </e:post>
+        
     </e:example>
 </body>
 </html>

@@ -68,7 +68,7 @@ enum class MiscHelpers(
     }
 
     private fun validate(options: Options) {
-        if ("resolve" == this.name || "resolveFile" == this.name) return
+        if ("resolve" == this.name || "resolveFile" == this.name || "map" == this.name) return
         val unexpected = options.hash.keys - this.options.keys
         if (unexpected.isNotEmpty()) throw IllegalArgumentException(
             "Wrong options for helper '${options.fn.text()}': found '$unexpected', expected any of '${this.options}'"
