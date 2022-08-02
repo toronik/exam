@@ -14,6 +14,10 @@ buildscript {
     }
 }
 
+plugins {
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+}
+
 group = 'io.github.adven27'
 version = libVersion
 
@@ -65,15 +69,24 @@ subprojects {
 }
 
 task publishMaven {
-    dependsOn ":exam-core:publish"
-    dependsOn ":exam-db:publish"
-    dependsOn ":exam-ws:publish"
-    dependsOn ":exam-mq:publish"
-    dependsOn ":exam-mq-rabbit:publish"
-    dependsOn ":exam-mq-kafka:publish"
-    dependsOn ":exam-mq-ibmmq:publish"
-    dependsOn ":exam-mq-redis:publish"
-    dependsOn ":exam-files:publish"
-    dependsOn ":exam-ui:publish"
-    dependsOn ":exam-ms:publish"
+    dependsOn ":exam-core:publishToSonatype"
+    dependsOn ":exam-db:publishToSonatype"
+    dependsOn ":exam-ws:publishToSonatype"
+    dependsOn ":exam-mq:publishToSonatype"
+    dependsOn ":exam-mq-rabbit:publishToSonatype"
+    dependsOn ":exam-mq-kafka:publishToSonatype"
+    dependsOn ":exam-mq-ibmmq:publishToSonatype"
+    dependsOn ":exam-mq-redis:publishToSonatype"
+    dependsOn ":exam-files:publishToSonatype"
+    dependsOn ":exam-ui:publishToSonatype"
+    dependsOn ":exam-ms:publishToSonatype"
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        }
+    }
 }

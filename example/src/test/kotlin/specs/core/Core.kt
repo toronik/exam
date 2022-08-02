@@ -12,5 +12,7 @@ class CoreVerify : Specs() {
         Result(it, """{ "result": "$it" }""", """<result>$it</result>""")
     }
 
+    val emptyString = ""
+
     data class Result(val text: String, val json: String, val xml: String)
 }

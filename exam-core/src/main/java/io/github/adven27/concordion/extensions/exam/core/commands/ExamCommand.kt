@@ -89,7 +89,7 @@ open class ExamAssertEqualsCommand(
 
     private fun CommandCall.swapText(value: String) {
         Html(descendantTextContainer(element)).removeChildren()(
-            codeHighlight(value, config.printer.style()).apply { el.appendNonBreakingSpaceIfBlank() }
+            codeHighlight(value, config.printer.style())
         )
     }
 

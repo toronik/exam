@@ -32,12 +32,10 @@ jobs:
           java-version: 11
 
       - name: Publish
-        run: gradle publishMaven
+        run: gradle publishMaven closeSonatypeStagingRepository -i
         env:
-          ossrhUsername: ${{ secrets.OSSRHUSERNAME }}
-          ossrhPassword: ${{ secrets.OSSRHPASSWORD }}
-          ORG_GRADLE_PROJECT_ossrhUsername: ${{ secrets.OSSRHUSERNAME }}
-          ORG_GRADLE_PROJECT_ossrhPassword: ${{ secrets.OSSRHPASSWORD }}
+          ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.OSSRHUSERNAME }}
+          ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.OSSRHPASSWORD }}
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGKEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGPASSWORD }}
 

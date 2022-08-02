@@ -57,6 +57,21 @@
         </table>
     </e:then>
 
+    <e:then>
+        <table cc:execute="#result = getEmptyString()" print="true">
+            <tr>
+                <th e:equals="#result">Text</th>
+                <th e:jsonEquals="#result">JSON</th>
+                <th e:xmlEquals="#result">XML</th>
+            </tr>
+            <tr>
+                <td/>
+                <td/>
+                <td/>
+            </tr>
+        </table>
+    </e:then>
+
 </e:example>
 
 </body>
