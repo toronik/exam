@@ -8,7 +8,6 @@ import io.github.adven27.concordion.extensions.exam.core.commands.SetUpListener
 import io.github.adven27.concordion.extensions.exam.nosql.NoSqlDBTester
 import org.concordion.api.Evaluator
 
-
 class SetCommand(
     override val name: String = "nosql-set",
     val dbTester: NoSqlDBTester,

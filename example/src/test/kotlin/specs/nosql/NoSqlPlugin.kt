@@ -2,4 +2,4 @@ package specs.nosql
 
 import specs.Specs
 
-class NoSqlPlugin:Specs()
+class NoSqlPlugin : Specs()

@@ -26,17 +26,17 @@ class HtmlSetRenderer : SetUpListener<SetCommand.Operation> {
         <tbody> ${renderDocuments(documents)} </tbody>
     </table>
 </div>
-    """.trimIndent()
+        """.trimIndent()
 
     //language=html
     fun renderDocuments(documents: List<NoSqlDocument>) = documents.joinToString("\n") {
         """
 <tr><td class='exp-body'>${renderDoc(it)}</td></tr>
-    """.trimIndent()
+        """.trimIndent()
     }.ifEmpty { """<tr><td class='exp-body'>EMPTY</td></tr>""" }
 
     // language=html
     fun renderDoc(doc: NoSqlDocument): String =
-        """<div class="json"></div>""".toHtml().text(ObjectMapper().writeValueAsString(doc.fields).pretty("json")).el.toXML()
-
+        """<div class="json"></div>""".toHtml()
+            .text(ObjectMapper().writeValueAsString(doc.fields).pretty("json")).el.toXML()
 }

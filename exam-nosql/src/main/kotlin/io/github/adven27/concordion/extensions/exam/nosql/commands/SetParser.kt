@@ -66,6 +66,6 @@ class SetParser : CommandParser<SetCommand.Operation> {
         return file
     }
 
-    private fun collectionFrom(command: CommandCall, eval: Evaluator) = (command.html().takeAwayAttr("collection", eval)
-        ?: throw IllegalArgumentException("collection attribute is missing in set command"))
+    private fun collectionFrom(command: CommandCall, eval: Evaluator) = command.html().takeAwayAttr("collection", eval)
+        ?: throw IllegalArgumentException("collection attribute is missing in set command")
 }
