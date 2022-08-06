@@ -12,9 +12,10 @@ class NoSqlPlugin @JvmOverloads constructor(
             SetCommand("nosql-set", dbTester)
         )
 
+    @Suppress("EmptyFunctionBlock")
     override fun setUp() {
     }
-
+    @Suppress("EmptyFunctionBlock")
     override fun tearDown() {
     }
 }

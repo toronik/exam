@@ -1,6 +1,10 @@
 package io.github.adven27.concordion.extensions.exam.nosql.commands
 
-import io.github.adven27.concordion.extensions.exam.core.commands.*
+import io.github.adven27.concordion.extensions.exam.core.commands.BeforeParseExamCommand
+import io.github.adven27.concordion.extensions.exam.core.commands.CommandParser
+import io.github.adven27.concordion.extensions.exam.core.commands.ExamSetUpCommand
+import io.github.adven27.concordion.extensions.exam.core.commands.NamedExamCommand
+import io.github.adven27.concordion.extensions.exam.core.commands.SetUpListener
 import io.github.adven27.concordion.extensions.exam.nosql.NoSqlDBTester
 import org.concordion.api.Evaluator
 

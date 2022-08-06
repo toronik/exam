@@ -7,5 +7,8 @@ interface NoSqlDBTester {
 }
 
 class NOOPTester : NoSqlDBTester {
-    override fun set(collection: String, documents: List<NoSqlDocument>) {}
+
+    @Suppress("EmptyFunctionBlock")
+    override fun set(collection: String, documents: List<NoSqlDocument>){
+    }
 }
