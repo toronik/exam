@@ -13,6 +13,7 @@ dependencies {
     testImplementation project(':exam-ms')
     testImplementation project(':exam-ui')
     testImplementation project(':exam-files')
+    testImplementation project(':exam-nosql')
 
     testImplementation 'org.concordion:concordion-timing-extension:1.1.0'
     testImplementation 'org.concordion:concordion-run-totals-extension:1.2.0'

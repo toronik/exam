@@ -11,5 +11,6 @@ include 'exam-mq-ibmmq'
 include 'exam-ui'
 include 'exam-files'
 include 'exam-ms'
+include 'exam-nosql'
 
 include 'example'
