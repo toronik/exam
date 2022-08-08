@@ -1,0 +1,43 @@
+<html xmlns:e="http://exam.extension.io" xmlns:cc="http://www.concordion.org/2007/concordion">
+<body>
+<h1>nosql-set</h1>
+
+<p class="lead">Reads dataset for specified collection and applies it to your database</p>
+<h2>Overview</h2>
+
+<e:set var="cmd" hidden="" value="e:nosql-set"/>
+<e:set var="cmdExample" hidden="">
+    <![CDATA[<e:nosql-set collection="MY_COLLECTION" from="/data/nosql/example.json"/>]]> </e:set>
+<e:include from="/specs/includes/nosql/usage.xml"/>
+
+<h2>Examples</h2>
+<e:example name="Inserting from file">
+    <e:given>
+        <e:nosql-set collection="MY_COLLECTION" from="/data/nosql/example.json" print="true"/>
+    </e:given>
+</e:example>
+
+<e:example name="Inserting directly from specification">
+    <e:given>
+        <e:nosql-set collection="MY_COLLECTION" print="true">
+            <e:doc>
+                {
+                    "field1": "value1",
+                    "field2": {
+                        "innerField1": "innerValue1"
+                    }
+                }
+            </e:doc>
+            <e:doc>
+                {
+                    "field2": "value2",
+                    "field3": {
+                        "innerField2": "innerValue2"
+                    }
+                }
+            </e:doc>
+        </e:nosql-set>
+    </e:given>
+</e:example>
+</body>
+</html>

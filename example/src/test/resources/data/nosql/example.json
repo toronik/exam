@@ -1,0 +1,14 @@
+[
+  {
+    "field1": "value1",
+    "field2": {
+      "innerField1": "innerValue1"
+    }
+  },
+  {
+    "field2": "value2",
+    "field3": {
+      "innerField2": "innerValue2"
+    }
+  }
+]

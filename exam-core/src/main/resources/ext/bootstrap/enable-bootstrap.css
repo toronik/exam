@@ -79,6 +79,14 @@ div.fa-caret-square-down {
     border-radius: 0.25rem !important;
 }
 
+.nosql-set > table {
+    table-layout: fixed;
+}
+
+.nosql-set pre {
+    border-radius: 0.25rem !important;
+}
+
 dt a {
     text-decoration: none;
     font-size: 1.25rem;

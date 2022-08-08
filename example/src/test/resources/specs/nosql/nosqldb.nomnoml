@@ -1,0 +1,20 @@
+#.exam: fill=#0ee
+#.interface: fill=#0ee
+#.db: fill=#0e0 visual=database
+
+#gravity: 3
+#padding: 18
+#spacing: 45
+#direction: right
+
+[<interface>NoSqlDBTester|set();verify();show();clear()]
+
+[<exam>NoSqlPlugin]uses->[NoSqlDBTester]
+[NoSqlDBTester]<:-- implements[<class> MongoTesterImpl]
+[NoSqlDBTester]<:-- implements[<class> CassandraTesterImpl]
+[NoSqlDBTester]<:--[<label> ...]
+[NoSqlDBTester]<:-- implements[<class> AnyCustomImpl]
+
+[MongoTesterImpl]interacts with->[<db> Mongo DB]
+[CassandraTesterImpl]interacts with->[<db> Cassandra]
+[AnyCustomImpl]interacts with->[<db> Any other NoSql DB]
