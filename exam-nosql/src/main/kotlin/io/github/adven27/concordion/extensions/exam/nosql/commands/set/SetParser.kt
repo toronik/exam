@@ -1,4 +1,4 @@
-package io.github.adven27.concordion.extensions.exam.nosql.commands
+package io.github.adven27.concordion.extensions.exam.nosql.commands.set
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -7,6 +7,7 @@ import io.github.adven27.concordion.extensions.exam.core.commands.CommandParser
 import io.github.adven27.concordion.extensions.exam.core.content
 import io.github.adven27.concordion.extensions.exam.core.html.html
 import io.github.adven27.concordion.extensions.exam.core.resolveJson
+import io.github.adven27.concordion.extensions.exam.nosql.NoSqlDocument
 import org.concordion.api.CommandCall
 import org.concordion.api.Evaluator
 import java.io.BufferedReader

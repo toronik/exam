@@ -1,10 +1,11 @@
-package io.github.adven27.concordion.extensions.exam.nosql.commands
+package io.github.adven27.concordion.extensions.exam.nosql.commands.set
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.adven27.concordion.extensions.exam.core.commands.SetUpEvent
 import io.github.adven27.concordion.extensions.exam.core.commands.SetUpListener
 import io.github.adven27.concordion.extensions.exam.core.pretty
 import io.github.adven27.concordion.extensions.exam.core.toHtml
+import io.github.adven27.concordion.extensions.exam.nosql.NoSqlDocument
 import org.concordion.api.Element
 import org.concordion.api.listener.AbstractElementEvent
 

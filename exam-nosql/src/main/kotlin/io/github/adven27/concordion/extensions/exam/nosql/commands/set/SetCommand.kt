@@ -1,4 +1,4 @@
-package io.github.adven27.concordion.extensions.exam.nosql.commands
+package io.github.adven27.concordion.extensions.exam.nosql.commands.set
 
 import io.github.adven27.concordion.extensions.exam.core.commands.BeforeParseExamCommand
 import io.github.adven27.concordion.extensions.exam.core.commands.CommandParser
@@ -6,6 +6,7 @@ import io.github.adven27.concordion.extensions.exam.core.commands.ExamSetUpComma
 import io.github.adven27.concordion.extensions.exam.core.commands.NamedExamCommand
 import io.github.adven27.concordion.extensions.exam.core.commands.SetUpListener
 import io.github.adven27.concordion.extensions.exam.nosql.NoSqlDBTester
+import io.github.adven27.concordion.extensions.exam.nosql.NoSqlDocument
 import org.concordion.api.Evaluator
 
 class SetCommand(
