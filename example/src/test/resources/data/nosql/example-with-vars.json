@@ -1,0 +1,6 @@
+ {
+    "field1": "{{myVar1}}",
+    "field2": {
+      "innerField1": "{{myVar2}}"
+    }
+  }

@@ -9,6 +9,7 @@ import io.github.adven27.concordion.extensions.exam.core.commands.NamedExamComma
 import io.github.adven27.concordion.extensions.exam.core.commands.VerifyListener
 import io.github.adven27.concordion.extensions.exam.nosql.NoSqlDBTester
 import io.github.adven27.concordion.extensions.exam.nosql.NoSqlDocument
+import io.github.adven27.concordion.extensions.exam.nosql.commands.HtmlNoSqlParser
 import io.github.adven27.concordion.extensions.exam.nosql.commands.check.CheckCommand.Actual
 import io.github.adven27.concordion.extensions.exam.nosql.commands.check.CheckCommand.Expected
 
@@ -17,7 +18,7 @@ class CheckCommand(
     private val dbTester: NoSqlDBTester,
     verifier: NoSqlVerifier = NoSqlVerifier(),
     actualProvider: ActualProvider<Expected, Pair<Boolean, Actual>> = NoSqlActualProvider(dbTester),
-    commandParser: CommandParser<Expected> = CheckParser(),
+    commandParser: CommandParser<Expected> = CheckParser(HtmlNoSqlParser()),
     resultRenderer: VerifyListener<Expected, Actual> = HtmlCheckRenderer()
 ) : ExamAssertCommand<Expected, Actual>(commandParser, verifier, actualProvider, resultRenderer),
     NamedExamCommand,

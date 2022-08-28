@@ -2,7 +2,8 @@
     <h3>NoSql Database plugin</h3>
     <hr/>
     <p>
-        <strong>NoSqlPlugin</strong> is a plugin that enables to setup and verify state of your nosql database system (like MongoDB)
+        <strong>NoSqlPlugin</strong>
+        is a plugin that enables to setup and verify state of your nosql database system (like MongoDB)
     </p>
     <figure class="figure">
         <canvas class="nomnoml container" from="/specs/nosql/nosqldb.nomnoml"/>
@@ -10,8 +11,14 @@
     </figure>
 
     <h4>Usage</h4>
-    <p>1. Add dependency <pre class="doc-code language-java"><code>testImplementation "io.github.adven27:exam-nosql:{{version}}"</code></pre></p>
-    <p>2. Configure and attach the <a cc:run="concordion" href="nosql/NoSqlPlugin.xhtml">NoSqlPlugin</a></p>
+    <p>1. Add dependency
+        <pre class="doc-code language-java">
+            <code>testImplementation "io.github.adven27:exam-nosql:{{version}}"</code>
+        </pre>
+    </p>
+    <p>2. Configure and attach the
+        <a cc:run="concordion" href="nosql/NoSqlPlugin.xhtml">NoSqlPlugin</a>
+    </p>
 
     <h4>Commands</h4>
     <p>
@@ -22,16 +29,26 @@
     <h5>Set up NoSql Database</h5>
 
     <dl>
-        <dt><code><a cc:run="concordion" href="nosql/nosqlset/NoSqlSet.xhtml">nosql-set</a></code></dt>
+        <dt>
+            <code>
+                <a cc:run="concordion" href="nosql/nosqlset/NoSqlSet.xhtml">nosql-set</a>
+            </code>
+        </dt>
         <dd>
             <p>Creates and applies a dataset for specified collection from file or directly from your specification:</p>
-            <pre class="doc-code language-xml"><code>
-            <![CDATA[
-                <e:nosql-set collection="MY_COLLECTION" from="/data/nosql/example.json"/>
+            <pre class="doc-code language-xml">
+                <code>
+                    <![CDATA[
+                <e:nosql-set collection="MY_COLLECTION">
+                    <e:doc from="/data/nosql/example.json"/>
+                    <e:doc from="/data/nosql/example-2.json"/>
+                </e:nosql-set>
             ]]>
-            </code></pre>
-            <pre class="doc-code language-xml"><code>
-                <![CDATA[
+                </code>
+            </pre>
+            <pre class="doc-code language-xml">
+                <code>
+                    <![CDATA[
                 <e:nosql-set collection="MY_COLLECTION">
                     <e:doc>
                         [
@@ -51,50 +68,49 @@
                     </e:doc>
                 </e:nosql-set>
                 ]]>
-            </code></pre>
+                </code>
+            </pre>
         </dd>
-        <!--<dt><code><a cc:run="concordion" href="db/dbexecute/DbExecute.xhtml">db-execute</a></code></dt>
-        <dd>
-            <p>Applies specified DbUnit datasets:</p>
-            <pre class="doc-code language-xml"><code><![CDATA[ <e:db-execute datasets="/data/db/adam.xml, /data/db/bob.json, /data/db/carl/person.csv"/> ]]></code></pre>
-        </dd>
-        <dt><code><a cc:run="concordion" href="db/dbclean/DbClean.xhtml">db-clean</a></code></dt>
+
+        <!--<dt><code><a cc:run="concordion" href="db/dbclean/DbClean.xhtml">db-clean</a></code></dt>
         <dd>
             <p>Cleans specified tables with <code>DELETE_ALL</code> DbUnit operation:</p>
             <pre class="doc-code language-xml"><code><![CDATA[<e:db-clean tables="person, person_fields"/>]]></code></pre>
         </dd>-->
     </dl>
 
-   <!-- <h5>Verify database</h5>
+    <h5>Verify NoSql Database</h5>
 
     <dl>
-        <dt><code><a cc:run="concordion" href="db/dbcheck/DbCheck.xhtml">db-check</a></code></dt>
+        <dt>
+            <code>
+                <a cc:run="concordion" href="nosql/nosqlcheck/NoSqlCheck.xhtml">nosql-check</a>
+            </code>
+        </dt>
         <dd>
-            <p>Creates a DbUnit dataset and verifies that it matches specified database table:</p>
-            <pre class="doc-code language-xml"><code>
-            <![CDATA[
-                <e:db-check table="person" cols="id=1..10, name, birthday, created={{now}}">
-                    <e:row>Bob, {{date '01.01.2001' format='dd.MM.yyyy'}}</e:row>
-                    <e:row> Ed, {{date '02.02.2002' format='dd.MM.yyyy'}}</e:row>
-                </e:db-check>
+            <p>Verifies that given set of documents matches specified database collection</p>
+            <pre class="doc-code language-xml">
+                <code>
+                    <![CDATA[
+                <e:nosql-check collection="MY_COLLECTION">
+                    <e:doc from="/data/nosql/example.json"/>
+                    <e:doc from="/data/nosql/example-2.json"/>
+                </e:nosql-check>
             ]]>
-            </code></pre>
-        </dd>
-        <dt><code><a cc:run="concordion" href="db/dbverify/DbVerify.xhtml">db-verify</a></code></dt>
-        <dd>
-            <p>Verifies that database matches a state described in a DbUnit datasets:</p>
-            <pre class="doc-code language-xml"><code><![CDATA[ <e:db-verify datasets="/data/db/adam.xml, /data/db/bob.json, /data/db/carl/person.csv"/> ]]></code></pre>
+                </code>
+            </pre>
         </dd>
     </dl>
 
-    <h5>Debug database</h5>
+    <!--
+     <h5>Debug database</h5>
 
-    <dl>
-        <dt><code><a cc:run="concordion" href="db/dbshow/DbShow.xhtml">db-show</a></code></dt>
-        <dd>
-            <p>Creates a DbUnit dataset files and prints content of specified database table:</p>
-            <pre class="doc-code language-xml"><code><![CDATA[<e:db-show table="person" saveToResources="/data/db/person.xml"/>]]></code></pre>
-        </dd>
-    </dl>-->
+     <dl>
+         <dt><code><a cc:run="concordion" href="db/dbshow/DbShow.xhtml">db-show</a></code></dt>
+         <dd>
+             <p>Creates a DbUnit dataset files and prints content of specified database table:</p>
+             <pre class="doc-code language-xml"><code><![CDATA[<e:db-show table="person" saveToResources="/data/db/person.xml"/>]]></code></pre>
+         </dd>
+     </dl>-->
 
 </ignored>

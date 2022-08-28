@@ -15,7 +15,7 @@ import io.github.adven27.concordion.extensions.exam.db.commands.IgnoreMillisComp
 import io.github.adven27.concordion.extensions.exam.files.FlPlugin
 import io.github.adven27.concordion.extensions.exam.mq.MqPlugin
 import io.github.adven27.concordion.extensions.exam.mq.MqTester
-import io.github.adven27.concordion.extensions.exam.nosql.NOOPTester
+import io.github.adven27.concordion.extensions.exam.nosql.NoSqlDefaultTester
 import io.github.adven27.concordion.extensions.exam.nosql.NoSqlPlugin
 import io.github.adven27.concordion.extensions.exam.ui.UiPlugin
 import io.github.adven27.concordion.extensions.exam.ws.WsPlugin
@@ -27,7 +27,7 @@ open class Specs : AbstractSpecs() {
     override fun init() = ExamExtension(
         WsPlugin(PORT.apply { System.setProperty("server.port", this.toString()) }),
         DbPlugin(dbTester),
-        NoSqlPlugin(NOOPTester()),
+        NoSqlPlugin(nosqlTester),
         MqPlugin(
             mapOf(
                 "myQueue" to object : MqTester.NOOP() {
@@ -80,6 +80,9 @@ open class Specs : AbstractSpecs() {
 
         @JvmStatic
         val dbTester = dbTester()
+
+        @JvmStatic
+        val nosqlTester = NoSqlDefaultTester()
 
         private fun dbTester() = DbTester(
             "org.h2.Driver", "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:sql/populate.sql'",

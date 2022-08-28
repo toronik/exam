@@ -1,0 +1,163 @@
+<html xmlns:e="http://exam.extension.io" xmlns:cc="http://www.concordion.org/2007/concordion">
+<body>
+<h1>nosql-check</h1>
+
+<p class="lead">Verifies that specified documents match the existing state of database collection</p>
+
+<h2>Overview</h2>
+
+<e:set var="cmd" hidden="" value="e:nosql-check"/>
+<e:set var="cmdExample" hidden=""><![CDATA[
+        <e:nosql-check collection="MY_COLLECTION">
+            <e:doc from="/data/nosql/example.json"/>
+            <e:doc from="/data/nosql/example-2.json"/>
+        </e:nosql-check>
+    ]]>
+</e:set>
+<e:include from="/specs/includes/nosql/usage.xml"/>
+
+<h3>Attributes</h3>
+<table class="table" style="table-layout: fixed;">
+    <thead>
+    <tr>
+        <th style="width: 155px;">attribute</th>
+        <th style="width: 300px;">desc</th>
+        <th>example</th>
+    </tr>
+    </thead>
+    <e:include from="/specs/includes/nosql/attr-collection.xml"/>
+    <e:include from="/specs/includes/attr-from.xml"/>
+    <e:include from="/specs/includes/attr-vars.xml"/>
+    <e:include from="/specs/includes/attr-awaitAtMostSec.xml"/>
+    <e:include from="/specs/includes/attr-awaitPollDelayMillis.xml"/>
+    <e:include from="/specs/includes/attr-awaitPollIntervalMillis.xml"/>
+</table>
+<e:include from="/specs/includes/await-footnote.xml"/>
+
+<h2>Examples</h2>
+
+<div cc:example="before">
+
+    <!-- TODO  switch to nosql-clean-->
+    Cleaning collection <code cc:set="#collectionName">MY_COLLECTION</code>
+    <span cc:execute="cleanCollection(#collectionName)"/>
+</div>
+
+<h3>Verify single document</h3>
+
+<h4>Specifying document in tag body</h4>
+
+<p>
+    To verify single document short form of the command may be used:
+    expected document template may be specified without nested <code>e:doc</code> tag.
+</p>
+<e:example name="Single document">
+    <e:given>
+        Collection has a document:
+        <e:nosql-set collection="MY_COLLECTION">{"date" : "{{now 'yyyy-MM-dd'}}"}</e:nosql-set>
+    </e:given>
+    <e:then>
+        Verify that there is a given document in database:
+        <e:nosql-check collection="MY_COLLECTION" print="true">{"date" : "{{now 'yyyy-MM-dd'}}"}</e:nosql-check>
+    </e:then>
+</e:example>
+
+<h4>Specifying document in a file</h4>
+
+<p>
+    Expected document template could be specified in file via <code>from</code> attribute.
+    <code>vars</code> attribute could be used to conveniently provide context variables for document template.
+</p>
+<e:example name="Single document from file">
+    <e:given>
+        Collection contains a document:
+        <e:nosql-set collection="MY_COLLECTION"
+                     from="/data/nosql/example-with-vars.json"
+                     vars="myVar1={{now 'yyyy-MM-dd'}} | myVar2={{date myVar1 minus='1 d'}}"
+                     varsSeparator="|"/>
+        And there is the expected doc file template:
+        <e:fl-check dir="filesDir">
+            <e:file name="example-with-vars.json"/>
+        </e:fl-check>
+    </e:given>
+    <e:then>
+        Verify that there is a document:
+        <e:nosql-check collection="MY_COLLECTION"
+                       from="/data/nosql/example-with-vars.json"
+                       vars="myVar1={{now 'yyyy-MM-dd'}} | myVar2={{date myVar1 minus='1 d'}}"
+                       varsSeparator="|"
+                       print="true"/>
+    </e:then>
+</e:example>
+
+<h4>Verify empty collection</h4>
+
+<p>
+    To verify that collection is empty use <code>e:nosql-check</code> command with empty tag body.
+</p>
+<e:example name="empty">
+    <e:then>
+        Verify that collection is empty:
+        <e:nosql-check collection="MY_COLLECTION" print="true"/>
+    </e:then>
+</e:example>
+
+<h3>Verifying list of documents</h3>
+
+<h4>Overview</h4>
+
+<p>
+    Expected document list can be specified via nested<code>e:doc</code> tags. Each document template may be
+    specified either as <code>e:doc</code> tag body or in a file via <code>from</code> attribute.
+    The <code>vars</code> attribute could be used to conveniently provide context variables for document template.
+</p>
+<e:example name="Message list">
+    <e:given>
+        Collection has docs:
+        <div class="row no-gutters">
+            <e:nosql-set collection="MY_COLLECTION">{"msg" : "1"}</e:nosql-set>
+            <e:nosql-set collection="MY_COLLECTION"
+                         from="/data/nosql/example-with-vars.json"
+                         vars="myVar1={{now 'yyyy-MM-dd'}} | myVar2={{date myVar1 minus='1 d'}}"
+                         varsSeparator="|"/>
+            <e:nosql-set collection="MY_COLLECTION">{"msg" : "3"}</e:nosql-set>
+        </div>
+    </e:given>
+    <e:then>
+        Verify that there is the exact document list:
+        <e:nosql-check collection="MY_COLLECTION" print="true">
+            <e:doc>{"msg" : "1"}</e:doc>
+            <e:doc from="/data/nosql/example-with-vars.json"
+                   vars="myVar1={{now 'yyyy-MM-dd'}} | myVar2={{date myVar1 minus='1 d'}}"
+                   varsSeparator="|"/>
+            <e:doc>{"msg" : "3"}</e:doc>
+        </e:nosql-check>
+    </e:then>
+</e:example>
+
+
+<h3>Pretty-printing</h3>
+
+<h4>Collapsable view</h4>
+
+<p>
+    Big documents may be collapsed in report via the <code>collapsable</code> attribute.
+</p>
+<e:example name="collapsable messages">
+    <e:given>
+        Collection has some big message:
+        <e:nosql-set collection="MY_COLLECTION" from="/data/nosql/example-big.json" collapsable="true"/>
+    </e:given>
+    <e:then>
+        Verified message may be hide in a collapsable block:
+        <e:nosql-check collection="MY_COLLECTION" from="/data/nosql/example-big.json" collapsable="true" print="true"/>
+    </e:then>
+</e:example>
+
+
+<h2>More</h2>
+<ul>
+    <li><a cc:run="concordion" href="NoSqlFailures.xhtml">How do check failures look like?</a></li>
+</ul>
+</body>
+</html>

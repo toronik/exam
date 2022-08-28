@@ -2,11 +2,27 @@ package io.github.adven27.concordion.extensions.exam.nosql
 
 interface NoSqlDBTester {
     fun set(collection: String, documents: List<NoSqlDocument>)
+    fun receive(collection: String): List<NoSqlDocument>
+    fun clean(collections: Collection<String>)
 }
 
-class NOOPTester : NoSqlDBTester {
+class NoSqlDefaultTester : NoSqlDBTester {
 
-    @Suppress("EmptyFunctionBlock")
+    private val docs: MutableMap<String, List<NoSqlDocument>> = HashMap()
+
     override fun set(collection: String, documents: List<NoSqlDocument>) {
+        if (docs.containsKey(collection)) {
+            docs[collection] = docs[collection]!! + documents
+        } else {
+            docs[collection] = documents
+        }
+    }
+
+    override fun receive(collection: String): List<NoSqlDocument> {
+        return docs[collection] ?: emptyList()
+    }
+
+    override fun clean(collections: Collection<String>) {
+        collections.forEach { c -> docs.remove(c) }
     }
 }

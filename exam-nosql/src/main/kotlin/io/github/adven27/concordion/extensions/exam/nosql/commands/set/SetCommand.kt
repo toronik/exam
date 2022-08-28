@@ -7,12 +7,13 @@ import io.github.adven27.concordion.extensions.exam.core.commands.NamedExamComma
 import io.github.adven27.concordion.extensions.exam.core.commands.SetUpListener
 import io.github.adven27.concordion.extensions.exam.nosql.NoSqlDBTester
 import io.github.adven27.concordion.extensions.exam.nosql.NoSqlDocument
+import io.github.adven27.concordion.extensions.exam.nosql.commands.HtmlNoSqlParser
 import org.concordion.api.Evaluator
 
 class SetCommand(
     override val name: String = "nosql-set",
     val dbTester: NoSqlDBTester,
-    commandParser: CommandParser<Operation> = SetParser(),
+    commandParser: CommandParser<Operation> = SetParser(HtmlNoSqlParser()),
     listener: SetUpListener<Operation> = HtmlSetRenderer()
 ) : ExamSetUpCommand<SetCommand.Operation>(commandParser, listener), NamedExamCommand, BeforeParseExamCommand {
 
