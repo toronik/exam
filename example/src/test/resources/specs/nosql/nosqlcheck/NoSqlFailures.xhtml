@@ -1,0 +1,73 @@
+<html xmlns:e="http://exam.extension.io" xmlns:cc="http://www.concordion.org/2007/concordion">
+<body>
+    <e:before-each>
+        <e:given>
+            <!-- TODO  switch to nosql-clean-->
+            Cleaning collection <code cc:set="#collectionName">MY_COLLECTION</code>
+            <span cc:execute="cleanCollection(#collectionName)"/>
+        </e:given>
+    </e:before-each>
+
+    <h1>Failures</h1>
+
+    <h2>Extra documents</h2>
+
+    <e:example name="extra-1" status="ExpectedToFail">
+        <e:when>
+            Collection contains a message
+            <e:nosql-set collection="MY_COLLECTION">{ "doc": "1" }</e:nosql-set>
+        </e:when>
+        <e:then>
+            Verify:
+            <e:nosql-check collection="MY_COLLECTION"/>
+        </e:then>
+    </e:example>
+
+
+    <e:example name="extra-2" status="ExpectedToFail">
+        <e:when>
+            Collection contains messages
+            <e:nosql-set collection="MY_COLLECTION">{ "doc": "1" }</e:nosql-set>
+            <e:nosql-set collection="MY_COLLECTION">{ "doc": "2" }</e:nosql-set>
+        </e:when>
+        <e:then>
+            Verify:
+            <e:nosql-check collection="MY_COLLECTION">{ "doc": "1" }</e:nosql-check>
+        </e:then>
+    </e:example>
+
+    <h2>Absent messages</h2>
+
+    <e:example name="absent-1" status="ExpectedToFail">
+        <e:then>
+            Verify:
+            <e:nosql-check collection="MY_COLLECTION">{ "doc": "1" }</e:nosql-check>
+        </e:then>
+    </e:example>
+
+    <e:example name="absent-2" status="ExpectedToFail">
+        <e:when>
+            Collection contains a message:
+            <e:nosql-set collection="MY_COLLECTION">{ "doc": "1" }</e:nosql-set>
+        </e:when>
+        <e:then>
+            Verify:
+            <e:nosql-check collection="MY_COLLECTION">
+                <e:doc>{ "doc": "1" }</e:doc>
+                <e:doc>{ "doc": "2" }</e:doc>
+            </e:nosql-check>
+        </e:then>
+    </e:example>
+
+    <h2>Wrong messages</h2>
+    <e:example name="wrong" status="ExpectedToFail">
+        <e:when>
+            Collection contains a message:
+            <e:nosql-set collection="MY_COLLECTION">{ "doc": "wrong" }</e:nosql-set>
+        </e:when>
+        <e:then>
+            <e:nosql-check collection="MY_COLLECTION">{ "doc": "right" }</e:nosql-check>
+        </e:then>
+    </e:example>
+</body>
+</html>
