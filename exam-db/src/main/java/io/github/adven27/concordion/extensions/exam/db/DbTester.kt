@@ -107,7 +107,7 @@ class JsonbPostgresqlDataTypeFactory : PostgresqlDataTypeFactory() {
     class JsonbDataType : AbstractDataType("jsonb", Types.OTHER, String::class.java, false) {
         override fun typeCast(obj: Any?): Any = obj.toString()
 
-        override fun getSqlValue(column: Int, resultSet: ResultSet): Any = resultSet.getString(column)
+        override fun getSqlValue(column: Int, resultSet: ResultSet): Any? = resultSet.getString(column)
 
         override fun setSqlValue(value: Any?, column: Int, statement: PreparedStatement) = statement.setObject(
             column,
