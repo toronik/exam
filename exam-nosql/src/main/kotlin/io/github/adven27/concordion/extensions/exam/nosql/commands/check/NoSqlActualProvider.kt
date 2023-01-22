@@ -10,5 +10,5 @@ class NoSqlActualProvider(
 ) : ActualProvider<Expected, Pair<Boolean, Actual>> {
 
     override fun provide(source: Expected): Pair<Boolean, Actual> =
-        dbTester.let { false to Actual(it.receive(source.collection)) }
+        dbTester.let { false to Actual(it.read(source.collection)) }
 }

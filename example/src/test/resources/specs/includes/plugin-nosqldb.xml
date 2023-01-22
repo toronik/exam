@@ -113,15 +113,14 @@
     </dl>
 
 
-    <!--
-     <h5>Debug database</h5>
 
+     <h5>Show NoSql database collection</h5>
      <dl>
-         <dt><code><a cc:run="concordion" href="db/dbshow/DbShow.xhtml">db-show</a></code></dt>
+         <dt><code><a cc:run="concordion" href="nosql/nosqlshow/NoSqlShow.xhtml">nosql-show</a></code></dt>
          <dd>
-             <p>Creates a DbUnit dataset files and prints content of specified database table:</p>
-             <pre class="doc-code language-xml"><code><![CDATA[<e:db-show table="person" saveToResources="/data/db/person.xml"/>]]></code></pre>
+             <p>Prints content of specified collection:</p>
+             <pre class="doc-code language-xml"><code><![CDATA[<e:nosql-show collection="MY_COLLECTION"/>]]></code></pre>
          </dd>
-     </dl>-->
+     </dl>
 
 </ignored>

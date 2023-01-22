@@ -5,6 +5,7 @@ import io.github.adven27.concordion.extensions.exam.core.commands.NamedExamComma
 import io.github.adven27.concordion.extensions.exam.nosql.commands.check.CheckCommand
 import io.github.adven27.concordion.extensions.exam.nosql.commands.clean.CleanCommand
 import io.github.adven27.concordion.extensions.exam.nosql.commands.set.SetCommand
+import io.github.adven27.concordion.extensions.exam.nosql.commands.show.ShowCommand
 
 class NoSqlPlugin @JvmOverloads constructor(
     private val dbTester: NoSqlDBTester
@@ -14,7 +15,8 @@ class NoSqlPlugin @JvmOverloads constructor(
         listOf(
             SetCommand("nosql-set", dbTester),
             CheckCommand("nosql-check", dbTester),
-            CleanCommand("nosql-clean", "pre", dbTester)
+            CleanCommand("nosql-clean", "pre", dbTester),
+            ShowCommand("nosql-show", dbTester)
         )
 
     @Suppress("EmptyFunctionBlock")
