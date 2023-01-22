@@ -1,0 +1,41 @@
+<html xmlns:e="http://exam.extension.io" xmlns:cc="http://www.concordion.org/2007/concordion">
+<body>
+    <h1>nosql-clean</h1>
+    <p class="lead">Cleans specified collections in a database</p>
+
+    <h2>Overview</h2>
+
+    <e:set var="cmd" hidden="" value="e:nosql-clean"/>
+    <e:set var="cmdExample" hidden=""><![CDATA[ <e:nosql-clean collections="person, department"/> ]]> </e:set>
+    <e:include from="/specs/includes/nosql/usage.xml"/>
+
+    <h3>Attributes</h3>
+
+    <table class="table" style="table-layout: fixed;">
+        <thead><tr><th style="width: 100px;">attribute</th><th style="width: 300px;">desc</th><th>example</th></tr></thead>
+        <tr>
+            <td><code>collections</code></td>
+            <td><span>Collections to clean.</span></td>
+            <td><var>Required</var>. <var>Default: -</var><pre class="doc-code language-json"><code>collections="person, department"</code></pre></td>
+        </tr>
+    </table>
+
+    <h3>Example</h3>
+    <e:example name="Clean">
+        <e:given>
+            Collection has the following documents:
+            <e:given>
+                <e:nosql-set collection="MY_COLLECTION" from="/data/nosql/example.json" print="true"/>
+            </e:given>
+        </e:given>
+        <e:when>
+            Clean:<e:nosql-clean collections="MY_COLLECTION" print="true"/>
+        </e:when>
+        <e:then>
+            Collection is empty:
+            <e:nosql-check collection="MY_COLLECTION"/>
+        </e:then>
+    </e:example>
+
+</body>
+</html>

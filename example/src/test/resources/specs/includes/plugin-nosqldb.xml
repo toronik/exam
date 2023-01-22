@@ -71,12 +71,6 @@
                 </code>
             </pre>
         </dd>
-
-        <!--<dt><code><a cc:run="concordion" href="db/dbclean/DbClean.xhtml">db-clean</a></code></dt>
-        <dd>
-            <p>Cleans specified tables with <code>DELETE_ALL</code> DbUnit operation:</p>
-            <pre class="doc-code language-xml"><code><![CDATA[<e:db-clean tables="person, person_fields"/>]]></code></pre>
-        </dd>-->
     </dl>
 
     <h5>Verify NoSql Database</h5>
@@ -101,6 +95,23 @@
             </pre>
         </dd>
     </dl>
+
+
+    <h5>Cleanup NoSql Database</h5>
+    <dl>
+        <dt>
+            <code>
+                <a cc:run="concordion" href="nosql/nosqlclean/NoSqlClean.xhtml">nosql-clean</a>
+            </code>
+        </dt>
+        <dd>
+            <p>Cleans specified list of collections :</p>
+            <pre class="doc-code language-xml">
+                <code><![CDATA[<e:nosql-clean collections="person, department"/>]]></code>
+            </pre>
+        </dd>
+    </dl>
+
 
     <!--
      <h5>Debug database</h5>
