@@ -81,6 +81,7 @@ task publishMaven {
     dependsOn ":exam-ui:publishToSonatype"
     dependsOn ":exam-ms:publishToSonatype"
     dependsOn ":exam-nosql:publishToSonatype"
+    dependsOn ":exam-nosql-mongo:publishToSonatype"
 }
 
 nexusPublishing {

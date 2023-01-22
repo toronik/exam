@@ -7,7 +7,7 @@
 
 <e:set var="cmd" hidden="" value="e:nosql-set"/>
 <e:set var="cmdExample" hidden="">
-    <![CDATA[<e:nosql-set collection="MY_COLLECTION" from="/data/nosql/example.json"/>]]> </e:set>
+    <![CDATA[<e:nosql-set append="false" collection="MY_COLLECTION" from="/data/nosql/example.json"/>]]> </e:set>
 <e:include from="/specs/includes/nosql/usage.xml"/>
 
 <h2>Examples</h2>
@@ -39,5 +39,19 @@
         </e:nosql-set>
     </e:given>
 </e:example>
+
+<e:example name="Inserting in append mode">
+    <e:given>
+        Executing set command three times, 2nd and 3rd with append mode
+        <e:nosql-set append="false" collection="MY_COLLECTION" from="/data/nosql/example.json" print="true"/>
+        <e:nosql-set append="true" collection="MY_COLLECTION" from="/data/nosql/example.json" print="true"/>
+        <e:nosql-set append="true" collection="MY_COLLECTION" from="/data/nosql/example.json" print="true"/>
+    </e:given>
+    <e:then>
+        Expecting all three documents to be in the database
+        <e:nosql-show collection="MY_COLLECTION"/>
+    </e:then>
+</e:example>
+
 </body>
 </html>

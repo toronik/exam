@@ -25,10 +25,15 @@ class SetCommand(
 
     class Operation(
         val collection: String,
-        val documents: List<NoSqlDocument>
+        val documents: List<NoSqlDocument>,
+        val appendMode: Boolean
     ) {
         fun executeSet(dbTester: NoSqlDBTester) {
-            dbTester.set(collection, documents)
+            if (appendMode) {
+                dbTester.setWithAppend(collection, documents)
+            } else {
+                dbTester.set(collection, documents)
+            }
         }
     }
 }

@@ -111,16 +111,16 @@
     specified either as <code>e:doc</code> tag body or in a file via <code>from</code> attribute.
     The <code>vars</code> attribute could be used to conveniently provide context variables for document template.
 </p>
-<e:example name="Message list">
+<e:example name="Document list">
     <e:given>
         Collection has docs:
         <div class="row no-gutters">
             <e:nosql-set collection="MY_COLLECTION">{"msg" : "1"}</e:nosql-set>
-            <e:nosql-set collection="MY_COLLECTION"
+            <e:nosql-set append="true" collection="MY_COLLECTION"
                          from="/data/nosql/example-with-vars.json"
                          vars="myVar1={{now 'yyyy-MM-dd'}} | myVar2={{date myVar1 minus='1 d'}}"
                          varsSeparator="|"/>
-            <e:nosql-set collection="MY_COLLECTION">{"msg" : "3"}</e:nosql-set>
+            <e:nosql-set append="true" collection="MY_COLLECTION">{"msg" : "3"}</e:nosql-set>
         </div>
     </e:given>
     <e:then>
