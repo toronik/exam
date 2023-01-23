@@ -10,9 +10,14 @@ class SetParser(private val parser: HtmlNoSqlParser) : CommandParser<SetCommand.
 
     override fun parse(command: CommandCall, evaluator: Evaluator) = SetCommand.Operation(
         collection = collectionFrom(command, evaluator),
-        documents = parser.parse(command, evaluator)
+        documents = parser.parse(command, evaluator),
+        appendMode = appendFrom(command, evaluator)
     )
 
-    private fun collectionFrom(command: CommandCall, eval: Evaluator) = command.html().takeAwayAttr("collection", eval)
-        ?: throw IllegalArgumentException("collection attribute is missing in set command")
+    private fun collectionFrom(command: CommandCall, eval: Evaluator) =
+        command.html().takeAwayAttr("collection", eval)
+            ?: throw IllegalArgumentException("collection attribute is missing in set command")
+
+    private fun appendFrom(command: CommandCall, eval: Evaluator) =
+        command.html().takeAwayAttr("append", eval).toBoolean()
 }
