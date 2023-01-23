@@ -13,7 +13,8 @@ class CleanCommand(name: String, tag: String, private val dbTester: NoSqlDBTeste
 
     override fun setUp(cmd: CommandCall, eval: Evaluator, resultRecorder: ResultRecorder, fixture: Fixture) {
         val el = cmd.html()
-        val collections = el.takeAwayAttr("collections", eval)?.also { cmd.swapText(it) } ?: eval.evaluate(cmd.expression).toString()
+        val collections = el.takeAwayAttr("collections", eval)?.also { cmd.element.swapText(it) }
+            ?: eval.evaluate(cmd.expression).toString()
         dbTester.clean(collections.split(",").map { it.trim() })
     }
 }

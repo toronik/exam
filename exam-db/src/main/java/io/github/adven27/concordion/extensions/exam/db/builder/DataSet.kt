@@ -70,7 +70,8 @@ class ScriptableTable(private val delegate: ITable) : ITable {
                     return getScriptResult(value.toString(), engine)
                 } catch (expected: Exception) {
                     logger.warn(
-                        "Could not evaluate script expression for table '{}', column '{}'. The original value will be used.",
+                        "Could not evaluate script expression for table '{}', column '{}'. " +
+                            "The original value will be used.",
                         tableMetaData.tableName,
                         column,
                         expected
@@ -114,7 +115,8 @@ class ScriptableTable(private val delegate: ITable) : ITable {
     }
 
     companion object : KLogging() {
-        // any non digit char (except 'regex') followed by ':' followed by 1 or more chars e.g: js: new Date().toString()
+        // any non digit char (except 'regex') followed by ':' followed by 1 or more chars
+        // e.g: js: new Date().toString()
         private val scriptEnginePattern = Pattern.compile("^(?!regex)[a-zA-Z]+:.+")
     }
 
@@ -183,6 +185,7 @@ class ExamTable(private val delegate: ITable, private val eval: Evaluator) : ITa
             val (start, end) = this.split("[.]{2}".toRegex()).map(String::toInt)
             IntProgression.fromClosedRange(start, end, end.compareTo(start))
         }
+
         else -> throw IllegalArgumentException("Couldn't parse range from string $this")
     }
 
@@ -288,8 +291,12 @@ class ContainsFilterTable(actualTable: ITable?, expectedTable: ITable?, ignoredC
         if (ignoredCols == null || !ignoredCols.contains(cell.key.uppercase())) {
             if (cell.value != null && cell.value.toString().startsWith("regex:")) {
                 regexMatches(cell.value.toString(), originalTable.getValue(row, cell.key).toString())
-            } else dataType(cell.key).matches(cell.value, originalTable.getValue(row, cell.key))
-        } else true
+            } else {
+                dataType(cell.key).matches(cell.value, originalTable.getValue(row, cell.key))
+            }
+        } else {
+            true
+        }
 
     private fun dataType(column: String): DataType =
         originalTable.tableMetaData.columns[originalTable.tableMetaData.getColumnIndex(column)].dataType
@@ -313,11 +320,13 @@ class ContainsFilterTable(actualTable: ITable?, expectedTable: ITable?, ignoredC
 
     @Throws(DataSetException::class)
     override fun getValue(row: Int, column: String): Any {
-        if (logger.isDebugEnabled) logger.debug(
-            "getValue(row={}, columnName={}) - start",
-            row.toString(),
-            column
-        )
+        if (logger.isDebugEnabled) {
+            logger.debug(
+                "getValue(row={}, columnName={}) - start",
+                row.toString(),
+                column
+            )
+        }
         val max = filteredRowIndexes.size
         return if (row < max) {
             val realRow = filteredRowIndexes[row]

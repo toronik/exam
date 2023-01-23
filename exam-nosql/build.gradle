@@ -6,5 +6,5 @@ apply from: "$rootDir/gradle/publish.gradle"
 
 dependencies {
     api project(':exam-core')
-    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3'
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonKt_version"
 }

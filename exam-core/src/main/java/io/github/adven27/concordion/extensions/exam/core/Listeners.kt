@@ -30,7 +30,7 @@ import org.concordion.api.listener.ThrowableCaughtListener
 import org.concordion.internal.FailFastException
 import java.io.ByteArrayInputStream
 import java.io.File
-import java.util.UUID
+import java.util.*
 import java.util.function.Predicate
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.collections.set
@@ -58,7 +58,10 @@ internal class ExamExampleListener(private val skipDecider: SkipDecider) : Examp
         if (skipDecider.test(event)) {
             elem.appendSister(
                 ConcordionElement("div").apply {
-                    appendText("Example \"$name\" is skipped by ${skipDecider.javaClass.simpleName} because ${skipDecider.reason()}")
+                    appendText(
+                        "Example \"$name\" is skipped by ${skipDecider.javaClass.simpleName} " +
+                            "because ${skipDecider.reason()}"
+                    )
                 }
             )
             elem.parentElement.removeChild(elem)
@@ -88,7 +91,7 @@ internal class ExamExampleListener(private val skipDecider: SkipDecider) : Examp
             "data-summary-ignore" to summary.ignoredCount.toString(),
             "data-summary-failure" to summary.failureCount.toString(),
             "data-summary-exception" to summary.exceptionCount.toString(),
-            "data-summary-status" to summary.implementationStatus.tag,
+            "data-summary-status" to summary.implementationStatus.tag
         )
         card.first("div")?.let { title ->
             title.childs().first().let {
@@ -133,7 +136,7 @@ class FocusOnErrorsListener : SpecificationProcessingListener {
                         summary.ignoredCount.toPill("secondary"),
                         summary.failureCount.toPill("warning"),
                         summary.exceptionCount.toPill("danger"),
-                        pill(summary.implementationStatus.tag, "warning"),
+                        pill(summary.implementationStatus.tag, "warning")
                     )
                     ownerOf(example, event.rootElement)?.let { markWithFailedExampleAnchor(it, id) }
                 }
@@ -204,7 +207,8 @@ internal class ExamDocumentParsingListener(private val registry: CommandRegistry
         val container = div("class" to "container-fluid")(
             div("class" to "container-xxl my-md-4 bd-layout")(
                 Html("main").css("bd-main order-1")(
-                    toc, content
+                    toc,
+                    content
                 )
             )
         )
@@ -260,13 +264,15 @@ class ErrorListener : ThrowableCaughtListener {
     }
 
     private fun help(event: ThrowableCaughtEvent) =
-        if (event.throwable.rootCause() is MissingHelperException) // language=xml
+        if (event.throwable.rootCause() is MissingHelperException) {
+            // language=xml
             """
             <p>Available helpers:</p>
             <div class='table-responsive'>${helpersDesc().map { packageWithHelpers(it) }.joinToString("")}</div>
             """.trimIndent()
-        else
+        } else {
             ""
+        }
 
     private fun packageWithHelpers(it: Map.Entry<Package, Map<String, Helper<*>>>) = // language=xml
         """

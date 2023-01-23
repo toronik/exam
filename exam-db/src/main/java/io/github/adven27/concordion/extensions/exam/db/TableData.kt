@@ -25,18 +25,20 @@ class TableData(private val table: String, private val columns: Map<String, Any?
     private fun validate(values: Array<out Any?>, columns: Set<String>) {
         if (values.size != columns.size) {
             fun breakReason(cols: List<String>, vals: List<Any?>) =
-                if (cols.size > vals.size) "column '${cols[vals.size]}' has no value" else "value '${vals[cols.size]}' has no column"
+                if (cols.size > vals.size) {
+                    "column '${cols[vals.size]}' has no value"
+                } else {
+                    "value '${vals[cols.size]}' has no column"
+                }
 
             fun msg(columns: Set<String>, values: Array<out Any?>) =
-                "Zipped " + columns.zip(values) { a, b -> "$a=$b" } + " then breaks because " + breakReason(columns.toList(), values.toList())
-            throw IllegalArgumentException(
-                String.format(
-                    "Number of columns (%s) for the table %s is different from the number of provided values (%s):\n %s",
-                    columns.size,
-                    table,
-                    values.size,
-                    msg(columns, values)
+                "Zipped " + columns.zip(values) { a, b -> "$a=$b" } + " then breaks because " + breakReason(
+                    columns.toList(),
+                    values.toList()
                 )
+            throw IllegalArgumentException(
+                "Number of columns (${columns.size}) for the table $table is different " +
+                    "from the number of provided values (${values.size}):\n ${msg(columns, values)}"
             )
         }
     }
@@ -65,7 +67,8 @@ class TableData(private val table: String, private val columns: Map<String, Any?
     private fun columns(c: Set<String>): Array<Column?> = c.map { Column(it, UNKNOWN) }.toTypedArray()
 
     companion object {
-        fun filled(table: String, rows: List<List<Any?>>, cols: Map<String, Any?>, eval: Evaluator) = TableData(table, cols).rows(rows).table(eval)
+        fun filled(table: String, rows: List<List<Any?>>, cols: Map<String, Any?>, eval: Evaluator) =
+            TableData(table, cols).rows(rows).table(eval)
     }
 }
 

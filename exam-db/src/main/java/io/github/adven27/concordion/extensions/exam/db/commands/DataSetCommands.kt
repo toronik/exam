@@ -71,12 +71,12 @@ class DataSetExecuteCommand(
 
     data class Attrs(
         val datasetCommandAttrs: DatasetCommandAttrs,
-        val setAttrs: SetAttrs,
+        val setAttrs: SetAttrs
     ) {
         companion object {
             fun from(cmd: CommandCall, evaluator: Evaluator, allowedSeedStrategies: List<SeedStrategy>) = Attrs(
                 DatasetCommandAttrs.from(cmd.html(), evaluator),
-                SetAttrs.from(cmd, allowedSeedStrategies),
+                SetAttrs.from(cmd, allowedSeedStrategies)
             )
         }
     }
@@ -145,7 +145,8 @@ class DataSetVerifyCommand(name: String, tag: String, val dbTester: DbTester, va
                     ?: td.markAsSuccess(recorder)(
                         Html(expectedValue).text(
                             appendIf(
-                                value.isDbMatcher() && actual.getTable(expected.tableName()).rowCount == expected.rowCount,
+                                value.isDbMatcher() &&
+                                    actual.getTable(expected.tableName()).rowCount == expected.rowCount,
                                 actual.getTable(expected.tableName()),
                                 row,
                                 col
@@ -219,7 +220,7 @@ class DataSetVerifyCommand(name: String, tag: String, val dbTester: DbTester, va
 
     data class Attrs(
         val datasetCommandAttrs: DatasetCommandAttrs,
-        val orderBy: Array<String>,
+        val orderBy: Array<String>
     ) {
         companion object {
             private const val ORDER_BY = "orderBy"
@@ -227,7 +228,7 @@ class DataSetVerifyCommand(name: String, tag: String, val dbTester: DbTester, va
             fun from(root: Html, evaluator: Evaluator) = Attrs(
                 DatasetCommandAttrs.from(root, evaluator),
                 root.takeAwayAttr(ORDER_BY, "").split(",").map { it.trim() }.filter { it.isNotEmpty() }
-                    .toTypedArray(),
+                    .toTypedArray()
             )
         }
     }
@@ -250,14 +251,14 @@ data class DatasetCommandAttrs(
             DatasetsAttrs.from(root),
             VarsAttrs(root, evaluator),
             root.takeAwayAttr(DS, DbTester.DEFAULT_DATASOURCE),
-            root.takeAwayAttr(DEBUG, "false").toBoolean(),
+            root.takeAwayAttr(DEBUG, "false").toBoolean()
         )
     }
 }
 
 data class DatasetsAttrs(
     val datasets: String,
-    val dir: String,
+    val dir: String
 ) {
     fun dataSets() = datasets.split(",").map { dir.trim() + it.trim() }
 
@@ -267,7 +268,7 @@ data class DatasetsAttrs(
 
         fun from(root: Html) = DatasetsAttrs(
             root.attrOrFail(DATASETS),
-            root.takeAwayAttr(DIR, ""),
+            root.takeAwayAttr(DIR, "")
         )
     }
 }

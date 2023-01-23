@@ -6,8 +6,6 @@ import io.github.adven27.concordion.extensions.exam.core.ExamResultRenderer
 import io.github.adven27.concordion.extensions.exam.core.TextContentTypeConfig
 import io.github.adven27.concordion.extensions.exam.core.content
 import io.github.adven27.concordion.extensions.exam.core.html.Html
-import io.github.adven27.concordion.extensions.exam.core.html.codeHighlight
-import io.github.adven27.concordion.extensions.exam.core.html.descendantTextContainer
 import io.github.adven27.concordion.extensions.exam.core.html.html
 import io.github.adven27.concordion.extensions.exam.core.resolveForContentType
 import io.github.adven27.concordion.extensions.exam.core.rootCauseMessage
@@ -83,14 +81,11 @@ open class ExamAssertEqualsCommand(
         super.verify(command.apply { resolve(evaluator) }, evaluator, resultRecorder, fixture)
     }
 
-    protected fun CommandCall.resolve(eval: Evaluator) {
+    protected fun CommandCall.resolve(eval: Evaluator) =
         swapText(config.resolver.resolve(content(normalize(element.text)), eval))
-    }
 
     private fun CommandCall.swapText(value: String) {
-        Html(descendantTextContainer(element)).removeChildren()(
-            codeHighlight(value, config.printer.style())
-        )
+        element = container(Html(element), config.printer.style()).text(value).el
     }
 
     companion object : KLogging()

@@ -7,9 +7,7 @@ import io.github.adven27.concordion.extensions.exam.nosql.commands.clean.CleanCo
 import io.github.adven27.concordion.extensions.exam.nosql.commands.set.SetCommand
 import io.github.adven27.concordion.extensions.exam.nosql.commands.show.ShowCommand
 
-class NoSqlPlugin @JvmOverloads constructor(
-    private val dbTester: NoSqlDBTester
-) : ExamPlugin {
+class NoSqlPlugin constructor(private val dbTester: NoSqlDBTester) : ExamPlugin {
 
     override fun commands(): List<NamedExamCommand> =
         listOf(

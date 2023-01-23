@@ -10,7 +10,10 @@ class ColParserTest {
     fun canParseColsDescription() {
         assertEquals(
             mapOf(
-                "NOTHING" to (0 to null), "MARKED" to (2 to null), "HAS_VAL" to (0 to "''"), "MARKED_AND_VAL" to (1 to "42")
+                "NOTHING" to (0 to null),
+                "MARKED" to (2 to null),
+                "HAS_VAL" to (0 to "''"),
+                "MARKED_AND_VAL" to (1 to "42")
             ),
             sut.parse("NOTHING, **MARKED, HAS_VAL='', *MARKED_AND_VAL=42")
         )

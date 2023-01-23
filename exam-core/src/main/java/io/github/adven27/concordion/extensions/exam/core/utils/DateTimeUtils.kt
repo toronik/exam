@@ -3,24 +3,23 @@
 package io.github.adven27.concordion.extensions.exam.core.utils
 
 import io.github.adven27.concordion.extensions.exam.core.handlebars.matchers.ISO_LOCAL_DATETIME_FORMAT
-import mu.KotlinLogging
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatter.ISO_DATE
+import java.time.format.DateTimeFormatter.ISO_DATE_TIME
+import java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME
 import java.time.format.DateTimeFormatterBuilder
 import java.time.format.DateTimeParseException
-import java.time.format.ResolverStyle
+import java.time.format.ResolverStyle.SMART
 import java.time.temporal.ChronoField
-import java.util.Date
+import java.util.*
 
-private val logger = KotlinLogging.logger {}
-
-private val DEFAULT_ZONED_DATETIME_FORMAT =
-    DateTimeFormatter.ISO_OFFSET_DATE_TIME.withResolverStyle(ResolverStyle.SMART)
-private val DEFAULT_LOCAL_DATETIME_FORMAT = DateTimeFormatter.ISO_DATE_TIME.withResolverStyle(ResolverStyle.SMART)
-private val DEFAULT_LOCAL_DATE_FORMAT = DateTimeFormatter.ISO_DATE.withResolverStyle(ResolverStyle.SMART)
+private val DEFAULT_ZONED_DATETIME_FORMAT = ISO_OFFSET_DATE_TIME.withResolverStyle(SMART)
+private val DEFAULT_LOCAL_DATETIME_FORMAT = ISO_DATE_TIME.withResolverStyle(SMART)
+private val DEFAULT_LOCAL_DATE_FORMAT = ISO_DATE.withResolverStyle(SMART)
 
 fun ZonedDateTime.toString(pattern: String): String = this.format(DateTimeFormatter.ofPattern(pattern))
 fun Date.toString(pattern: String): String =
@@ -39,11 +38,9 @@ fun Date.toLocalDate(zoneId: ZoneId = ZoneId.systemDefault()): LocalDate =
 fun String.parseDate(format: String? = null) = try {
     parseDateTime(format).toDate()
 } catch (e: DateTimeParseException) {
-    logger.debug("Failed to parse ZonedDateTime from $this with pattern '${format ?: DEFAULT_ZONED_DATETIME_FORMAT}'. Try to parse as LocalDateTime.")
     try {
         parseLocalDateTime(format).toDate()
     } catch (e: DateTimeParseException) {
-        logger.debug("Failed to parse LocalDateTime from $this with pattern '${format ?: DEFAULT_LOCAL_DATETIME_FORMAT}'. Try to parse as LocalDate.")
         parseLocalDate(format).toDate()
     }
 }
@@ -63,7 +60,9 @@ fun String.toDatePattern(): DateTimeFormatter = if (this == "ISO_LOCAL") {
         .appendPattern(ISO_LOCAL_DATETIME_FORMAT)
         .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 9, true)
         .toFormatter()
-} else DateTimeFormatter.ofPattern(this)
+} else {
+    DateTimeFormatter.ofPattern(this)
+}
 
 fun date(item: Any, pattern: String? = null): Result<ZonedDateTime> = try {
     Result.success(

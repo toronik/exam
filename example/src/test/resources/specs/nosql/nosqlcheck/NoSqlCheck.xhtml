@@ -37,10 +37,8 @@
 <h2>Examples</h2>
 
 <div cc:example="before">
-
-    <!-- TODO  switch to nosql-clean-->
-    Cleaning collection <code cc:set="#collectionName">MY_COLLECTION</code>
-    <span cc:execute="cleanCollection(#collectionName)"/>
+    Cleaning collection <code>MY_COLLECTION</code> before each example:
+    <e:nosql-clean colections="MY_COLLECTION"/>
 </div>
 
 <h3>Verify single document</h3>

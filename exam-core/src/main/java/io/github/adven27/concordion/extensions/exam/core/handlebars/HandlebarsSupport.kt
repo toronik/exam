@@ -8,6 +8,7 @@ import com.github.jknack.handlebars.Helper
 import com.github.jknack.handlebars.Options
 import io.github.adven27.concordion.extensions.exam.core.handlebars.date.DateHelpers
 import io.github.adven27.concordion.extensions.exam.core.handlebars.matchers.MatcherHelpers
+import io.github.adven27.concordion.extensions.exam.core.handlebars.matchers.PLACEHOLDER_TYPE
 import io.github.adven27.concordion.extensions.exam.core.handlebars.misc.MiscHelpers
 import org.concordion.api.Evaluator
 
@@ -69,7 +70,17 @@ interface ExamHelper : Helper<Any?> {
     val options: Map<String, String>
 
     fun describe() =
-        "$example will produce: ${expectedStr()} ${if (context.isEmpty()) "" else "(given context has variables: $context)"}"
+        "$example will produce: ${expectedStr()} " +
+            if (context.isEmpty()) "" else "(given context has variables: $context)"
+
+    fun placeholderType(context: Context) = (context.model() as Evaluator).getVariable("#$PLACEHOLDER_TYPE")
+
+    fun validate(options: Options) {
+        val unexpected = options.hash.keys - this.options.keys
+        require(unexpected.isEmpty()) {
+            "Wrong options for helper '${options.fn.text()}': found '$unexpected', expected any of '${this.options}'"
+        }
+    }
 
     private fun expectedStr() = when (expected) {
         is String -> "\"$expected\""

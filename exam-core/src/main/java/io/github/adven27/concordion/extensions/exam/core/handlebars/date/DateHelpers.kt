@@ -4,24 +4,33 @@ import com.github.jknack.handlebars.Options
 import com.github.jknack.handlebars.internal.lang3.LocaleUtils
 import com.github.jknack.handlebars.internal.lang3.Validate
 import io.github.adven27.concordion.extensions.exam.core.handlebars.ExamHelper
+import io.github.adven27.concordion.extensions.exam.core.handlebars.matchers.ISO_LOCAL_DATE_FORMAT
+import io.github.adven27.concordion.extensions.exam.core.handlebars.matchers.PLACEHOLDER_TYPE
+import io.github.adven27.concordion.extensions.exam.core.utils.DateWithin.Companion.PARAMS_SEPARATOR
+import io.github.adven27.concordion.extensions.exam.core.utils.DurationStyle.Companion.detectAndParse
 import io.github.adven27.concordion.extensions.exam.core.utils.minus
 import io.github.adven27.concordion.extensions.exam.core.utils.parseDate
 import io.github.adven27.concordion.extensions.exam.core.utils.parsePeriodFrom
 import io.github.adven27.concordion.extensions.exam.core.utils.plus
 import io.github.adven27.concordion.extensions.exam.core.utils.toDate
+import io.github.adven27.concordion.extensions.exam.core.utils.toLocalDate
+import io.github.adven27.concordion.extensions.exam.core.utils.toLocalDateTime
 import io.github.adven27.concordion.extensions.exam.core.utils.toString
 import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Date
-import java.util.Locale
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
+import java.util.*
 
 private const val TZ = "tz"
 private const val FORMAT = "format"
 private const val PLUS = "plus"
 private const val MINUS = "minus"
+
+/* ktlint-disable enum-entry-name-case */
 
 @Suppress("EnumNaming", "MagicNumber")
 enum class DateHelpers(
@@ -30,6 +39,13 @@ enum class DateHelpers(
     override val expected: Any? = "",
     override val options: Map<String, String> = emptyMap()
 ) : ExamHelper {
+    at(
+        example = "{{at '-2d'}}",
+        expected = LocalDateTime.now().minusDays(2).toDate()
+    ) {
+        override fun invoke(context: Any?, options: Options) =
+            (if (context is String) AT.plus(detectAndParse(context)) else AT).toDate()
+    },
     now(
         example = """{{now "yyyy-MM-dd'T'HH:mm Z" tz="GMT+3" minus="1 y, 2 months, d 3" plus="4 h, 5 min, 6 s"}}""",
         expected = ZonedDateTime.now("GMT+3".timeZoneId())
@@ -103,11 +119,82 @@ enum class DateHelpers(
         override fun invoke(context: Any?, options: Options) =
             now().minusDays(context?.toString()?.toLongOrNull() ?: 1).atStartOfDay().toDate()
     },
+    iso(
+        example = "{{iso date}}",
+        context = mapOf("date" to "2000-01-02T10:20:11.123".parseDate()),
+        expected = "2000-01-02T10:20:11.123"
+    ) {
+        override fun invoke(context: Any?, options: Options): String =
+            when (context) {
+                is Date -> ISO_LOCAL_DATE_TIME.format(context.toLocalDateTime())
+                is String -> "\${${placeholderType(options.context)}-unit.matches:formattedAndWithin}ISO_LOCAL" +
+                    "$PARAMS_SEPARATOR$context$PARAMS_SEPARATOR${options.param(0, Date()).toLocalDateTime()}"
+
+                else -> "\${${placeholderType(options.context)}-unit.matches:formattedAs}ISO_LOCAL"
+            }
+    },
+    isoDate(
+        example = "{{isoDate date}}",
+        context = mapOf("date" to "2000-01-02T10:20:11.123".parseDate()),
+        expected = "2000-01-02"
+    ) {
+        override fun invoke(context: Any?, options: Options): String =
+            when (context) {
+                is Date -> ISO_LOCAL_DATE.format(context.toLocalDateTime())
+                is String ->
+                    "\${${placeholderType(options.context)}-unit.matches:formattedAndWithin}$ISO_LOCAL_DATE_FORMAT" +
+                        "$PARAMS_SEPARATOR$context$PARAMS_SEPARATOR${options.param(0, Date()).toLocalDate()}"
+
+                else -> "\${${placeholderType(options.context)}-unit.matches:formattedAs}$ISO_LOCAL_DATE_FORMAT"
+            }
+    },
+    formattedAndWithin(
+        example = "{{formattedAndWithin 'yyyy-MM-dd' '5s' (today)}}",
+        context = mapOf(PLACEHOLDER_TYPE to "json"),
+        expected = "\${json-unit.matches:formattedAndWithin}yyyy-MM-dd" +
+            "${PARAMS_SEPARATOR}5s" +
+            "${PARAMS_SEPARATOR}${now()}T00:00"
+    ) {
+        override fun invoke(context: Any?, options: Options): Any =
+            "\${${placeholderType(options.context)}-unit.matches:$name}$context" +
+                "${PARAMS_SEPARATOR}${options.param(0, "5s")}" +
+                "${PARAMS_SEPARATOR}${options.param(1, Date()).toLocalDateTime()}"
+    },
+    formattedAs(
+        example = "{{formattedAs \"yyyy-MM-dd'T'hh:mm:ss\"}}",
+        context = mapOf(PLACEHOLDER_TYPE to "json"),
+        expected = "\${json-unit.matches:formattedAs}yyyy-MM-dd'T'hh:mm:ss"
+    ) {
+        override fun invoke(context: Any?, options: Options): Any =
+            "\${${placeholderType(options.context)}-unit.matches:$name}$context"
+    },
+    after(
+        example = "{{after (today)}}",
+        context = mapOf(PLACEHOLDER_TYPE to "json"),
+        expected = "\${json-unit.matches:after}${now()}T00:00"
+    ) {
+        override fun invoke(context: Any?, options: Options): Any =
+            when (context) {
+                is Date -> "\${${placeholderType(options.context)}-unit.matches:$name}${context.toLocalDateTime()}"
+                else -> "\${${placeholderType(options.context)}-unit.matches:$name}$context"
+            }
+    },
+    before(
+        example = "{{before (today)}}",
+        context = mapOf(PLACEHOLDER_TYPE to "json"),
+        expected = "\${json-unit.matches:before}${now()}T00:00"
+    ) {
+        override fun invoke(context: Any?, options: Options): Any =
+            when (context) {
+                is Date -> "\${${placeholderType(options.context)}-unit.matches:$name}${context.toLocalDateTime()}"
+                else -> "\${${placeholderType(options.context)}-unit.matches:$name}$context"
+            }
+    },
     dateFormat(
-        example = """{{dateFormat date "yyyy-MM-dd'T'HH:mm O" tz="GMT+3" minus="1 y, 2 months, d 3" plus="4 h, 5 min, 6 s"}}""",
+        example = """{{dateFormat date "yyyy-MM-dd'T'HH:mm O" tz="GMT+3"}}""",
         context = mapOf("date" to "2000-01-02T10:20+03:00".parseDate()),
-        expected = "1998-10-30T14:25 GMT+3",
-        options = mapOf(TZ to "\"GMT+3\"", PLUS to "\"1 day\"", MINUS to "\"5 hours\"")
+        expected = "2000-01-02T10:20 GMT+3",
+        options = mapOf(TZ to "\"GMT+3\"")
     ) {
         override fun invoke(context: Any?, options: Options): Any? {
             Validate.isInstanceOf(
@@ -122,8 +209,8 @@ enum class DateHelpers(
                 context as Date,
                 options.param(0, DEFAULT_FORMAT),
                 options.param(1, Locale.getDefault().toString()),
-                options.hash(PLUS, ""),
-                options.hash(MINUS, ""),
+                "",
+                "",
                 options.hash(TZ)
             )
         }
@@ -138,19 +225,11 @@ enum class DateHelpers(
 
     override fun apply(context: Any?, options: Options): Any? {
         validate(options)
-        val result = try {
+        return try {
             this(context, options)
         } catch (expected: Exception) {
             throw ExamHelper.InvocationFailed(name, context, options, expected)
         }
-        return result
-    }
-
-    private fun validate(options: Options) {
-        val unexpected = options.hash.keys - this.options.keys
-        if (unexpected.isNotEmpty()) throw IllegalArgumentException(
-            "Wrong options for helper '${options.fn.text()}': found '$unexpected', expected any of '${this.options}'"
-        )
     }
 
     override fun toString() = this.describe()
@@ -158,6 +237,7 @@ enum class DateHelpers(
 
     companion object {
         const val DEFAULT_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
+        private val AT = LocalDateTime.now()
     }
 }
 

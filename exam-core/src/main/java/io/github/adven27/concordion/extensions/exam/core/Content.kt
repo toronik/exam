@@ -34,19 +34,19 @@ open class ContentTypeConfig(
 open class JsonContentTypeConfig @JvmOverloads constructor(
     resolver: ContentResolver = JsonResolver(),
     verifier: ContentVerifier = JsonVerifier(),
-    printer: ContentPrinter = JsonPrinter(),
+    printer: ContentPrinter = JsonPrinter()
 ) : ContentTypeConfig(resolver, verifier, printer)
 
 open class XmlContentTypeConfig @JvmOverloads constructor(
     resolver: ContentResolver = XmlResolver(),
     verifier: ContentVerifier = XmlVerifier(),
-    printer: ContentPrinter = XmlPrinter(),
+    printer: ContentPrinter = XmlPrinter()
 ) : ContentTypeConfig(resolver, verifier, printer)
 
 open class TextContentTypeConfig @JvmOverloads constructor(
     resolver: ContentResolver = JsonResolver(),
     verifier: ContentVerifier = ContentVerifier.Default("text"),
-    printer: ContentPrinter = ContentPrinter.AsIs(),
+    printer: ContentPrinter = ContentPrinter.AsIs()
 ) : ContentTypeConfig(resolver, verifier, printer)
 
 interface ContentResolver {
@@ -112,8 +112,12 @@ interface ContentVerifier {
         override fun verify(expected: String, actual: String) = try {
             when {
                 actual.isEmpty() ->
-                    if (expected.isEmpty()) Result.success(ExpectedContent(type, expected))
-                    else Result.failure(Fail("Actual is empty", expected, actual))
+                    if (expected.isEmpty()) {
+                        Result.success(ExpectedContent(type, expected))
+                    } else {
+                        Result.failure(Fail("Actual is empty", expected, actual))
+                    }
+
                 else -> {
                     assertThat(expected, actual)
                     Result.success(ExpectedContent(type, expected))
@@ -167,7 +171,9 @@ open class XmlVerifier(protected val nodeMatcher: NodeMatcher) : ContentVerifier
 open class JsonVerifier(protected val configuration: Configuration) : ContentVerifier.Default("json") {
 
     @JvmOverloads
-    constructor(configure: (Configuration) -> Configuration = { it }) : this(configure(ExamExtension.DEFAULT_JSON_UNIT_CFG))
+    constructor(configure: (Configuration) -> Configuration = { it }) : this(
+        configure(ExamExtension.DEFAULT_JSON_UNIT_CFG)
+    )
 
     override fun assertThat(expected: String, actual: String) {
         validate(actual)

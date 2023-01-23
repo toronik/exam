@@ -164,7 +164,7 @@ class ExamExtension constructor(private vararg var plugins: ExamPlugin) : Concor
             "formattedAndWithinNow" to DateWithinNow(),
             "xmlDateWithinNow" to XMLDateWithin(),
             "after" to After(),
-            "before" to Before(),
+            "before" to Before()
         )
 
         @JvmField
@@ -186,7 +186,7 @@ class ExamExtension constructor(private vararg var plugins: ExamPlugin) : Concor
         val CONTENT_TYPE_CONFIGS: MutableMap<String, ContentTypeConfig> = mutableMapOf(
             "json" to JsonContentTypeConfig(),
             "xml" to XmlContentTypeConfig(),
-            "text" to TextContentTypeConfig(),
+            "text" to TextContentTypeConfig()
         )
 
         @JvmStatic

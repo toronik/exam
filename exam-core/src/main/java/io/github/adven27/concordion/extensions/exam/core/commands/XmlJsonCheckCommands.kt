@@ -67,24 +67,26 @@ class JsonCheckCommand(tag: String, private val verifier: ContentVerifier) :
     }
 
     private fun checkJsonContent(act: String, exp: String, resultRecorder: ResultRecorder, root: Html) {
-        verifier.verify(exp, act).onFailure { f ->
-            when (f) {
-                is ContentVerifier.Fail -> {
-                    resultRecorder.failure(root, f.actual, f.expected)
-                    root.below(
-                        pre(f.details, CLASS to "exceptionMessage")
-                    )
+        verifier.verify(exp, act)
+            .onFailure { f ->
+                when (f) {
+                    is ContentVerifier.Fail -> {
+                        resultRecorder.failure(root, f.actual, f.expected)
+                        root.below(
+                            pre(f.details, CLASS to "exceptionMessage")
+                        )
+                    }
+
+                    else -> throw f
                 }
-                else -> throw f
+            }.onSuccess {
+                root.text(exp)
+                resultRecorder.pass(root)
             }
-        }.onSuccess {
-            root.text(exp)
-            resultRecorder.pass(root)
-        }
     }
 }
 
-private fun container(root: Html, type: String, collapsable: Boolean): Html {
+fun container(root: Html, type: String, collapsable: Boolean = false): Html {
     return if (collapsable) collapsableContainer(root, type) else fixedContainer(root, type)
 }
 

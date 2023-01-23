@@ -17,12 +17,10 @@ fun parseTemplate(tmpl: String) = Html(Element(Builder().build(StringReader(tmpl
 
 fun String.fileExt() = substring(lastIndexOf('.') + 1).lowercase()
 
-fun String.toMap(): Map<String, String> = unboxIfNeeded(this)
-    .split(",")
-    .map {
-        val (n, v) = it.split("=")
-        Pair(n.trim(), v.trim())
-    }.toMap()
+fun String.toMap(): Map<String, String> = unboxIfNeeded(this).split(",").associate {
+    val (n, v) = it.split("=")
+    Pair(n.trim(), v.trim())
+}
 
 fun Map<String, String>.resolveValues(eval: Evaluator) = this.mapValues { eval.resolveNoType(it.value) }
 
@@ -40,12 +38,16 @@ private fun failTemplate(header: String = "", help: String = "", cntId: String) 
     """
 
 //language=xml
-private fun help(help: String, cntId: String) = if (help.isNotEmpty()) """
+private fun help(help: String, cntId: String) = if (help.isNotEmpty()) {
+    """
 <p data-bs-toggle="collapse" data-bs-target="#help-$cntId" aria-expanded="false">
     <i class="far fa-caret-square-down"> </i><span> Help</span>
 </p>
 <div id='help-$cntId' class='collapse'>$help</div>
-""" else ""
+"""
+} else {
+    ""
+}
 
 fun errorMessage(
     header: String = "",
@@ -75,7 +77,11 @@ fun Throwable.rootCauseMessage() = this.rootCause().let { it.message ?: it.toStr
 
 fun List<String>.sameSizeWith(values: List<Any?>): List<String> = if (values.size != size) {
     fun breakReason(cols: List<String>, vals: List<Any?>) =
-        if (cols.size > vals.size) "variable '${cols[vals.size]}' has no value" else "value '${vals[cols.size]}' has no variable"
+        if (cols.size > vals.size) {
+            "variable '${cols[vals.size]}' has no value"
+        } else {
+            "value '${vals[cols.size]}' has no variable"
+        }
 
     fun msg(columns: List<String>, values: List<Any?>) =
         "Zipped " + columns.zip(values) { a, b -> "$a=$b" } + " then breaks because " + breakReason(
@@ -83,15 +89,11 @@ fun List<String>.sameSizeWith(values: List<Any?>): List<String> = if (values.siz
             values.toList()
         )
     throw IllegalArgumentException(
-        String.format(
-            "e:where has the variables and values mismatch\ngot %s vars: %s\ngot %s vals: %s:\n%s",
-            size,
-            this,
-            values.size,
-            values,
-            msg(this, values)
-        )
+        "e:where has the variables and values mismatch\n" +
+            "got $size vars: $this\ngot ${values.size} vals: $values:\n${msg(this, values)}"
     )
-} else this
+} else {
+    this
+}
 
-fun String.escapeHtml(): String = StringEscapeUtils.escapeHtml4(this)
+fun String.escapeHtml(): String = StringEscapeUtils.escapeJava(this)

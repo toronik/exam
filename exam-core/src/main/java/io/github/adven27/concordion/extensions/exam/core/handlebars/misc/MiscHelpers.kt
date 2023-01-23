@@ -8,7 +8,8 @@ import io.github.adven27.concordion.extensions.exam.core.resolveToObj
 import io.github.adven27.concordion.extensions.exam.core.utils.toDate
 import java.time.LocalDate
 
-@Suppress("EnumNaming")
+/* ktlint-disable enum-entry-name-case */
+@Suppress("EnumNaming", "EnumEntryName")
 enum class MiscHelpers(
     override val example: String,
     override val context: Map<String, Any?> = emptyMap(),
@@ -24,10 +25,14 @@ enum class MiscHelpers(
         override fun invoke(context: Any?, options: Options): Any? = context ?: options.param<String>(0)
     },
     map("""{{map key='value'}}""", mapOf(), mapOf("key" to "value"), mapOf()) {
-        override fun invoke(context: Any?, options: Options): Any? = options.hash
+        override fun invoke(context: Any?, options: Options): Map<*, *> =
+            if (context is Map<*, *>) context + options.hash else options.hash
     },
     NULL("{{NULL}}", emptyMap(), null) {
         override fun invoke(context: Any?, options: Options): Any = Result.success(null)
+    },
+    exist("{{exist obj}}", mapOf("obj" to "any"), true) {
+        override fun invoke(context: Any?, options: Options): Any = context != null
     },
     eval("{{eval '#var'}}", mapOf("var" to 2), 2) {
         override fun invoke(context: Any?, options: Options): Any? = options.evaluator().evaluate("$context")
@@ -58,21 +63,13 @@ enum class MiscHelpers(
     };
 
     override fun apply(context: Any?, options: Options): Any? {
-        validate(options)
+        if (name !in setOf("resolveFile", "resolve", "map")) validate(options)
         val result = try {
             this(context, options)
         } catch (expected: Exception) {
             throw ExamHelper.InvocationFailed(name, context, options, expected)
         }
         return result
-    }
-
-    private fun validate(options: Options) {
-        if ("resolve" == this.name || "resolveFile" == this.name || "map" == this.name) return
-        val unexpected = options.hash.keys - this.options.keys
-        if (unexpected.isNotEmpty()) throw IllegalArgumentException(
-            "Wrong options for helper '${options.fn.text()}': found '$unexpected', expected any of '${this.options}'"
-        )
     }
 
     override fun toString() = describe()

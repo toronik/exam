@@ -32,7 +32,7 @@ class DbPlugin @JvmOverloads constructor(
     val dbTester: DbTester,
     private val connectOnDemand: Boolean = true,
     private val valuePrinter: ValuePrinter = ValuePrinter.Simple(),
-    private val allowedSeedStrategies: List<SeedStrategy> = SeedStrategy.values().toList(),
+    private val allowedSeedStrategies: List<SeedStrategy> = SeedStrategy.values().toList()
 ) : ExamPlugin {
 
     /**
@@ -49,7 +49,7 @@ class DbPlugin @JvmOverloads constructor(
         connectOnDemand: Boolean = true,
         valuePrinter: ValuePrinter = ValuePrinter.Simple(),
         dbUnitConfig: DbUnitConfig = DbUnitConfig(),
-        allowedSeedStrategies: List<SeedStrategy> = SeedStrategy.values().toList(),
+        allowedSeedStrategies: List<SeedStrategy> = SeedStrategy.values().toList()
     ) : this(
         DbTester(driver, url, user, password, schema, dbUnitConfig),
         connectOnDemand,
@@ -89,7 +89,7 @@ class DbPlugin @JvmOverloads constructor(
         others: Map<String, DbTester>,
         connectOnDemand: Boolean = true,
         valuePrinter: ValuePrinter = ValuePrinter.Simple(),
-        allowedSeedStrategies: List<SeedStrategy> = SeedStrategy.values().toList(),
+        allowedSeedStrategies: List<SeedStrategy> = SeedStrategy.values().toList()
     ) : this(defaultTester, connectOnDemand, valuePrinter, allowedSeedStrategies) {
         for ((key, value) in others) {
             dbTester.executors[key] = value
@@ -132,8 +132,9 @@ class DbPlugin @JvmOverloads constructor(
             override fun orElse(value: Any): String = value.toString()
         }
 
-        abstract class AbstractDefault @JvmOverloads constructor(private val dateFormat: String = "yyyy-MM-dd'T'HH:mm:ss.SSS") :
-            ValuePrinter {
+        abstract class AbstractDefault @JvmOverloads constructor(
+            private val dateFormat: String = "yyyy-MM-dd'T'HH:mm:ss.SSS"
+        ) : ValuePrinter {
             override fun print(value: Any?): String = when (value) {
                 null -> "(null)"
                 is Array<*> -> value.contentToString()

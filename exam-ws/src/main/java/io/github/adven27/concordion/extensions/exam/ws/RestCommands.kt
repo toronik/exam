@@ -227,7 +227,7 @@ class CaseCommand(
     }
 
     private fun byContentType(resolvedType: ContentType): ContentTypeConfig = contentTypeConfigs[resolvedType]
-        ?: throw IllegalStateException("Content type config for type $resolvedType not found. Provide one through WsPlugin constructor.")
+        ?: error("Content type config for type $resolvedType not found. Provide one through WsPlugin constructor.")
 
     override fun execute(
         commandCall: CommandCall,
@@ -408,23 +408,25 @@ class CaseCommand(
 
     private fun check(actual: String, expected: String, resultRecorder: ResultRecorder, root: Html) {
         (contentTypeConfig.verifier to contentTypeConfig.printer).let { (verifier, printer) ->
-            verifier.verify(expected, actual).onFailure {
-                when (it) {
-                    is ContentVerifier.Fail -> {
-                        val diff = div().css(printer.style())
-                        val (_, errorMsg) = errorMessage(message = it.details, html = diff, type = printer.style())
-                        root.removeChildren()(errorMsg)
-                        resultRecorder.failure(diff, printer.print(it.actual), printer.print(it.expected))
+            verifier.verify(expected, actual)
+                .onFailure {
+                    when (it) {
+                        is ContentVerifier.Fail -> {
+                            val diff = div().css(printer.style())
+                            val (_, errorMsg) = errorMessage(message = it.details, html = diff, type = printer.style())
+                            root.removeChildren()(errorMsg)
+                            resultRecorder.failure(diff, printer.print(it.actual), printer.print(it.expected))
+                        }
+
+                        else -> throw it
                     }
-                    else -> throw it
+                }.onSuccess {
+                    root.removeChildren()(
+                        tag("exp").text(printer.print(expected)) css printer.style(),
+                        tag("act").text(printer.print(actual)) css printer.style()
+                    )
+                    resultRecorder.pass(root)
                 }
-            }.onSuccess {
-                root.removeChildren()(
-                    tag("exp").text(printer.print(expected)) css printer.style(),
-                    tag("act").text(printer.print(actual)) css printer.style()
-                )
-                resultRecorder.pass(root)
-            }
         }
     }
 
@@ -519,6 +521,6 @@ private fun tab(id: Long, trs: List<Element>): Pair<Html, Html> {
         "class" to "tab-pane fade",
         "id" to "nav-$name-$id",
         "role" to "tabpanel",
-        "aria-labelledby" to "nav-$name-$id-tab",
+        "aria-labelledby" to "nav-$name-$id-tab"
     )(table()(cnt))
 }

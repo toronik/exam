@@ -24,7 +24,7 @@ import java.io.OutputStream
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 
-class JSONWriter(private val dataSet: IDataSet, outputStream: OutputStream?) : IDataSetConsumer {
+class JSONWriter(private val dataSet: IDataSet, outputStream: OutputStream) : IDataSetConsumer {
     private val out: OutputStreamWriter = OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
     private var metaData: ITableMetaData? = null
     private var tableCount = 0
@@ -151,8 +151,8 @@ class JSONDataSet : AbstractDataSet {
         tables = tableParser.getTables(file)
     }
 
-    constructor(`is`: InputStream) {
-        tables = tableParser.getTables(`is`)
+    constructor(stream: InputStream) {
+        tables = tableParser.getTables(stream)
     }
 
     @Throws(DataSetException::class)
@@ -176,7 +176,10 @@ class TableParser {
     }
 
     private fun getMetaData(tableName: String, rows: List<Map<String, Any?>>): ITableMetaData =
-        DefaultTableMetaData(tableName, rows.flatMap { row -> row.keys }.toSet().map { Column(it, UNKNOWN) }.toTypedArray())
+        DefaultTableMetaData(
+            tableName,
+            rows.flatMap { row -> row.keys }.toSet().map { Column(it, UNKNOWN) }.toTypedArray()
+        )
 
     private fun fillRow(table: DefaultTable, row: Map<String, Any?>, rowIndex: Int) {
         if (row.entries.isNotEmpty()) {

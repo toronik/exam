@@ -1,7 +1,7 @@
 configurations.create("ktl")
 
 dependencies {
-    ktl "com.pinterest:ktlint:0.39.0"
+    ktl "com.pinterest:ktlint:0.46.1"
 }
 
 task ktlint(type: JavaExec, group: "verification") {

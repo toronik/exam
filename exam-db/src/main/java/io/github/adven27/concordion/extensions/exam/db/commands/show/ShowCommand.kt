@@ -34,7 +34,7 @@ class ShowCommand(
     override val name: String,
     val dbTester: DbTester,
     private val valuePrinter: DbPlugin.ValuePrinter,
-    private val commandParser: CommandParser<Attrs> = ShowParser(),
+    private val commandParser: CommandParser<Attrs> = ShowParser()
 ) : AbstractCommand(), NamedExamCommand, BeforeParseExamCommand {
     override val tag = "div"
 
@@ -62,7 +62,7 @@ class ShowCommand(
                         cols.toTypedArray()
                     ),
                     valuePrinter,
-                    el.takeAwayAttr("caption"),
+                    el.takeAwayAttr("caption")
                 )
             )
             if (createDataSet || !saveToResources.isNullOrEmpty()) {
@@ -95,6 +95,7 @@ class ShowCommand(
                     }
                 }
             }
+
             else -> FlatXmlDataSet.write(dataSet, it).run { saveIfNeeded(saveToResources, it) }
         }
     }

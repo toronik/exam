@@ -16,7 +16,14 @@ interface MqTester {
         override fun purge() = Unit
     }
 
-    open class Message @JvmOverloads constructor(val body: String = "", val headers: Map<String, String> = emptyMap()) {
-        override fun toString() = "headers: $headers; body:$body"
+    open class Message @JvmOverloads constructor(
+        val body: String = "",
+        val headers: Map<String, String?> = mapOf(),
+        val key: String? = null
+    ) {
+        override fun toString() = "key: $key\nheaders: ${printHeaders()}\nbody:\n$body"
+        private fun printHeaders() = headers.takeIf { it.isNotEmpty() }
+            ?.entries
+            ?.joinToString("\n", prefix = "\n") { it.key + ": " + it.value }
     }
 }

@@ -1,4 +1,5 @@
 @file:JvmName("HtmlBuilder")
+@file:Suppress("TooManyFunctions")
 
 package io.github.adven27.concordion.extensions.exam.core.html
 
@@ -16,6 +17,7 @@ const val STYLE = "style"
 const val NAME = "name"
 const val TABLE = "table"
 
+@Suppress("TooManyFunctions", "SpreadOperator")
 class Html(val el: Element) {
     constructor(tag: String) : this(Element(tag))
     constructor(tag: String, vararg attrs: Pair<String, String>) : this(tag, null, *attrs)
@@ -194,7 +196,7 @@ class Html(val el: Element) {
         return el.childElements.asList().filter { it.localName == tag }.map { Html(it) }
     }
 
-    fun firstOrThrow(tag: String) = first(tag) ?: throw IllegalStateException("<$tag> tag is required")
+    fun firstOrThrow(tag: String) = first(tag) ?: error("<$tag> tag is required")
 
     fun removeChildren(): Html {
         moveChildrenTo(Html("tmp"))
@@ -286,8 +288,6 @@ fun pill(count: Long, style: String) = pill(if (count == 0L) "" else count.toStr
 
 fun pill(txt: String, style: String) = span(txt).css("badge badge-pill badge-$style")
 
-fun `var`(txt: String) = Html("var", txt)
-
 fun link(txt: String) = Html("a", txt)
 
 fun link(txt: String, vararg childs: Html) = link(txt)(*childs)
@@ -313,6 +313,7 @@ fun imageOverlay(src: String, size: Int, title: String, desc: Html, fail: Boolea
     )
 }
 
+@Suppress("MagicNumber")
 fun noImageOverlay(title: String, desc: Html, fail: Boolean): Html {
     return div().css("col")(
         div().css("card ${if (fail) "border border-danger" else ""}")(

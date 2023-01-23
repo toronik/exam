@@ -67,7 +67,7 @@ open class DefaultFilesLoader : FilesLoader {
 
     protected fun readFile(file: File): String = try {
         file.readText()
-    } catch (e: IOException) {
+    } catch (ignore: IOException) {
         "ERROR WHILE FILE READING"
     }
 

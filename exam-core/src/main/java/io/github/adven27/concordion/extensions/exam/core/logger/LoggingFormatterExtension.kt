@@ -85,7 +85,7 @@ class LoggingFormatterExtension @JvmOverloads constructor(loggingAdaptor: Loggin
                         .replace("LOG_FILE_NAME", logFile.name)
                         .replace("LOG_FILE_CONTENT", quoteReplacement(logContent(logFile)))
                 )
-            } catch (e: IOException) {
+            } catch (ignore: IOException) {
                 logName = logFile.name
             }
             return logName
@@ -133,7 +133,8 @@ class LoggingFormatterExtension @JvmOverloads constructor(loggingAdaptor: Loggin
                     thread = (THREAD_REGEXP.toRegex().find(line!!)?.groupValues?.get(1) ?: thread).lowercase()
                         .replace(" ", "-")
                     prevline =
-                        "<li class=\"line $lineLevel $lineLevel-color $thread\"><div class=\"line-numbers\">$lineNumber</div><pre>$line</pre></li>"
+                        "<li class=\"line $lineLevel $lineLevel-color $thread\">" +
+                        "<div class=\"line-numbers\">$lineNumber</div><pre>$line</pre></li>"
                 }
                 if (prevline != null) logContent.append(prevline).append("\n")
                 br.close()
@@ -161,7 +162,8 @@ class LoggingFormatterExtension @JvmOverloads constructor(loggingAdaptor: Loggin
             val anchor = Element("a")
             anchor.addAttribute(
                 "style",
-                "font-size: 9pt; font-weight: bold; float: right; display: inline-block; margin-top: 20px; text-decoration: none; color: #89C;"
+                "font-size: 9pt; font-weight: bold; float: right; display: inline-block;" +
+                    "margin-top: 20px; text-decoration: none; color: #89C;"
             )
             anchor.addAttribute("href", logURL)
             anchor.appendText("Log File")

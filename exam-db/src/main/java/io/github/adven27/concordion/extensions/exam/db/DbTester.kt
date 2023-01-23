@@ -34,7 +34,7 @@ open class DbTester @JvmOverloads constructor(
     password: String,
     schema: String? = null,
     val dbUnitConfig: DbUnitConfig = DbUnitConfig(),
-    private val dataTypeConfig: Map<String, (DatabaseConfig) -> DatabaseConfig> = DATA_TYPES,
+    private val dataTypeConfig: Map<String, (DatabaseConfig) -> DatabaseConfig> = DATA_TYPES
 ) : JdbcDatabaseTester(driver, url, user, password, schema), AutoCloseable {
 
     companion object : KLogging() {

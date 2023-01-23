@@ -24,7 +24,7 @@ import java.time.Duration.ofMillis
 import java.time.Duration.ofSeconds
 import java.util.concurrent.TimeUnit
 
-@Suppress("unused", "LongParameterList")
+@Suppress("unused", "LongParameterList", "MagicNumber")
 open class KafkaConsumeAndSendTester @JvmOverloads constructor(
     bootstrapServers: String,
     topic: String,
@@ -61,13 +61,14 @@ open class KafkaConsumeAndSendTester @JvmOverloads constructor(
     override fun send(message: Message, params: Map<String, String>) =
         logger.debug("Sending to {}...", topic).also {
             producer.send(record(message, partitionFrom(params), keyFrom(params))).get().apply {
-                logger.info("Message sent to {}-{} {}: {}", topic(), partition(), offset(), message)
+                logger.debug("Message sent to {}-{} {}: {}", topic(), partition(), offset(), message)
             }
         }
 
-    private fun record(message: Message, partition: Int?, key: String?) = ProducerRecord(
-        topic, partition, key, message.body, message.headers.map { RecordHeader(it.key, it.value.toByteArray()) }
-    )
+    private fun record(message: Message, partition: Int?, key: String?) =
+        ProducerRecord(topic, partition, key, message.body, message.headers.map(::toRecordHeader))
+
+    private fun toRecordHeader(it: Map.Entry<String, String?>) = RecordHeader(it.key, it.value?.toByteArray())
 
     companion object : KLogging() {
         private const val PARAM_PARTITION = "partition"
@@ -78,7 +79,7 @@ open class KafkaConsumeAndSendTester @JvmOverloads constructor(
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java.name,
             ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java.name,
             ProducerConfig.ACKS_CONFIG to "all",
-            ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to "true",
+            ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to "true"
         )
 
         private fun partitionFrom(headers: Map<String, String>) = headers[PARAM_PARTITION]?.toInt()
@@ -86,7 +87,7 @@ open class KafkaConsumeAndSendTester @JvmOverloads constructor(
     }
 }
 
-@Suppress("unused", "TooManyFunctions", "LongParameterList")
+@Suppress("unused", "TooManyFunctions", "LongParameterList", "MagicNumber")
 open class KafkaConsumeOnlyTester @JvmOverloads constructor(
     protected val bootstrapServers: String,
     protected val topic: String,
@@ -121,7 +122,7 @@ open class KafkaConsumeOnlyTester @JvmOverloads constructor(
                 .map { it.key to RecordsToDelete.beforeOffset(it.value.offset()) }
                 .associate { it.apply { logger.debug("Purging partition {}", this) } }
         )
-        logger.info("Topic purged: {}", topic)
+        logger.debug("Topic purged: {}", topic)
     }
 
     private fun listLatestOffsets() = adminClient.listOffsets(latestOffsetsSpec())
@@ -166,7 +167,7 @@ open class KafkaConsumeOnlyTester @JvmOverloads constructor(
 
     private fun KafkaConsumer<String, String>.consume(): List<Message> =
         logger.debug("Consuming events... {}ms", pollTimeout.toMillis()).let {
-            poll(pollTimeout).map { recordMapper(it) }.apply { logger.info("Events consumed:\n{}", this) }
+            poll(pollTimeout).map { recordMapper(it) }.apply { logger.debug("Events consumed:\n{}", this) }
         }
 
     companion object : KLogging() {
@@ -178,7 +179,7 @@ open class KafkaConsumeOnlyTester @JvmOverloads constructor(
             ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java.name,
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java.name,
             ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to "false",
-            ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
+            ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest"
         )
 
         @JvmField

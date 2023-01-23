@@ -5,9 +5,10 @@ import io.github.adven27.concordion.extensions.exam.nosql.NoSqlDBTester
 import io.github.adven27.concordion.extensions.exam.nosql.NoSqlDocument
 import org.bson.Document
 
+@Suppress("unused")
 class MongoTester(
     connectionString: String,
-    dbName: String,
+    dbName: String
 ) : NoSqlDBTester {
 
     private val client = MongoClients.create(connectionString)
