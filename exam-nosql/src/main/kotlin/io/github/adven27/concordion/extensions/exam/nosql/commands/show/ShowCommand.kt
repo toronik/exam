@@ -16,17 +16,21 @@ import org.concordion.api.ResultRecorder
 
 class ShowCommand(
     override val name: String,
-    private val dbTester: NoSqlDBTester,
+    private val dbTesters: Map<String, NoSqlDBTester>,
     private val commandParser: CommandParser<Attrs> = ShowParser(),
 ) : AbstractCommand(), NamedExamCommand, BeforeParseExamCommand {
     override val tag = "div"
 
-    data class Attrs(val collection: String)
+    data class Attrs(
+        val dsName: String,
+        val collection: String
+    )
 
     override fun setUp(cmd: CommandCall, eval: Evaluator, resultRecorder: ResultRecorder?, fixture: Fixture) {
         with(commandParser.parse(cmd, eval)) {
             val el = cmd.html()
-            val docs = dbTester.read(collection)
+            val docs = dbTesters[dsName]?.read(collection)
+                ?: throw IllegalArgumentException("NoSqlDBTester with name $dsName is not registered")
             el(
                 renderCollection(collection, docs).toHtml()
             )

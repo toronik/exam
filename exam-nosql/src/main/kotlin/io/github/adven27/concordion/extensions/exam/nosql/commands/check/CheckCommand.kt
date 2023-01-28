@@ -15,9 +15,9 @@ import io.github.adven27.concordion.extensions.exam.nosql.commands.check.CheckCo
 
 class CheckCommand(
     override val name: String = "nosql-check",
-    private val dbTester: NoSqlDBTester,
+    private val dbTesters: Map<String, NoSqlDBTester>,
     verifier: NoSqlVerifier = NoSqlVerifier(),
-    actualProvider: ActualProvider<Expected, Pair<Boolean, Actual>> = NoSqlActualProvider(dbTester),
+    actualProvider: ActualProvider<Expected, Pair<Boolean, Actual>> = NoSqlActualProvider(dbTesters),
     commandParser: CommandParser<Expected> = CheckParser(HtmlNoSqlParser()),
     resultRenderer: VerifyListener<Expected, Actual> = HtmlCheckRenderer()
 ) : ExamAssertCommand<Expected, Actual>(commandParser, verifier, actualProvider, resultRenderer),
@@ -27,6 +27,7 @@ class CheckCommand(
 
     data class Actual(val documents: List<NoSqlDocument> = listOf())
     data class Expected(
+        val dsName: String,
         val collection: String,
         val documents: List<NoSqlDocument> = listOf(),
         val await: AwaitConfig?
