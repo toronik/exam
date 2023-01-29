@@ -18,8 +18,8 @@ class CleanCommand(
 
     override fun setUp(cmd: CommandCall, eval: Evaluator, resultRecorder: ResultRecorder, fixture: Fixture) {
         val el = cmd.html()
-        val collections =
-            el.takeAwayAttr("collections", eval)?.also { cmd.element.swapText(it) } ?: eval.evaluate(cmd.expression).toString()
+        val collections = el.takeAwayAttr("collections", eval)?.also { cmd.element.swapText(it) }
+            ?: eval.evaluate(cmd.expression).toString()
         val dsName = dataSourceNameFrom(el, eval)
         dbTesters[dsName]?.clean(collections.split(",").map { it.trim() })
             ?: throw IllegalArgumentException("NoSqlDBTester with name $dsName is not registered")
