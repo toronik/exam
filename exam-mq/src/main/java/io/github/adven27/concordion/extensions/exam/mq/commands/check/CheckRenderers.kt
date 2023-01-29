@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions")
+
 package io.github.adven27.concordion.extensions.exam.mq.commands.check
 
 import io.github.adven27.concordion.extensions.exam.core.ContentVerifier
@@ -46,7 +48,7 @@ abstract class BaseResultRenderer : SuitableResultRenderer<Expected, Actual>() {
                 is MqVerifier.MessageVerifyingError -> renderMessageContentError(event)
                 else -> div()(
                     pre(event.fail.toString()),
-                    pre(event.expected.toString()),
+                    pre(event.expected.toString())
                 ).el
             }
         )
@@ -81,7 +83,7 @@ abstract class BaseResultRenderer : SuitableResultRenderer<Expected, Actual>() {
                             Result.success(ExpectedContent("text", it.body))
                         )
                     }
-                ).toHtml(),
+                ).toHtml()
             )
         ).second.el
 }
@@ -127,14 +129,15 @@ private fun renderBodyError(error: Throwable) = when (error) {
         type = "json",
         html = div("class" to "${error.type} rest-failure")(
             Html("del", error.expected, "class" to "expected"),
-            Html("ins", error.actual, "class" to "actual"),
+            Html("ins", error.actual, "class" to "actual")
         )
     ).second.el.toXML()
+
     else -> """<div class="json exp-body rest-failure">${error.message?.escapeHtml()}</div>"""
 }
 
 // language=html
-private fun renderHeaders(headers: Map<String, String>) = if (headers.isNotEmpty()) {
+private fun renderHeaders(headers: Map<String, String?>) = if (headers.isNotEmpty()) {
     """
     <tr><td> 
         <table class="table table-sm caption-top">
@@ -160,7 +163,7 @@ private fun expectedButWas(error: MqVerifier.HeadersSizeVerifyingError) = errorM
         span("Expected:"),
         templateHeaders { toRows(error.expected) }.toHtml(),
         span("but was:"),
-        templateHeaders { toRows(error.actual) }.toHtml(),
+        templateHeaders { toRows(error.actual) }.toHtml()
     )
 ).second.el.toXML()
 
@@ -173,8 +176,8 @@ private fun templateHeaders(rows: () -> String) = """
 """.trimIndent()
 
 // language=html
-private fun toRows(headers: Map<String, String>) = headers.entries.joinToString("\n") { (k, v) ->
-    """<tr><td class="rest-success">$k</td><td class="rest-success">${v.escapeHtml()}</td></tr>"""
+private fun toRows(headers: Map<String, String?>) = headers.entries.joinToString("\n") { (k, v) ->
+    """<tr><td class="rest-success">$k</td><td class="rest-success">${v?.escapeHtml()}</td></tr>"""
 }
 
 // language=html
@@ -183,6 +186,6 @@ private fun toRows(headers: List<MqVerifier.HeaderCheckResult>) = headers.joinTo
 }
 
 // language=html
-private fun tdResult(actual: String?, expected: String) =
-    if (actual == null) """<td class="rest-success">${expected.escapeHtml()}</td>"""
-    else """<td class="rest-failure"><del>${expected.escapeHtml()}</del><ins>${actual.escapeHtml()}</ins></td>"""
+private fun tdResult(actual: String?, expected: String?) =
+    if (actual == null && expected != null) """<td class="rest-success">${expected.escapeHtml()}</td>"""
+    else """<td class="rest-failure"><del>${expected?.escapeHtml()}</del><ins>${actual?.escapeHtml()}</ins></td>"""

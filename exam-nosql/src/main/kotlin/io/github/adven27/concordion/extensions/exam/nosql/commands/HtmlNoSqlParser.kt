@@ -28,7 +28,8 @@ class HtmlNoSqlParser {
         val from: String? = doc.attr("from")
         return NoSqlDocument(
             eval.resolveForContentType(
-                VarsAttrs(doc, eval).let { doc.content(from, eval) }, "json"
+                VarsAttrs(doc, eval).let { doc.content(from, eval) },
+                "json"
             )
         )
     }

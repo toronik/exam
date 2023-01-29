@@ -37,7 +37,7 @@ class CommandRegistry(jsonVerifier: ContentVerifier, xmlVerifier: ContentVerifie
         XmlEqualsCommand(),
         XmlEqualsFileCommand(),
         JsonEqualsCommand(),
-        JsonEqualsFileCommand(),
+        JsonEqualsFileCommand()
     )
 
     fun getBy(name: String): NamedExamCommand? = commands.firstOrNull { it.name == name }

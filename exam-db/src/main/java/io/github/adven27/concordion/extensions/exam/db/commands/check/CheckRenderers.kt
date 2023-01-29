@@ -62,7 +62,9 @@ abstract class BaseResultRenderer(private val printer: ValuePrinter) : SuitableR
     }
 
     private fun renderSizeMismatch(fail: TableSizeMismatch, expected: Expected) = errorTemplate(
-        expected, fail, butWas = renderTable(fail.actual, printer)
+        expected,
+        fail,
+        butWas = renderTable(fail.actual, printer)
     )
 
     private fun renderContentMismatch(fail: TableContentMismatch, expected: Expected) = errorTemplate(
@@ -89,7 +91,7 @@ abstract class BaseResultRenderer(private val printer: ValuePrinter) : SuitableR
             span("Expected:"),
             expectedTable,
             if (butWas != null) span("but was:") else null,
-            butWas,
+            butWas
         )
     ).second.el
 

@@ -1,52 +1,52 @@
 @file:JvmName("SutApp")
+@file:Suppress("MagicNumber")
 
 package app
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
-import io.ktor.application.ApplicationCall
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.application.log
-import io.ktor.features.CallLogging
-import io.ktor.features.ContentNegotiation
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.HttpStatusCode.Companion.BadRequest
 import io.ktor.http.HttpStatusCode.Companion.Created
-import io.ktor.http.content.resources
-import io.ktor.http.content.static
-import io.ktor.jackson.jackson
-import io.ktor.request.header
-import io.ktor.request.httpMethod
-import io.ktor.request.receive
-import io.ktor.request.receiveOrNull
-import io.ktor.request.receiveText
-import io.ktor.request.uri
-import io.ktor.response.respond
-import io.ktor.routing.delete
-import io.ktor.routing.get
-import io.ktor.routing.post
-import io.ktor.routing.put
-import io.ktor.routing.routing
+import io.ktor.serialization.jackson.jackson
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
+import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.http.content.resources
+import io.ktor.server.http.content.static
 import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.request.header
+import io.ktor.server.request.httpMethod
+import io.ktor.server.request.receive
+import io.ktor.server.request.receiveOrNull
+import io.ktor.server.request.receiveText
+import io.ktor.server.request.uri
+import io.ktor.server.response.respond
+import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.put
+import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatter.ofPattern
 import java.util.TimeZone
+import kotlin.collections.ArrayList
 
 private val engine = embeddedServer(Netty, port = System.getProperty("server.port").toInt(), host = "") {
-    install(CallLogging)
     install(ContentNegotiation) {
         jackson {
             setTimeZone(TimeZone.getDefault())
@@ -54,7 +54,7 @@ private val engine = embeddedServer(Netty, port = System.getProperty("server.por
                 JavaTimeModule()
                     .addSerializer(
                         LocalDateTime::class.java,
-                        LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"))
+                        LocalDateTimeSerializer(ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"))
                     )
             )
             configure(SerializationFeature.INDENT_OUTPUT, true)
@@ -67,7 +67,7 @@ private val engine = embeddedServer(Netty, port = System.getProperty("server.por
     val jobService = JobService()
     routing {
         post("/jobs") {
-            log.info("trigger job " + call.receiveOrNull<NewWidget>())
+            call.application.environment.log.info("trigger job " + call.receiveOrNull<NewWidget>())
             val id = jobService.add()
             jobs.add(id)
 
@@ -81,12 +81,12 @@ private val engine = embeddedServer(Netty, port = System.getProperty("server.por
         }
 
         get("/jobs/{id}") {
-            log.info("is job running?")
+            call.application.environment.log.info("is job running?")
             call.respond("""{ "running" : "${jobs.contains(call.parameters["id"]?.toInt()!!)}" }""")
         }
 
         get("/widgets") {
-            log.info("service.getAll: " + widgetService.getAll().toString())
+            call.application.environment.log.info("service.getAll: " + widgetService.getAll().toString())
             call.respond(widgetService.getAll())
         }
 

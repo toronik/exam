@@ -20,7 +20,7 @@ open class RabbitTester @JvmOverloads constructor(
         port = DEFAULT_PORT
     },
     protected val sendConfig: SendConfig,
-    protected val receiveConfig: ReceiveConfig,
+    protected val receiveConfig: ReceiveConfig
 ) : MqTester {
     private lateinit var connection: Connection
     private lateinit var ch: Channel
@@ -30,27 +30,27 @@ open class RabbitTester @JvmOverloads constructor(
         host: String,
         port: Int = 5672,
         sendConfig: SendConfig,
-        receiveConfig: ReceiveConfig,
+        receiveConfig: ReceiveConfig
     ) : this(
         connectionFactory = ConnectionFactory().apply {
             this.host = host
             this.port = port
         },
         sendConfig = sendConfig,
-        receiveConfig = receiveConfig,
+        receiveConfig = receiveConfig
     )
 
     constructor(
         port: Int,
         sendConfig: SendConfig,
-        receiveConfig: ReceiveConfig,
+        receiveConfig: ReceiveConfig
     ) : this(
         connectionFactory = ConnectionFactory().apply {
             this.host = DEFAULT_HOST
             this.port = port
         },
         sendConfig = sendConfig,
-        receiveConfig = receiveConfig,
+        receiveConfig = receiveConfig
     )
 
     override fun purge() {
@@ -119,7 +119,7 @@ open class RabbitTester @JvmOverloads constructor(
     data class SendConfig @JvmOverloads constructor(
         val exchange: String = "",
         val routingKey: String,
-        val sendConverter: SendConverter = DEFAULT_SEND_CONVERTER,
+        val sendConverter: SendConverter = DEFAULT_SEND_CONVERTER
     ) {
         constructor(routingKey: String, sendConverter: SendConverter = DEFAULT_SEND_CONVERTER) :
             this("", routingKey, sendConverter)

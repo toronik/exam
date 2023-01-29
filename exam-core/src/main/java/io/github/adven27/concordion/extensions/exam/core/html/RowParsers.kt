@@ -27,7 +27,8 @@ class RowParserEval(private val el: Html, private val tag: String, private val e
 
     fun parse(): Map<String, List<Any?>> = el.childs().filter { it.localName().contains(tag) }
         .mapIndexed { i, html ->
-            (html.attr("desc") ?: (i + 1).toString()) to parseValues(html.text(), separator).map { eval.resolveToObj(it) }
+            (html.attr("desc") ?: (i + 1).toString()) to
+                parseValues(html.text(), separator).map { eval.resolveToObj(it) }
         }.toMap()
 }
 

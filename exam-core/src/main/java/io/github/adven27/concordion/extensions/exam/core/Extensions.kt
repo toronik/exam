@@ -23,7 +23,7 @@ class CodeMirrorExtension : ConcordionExtension {
             "enable-codemirror.css",
             "merge.css",
             "foldgutter.css",
-            "simplescrollbar.css",
+            "simplescrollbar.css"
         )
 
         e.linkedJs(
@@ -165,7 +165,7 @@ class FontAwesomeExtension : ConcordionExtension {
             "css/all.min.css",
             "css/regular.min.css",
             "css/solid.min.css",
-            "css/all.min.css",
+            "css/all.min.css"
         )
         e.resources(
             BASE,
@@ -178,7 +178,7 @@ class FontAwesomeExtension : ConcordionExtension {
             "webfonts/fa-solid-900.eot",
             "webfonts/fa-solid-900.svg",
             "webfonts/fa-solid-900.ttf",
-            "webfonts/fa-solid-900.woff",
+            "webfonts/fa-solid-900.woff"
         )
     }
 
@@ -190,7 +190,14 @@ class FontAwesomeExtension : ConcordionExtension {
 class BootstrapExtension : ConcordionExtension {
     override fun addTo(e: ConcordionExtender) {
         e.linkedCss(BASE, "bootstrap.min.css", "enable-bootstrap.css", "doc.min.css", "scrollToTop.css")
-        e.linkedJs(BASE, "bootstrap.bundle.min.js", "jquery-3.2.1.slim.min.js", "sidebar.js", "doc.min.js", "scrollToTop.js")
+        e.linkedJs(
+            BASE,
+            "bootstrap.bundle.min.js",
+            "jquery-3.2.1.slim.min.js",
+            "sidebar.js",
+            "doc.min.js",
+            "scrollToTop.js"
+        )
     }
 
     companion object {

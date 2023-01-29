@@ -12,14 +12,15 @@ class Xj : Specs() {
         get() = "<date>$NOW</date>"
 
     val actualBigXml: String
-        get() = "<root>${(1..50).map { "<num>$it</num>" }.reduce { it, acc -> acc + it }}</root>"
+        get() = "<root>${(1..50).map { "<num>$it</num>" }.reduce { acc, next -> acc + next }}</root>"
 
     val actualJsonWithFieldsToIgnore: String
         get() = """{ 
-            |"param1":"1", 
-            |"extra":"ignore", 
-            |"arr": [{"param2":"2", "extra":"ignore"}, {"extra":"ignore", "param3":"3"}]
-            |}""".trimMargin()
+            "param1":"1", 
+            "extra":"ignore", 
+            "arr": [{"param2":"2", "extra":"ignore"}, {"extra":"ignore", "param3":"3"}]
+            }
+        """.trimIndent()
 
     companion object {
         private val NOW = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))

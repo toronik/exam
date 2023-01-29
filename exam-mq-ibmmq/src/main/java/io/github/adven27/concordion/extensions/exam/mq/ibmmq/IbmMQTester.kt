@@ -179,6 +179,7 @@ abstract class JmsTester(protected val config: Config) : MqTester.NOOP() {
         val DEFAULT_SEND_CONVERTER: SendConverter = object : SendConverter {
             override fun apply(m: Pair<MqTester.Message, Session>): Message = m.second.createTextMessage(m.first.body)
         }
+
         @JvmField
         val DEFAULT_RECEIVE_CONVERTER: ReceiveConverter = object : ReceiveConverter {
             override fun apply(m: Message): MqTester.Message = MqTester.Message((m as TextMessage).text)

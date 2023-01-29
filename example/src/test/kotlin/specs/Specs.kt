@@ -63,7 +63,7 @@ open class Specs : AbstractSpecs() {
             ),
             "jsonIgnorePaths" to JsonContentTypeConfig(
                 verifier = JsonVerifier { it.whenIgnoringPaths("param2", "arr[*].param4") }
-            ),
+            )
         )
     )
 
@@ -85,8 +85,10 @@ open class Specs : AbstractSpecs() {
         val nosqlTester = NoSqlDefaultTester()
 
         private fun dbTester() = DbTester(
-            "org.h2.Driver", "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:sql/populate.sql'",
-            "sa", "",
+            driver = "org.h2.Driver",
+            url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:sql/populate.sql'",
+            user = "sa",
+            password = "",
             dbUnitConfig = DbUnitConfig(columnValueComparers = mapOf("DATETIME_TYPE" to IgnoreMillisComparer()))
         )
     }

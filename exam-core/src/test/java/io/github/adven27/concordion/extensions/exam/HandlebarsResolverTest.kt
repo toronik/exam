@@ -15,7 +15,7 @@ import org.concordion.internal.FixtureInstance
 import org.concordion.internal.OgnlEvaluator
 import org.junit.Test
 import java.time.LocalDate
-import java.util.Date
+import java.util.*
 import kotlin.test.assertEquals
 
 class HandlebarsResolverTest {
@@ -66,7 +66,10 @@ class HandlebarsResolverTest {
         val placeholder = """{{dateFormat someDate wrong="yyyy-MM-dd" tz="GMT+3"}}"""
 
         assertThatExceptionOfType(HandlebarsException::class.java).isThrownBy { sut(placeholder) }
-            .withMessageContaining("""Wrong options for helper '$placeholder': found '[wrong]', expected any of '${DateHelpers.dateFormat.options}""")
+            .withMessageContaining(
+                "Wrong options for helper '$placeholder': found '[wrong]', " +
+                    "expected any of '${DateHelpers.dateFormat.options}"
+            )
             .withRootCauseExactlyInstanceOf(IllegalArgumentException::class.java)
     }
 
@@ -80,7 +83,10 @@ class HandlebarsResolverTest {
         val placeholder = """{{now wrong="yyyy-MM-dd" tz="GMT+3"}}"""
 
         assertThatExceptionOfType(HandlebarsException::class.java).isThrownBy { sut(placeholder) }
-            .withMessageContaining("""Wrong options for helper '$placeholder': found '[wrong]', expected any of '${DateHelpers.now.options}""")
+            .withMessageContaining(
+                "Wrong options for helper '$placeholder': " +
+                    "found '[wrong]', expected any of '${DateHelpers.now.options}"
+            )
             .withRootCauseExactlyInstanceOf(IllegalArgumentException::class.java)
     }
 
@@ -88,9 +94,11 @@ class HandlebarsResolverTest {
     fun `defaults date`() {
         DateHelpers.values().forEach {
             val expected = it.expected
-            if (expected is Date) assertThat(helper(it) as Date).describedAs("Failed helper: %s", it)
-                .isCloseTo(expected, 2000)
-            else assertEquals(expected, helper(it), "Failed helper: $it")
+            if (expected is Date) {
+                assertThat(helper(it) as Date).describedAs("Failed helper: %s", it).isCloseTo(expected, 2000)
+            } else {
+                assertEquals(expected, helper(it), "Failed helper: $it")
+            }
         }
     }
 

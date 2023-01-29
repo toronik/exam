@@ -17,7 +17,7 @@ import org.concordion.api.ResultRecorder
 class ShowCommand(
     override val name: String,
     private val dbTesters: Map<String, NoSqlDBTester>,
-    private val commandParser: CommandParser<Attrs> = ShowParser(),
+    private val commandParser: CommandParser<Attrs> = ShowParser()
 ) : AbstractCommand(), NamedExamCommand, BeforeParseExamCommand {
     override val tag = "div"
 

@@ -55,9 +55,12 @@ open class DbVerifier(val dbTester: DbTester) : AwaitVerifier<Expected, ITable> 
                 }
             } ?: dbUnitAssert(expectedTable, actualTable)
             Result.success(Success(expected, actualTable))
+        } catch (cto: ConditionTimeoutException) {
+            logger.warn("Check failed", cto)
+            Result.failure(cto.cause!!)
         } catch (expected: Throwable) {
             logger.warn("Check failed", expected)
-            Result.failure(if (expected is ConditionTimeoutException) expected.cause!! else expected)
+            Result.failure(expected)
         }
 
     class TableSizeMismatch(val actual: ITable, failure: DbComparisonFailure) :

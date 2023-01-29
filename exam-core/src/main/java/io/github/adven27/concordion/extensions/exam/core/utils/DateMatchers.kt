@@ -71,7 +71,7 @@ open class DateWithin(
     }
 
     companion object : KLogging() {
-        internal const val PARAMS_SEPARATOR = "|param|"
+        internal const val PARAMS_SEPARATOR = "|$|"
     }
 }
 

@@ -52,9 +52,9 @@ class FilesCheckCommand(name: String?, tag: String?, filesLoader: FilesLoader) :
             var empty = true
             for (f in table.childs()) {
                 if ("file" == f.localName()) {
-                    val (name1, content1, autoFormat, lineNumbers) = filesLoader.readFileTag(f, evaluator)
-                    val resolvedName = evaluator.resolveToObj(name1)
-                    val expectedName = resolvedName?.toString() ?: name1!!
+                    val fileTag = filesLoader.readFileTag(f, evaluator)
+                    val resolvedName = evaluator.resolveToObj(fileTag.name)
+                    val expectedName = resolvedName?.toString() ?: fileTag.name!!
                     val fileNameTD = td(expectedName)
                     var pre = codeXml("")
                     if (!filesLoader.fileExists(evalPath + File.separator + expectedName)) {
@@ -64,7 +64,7 @@ class FilesCheckCommand(name: String?, tag: String?, filesLoader: FilesLoader) :
                         resultRecorder.record(Result.SUCCESS)
                         announceSuccess(fileNameTD.el())
                         surplusFiles.remove(expectedName)
-                        if (content1 == null) {
+                        if (fileTag.content == null) {
                             val id = generateId()
                             val content = filesLoader.readFile(evalPath, expectedName)
                             if (!content.isEmpty()) {
@@ -78,7 +78,7 @@ class FilesCheckCommand(name: String?, tag: String?, filesLoader: FilesLoader) :
                         } else {
                             checkContent(
                                 evalPath + File.separator + expectedName,
-                                content1,
+                                fileTag.content,
                                 resultRecorder,
                                 pre.el()
                             )
@@ -89,8 +89,8 @@ class FilesCheckCommand(name: String?, tag: String?, filesLoader: FilesLoader) :
                             fileNameTD,
                             td().invoke(
                                 pre.attrs(
-                                    "autoFormat".to(autoFormat.toString()),
-                                    "lineNumbers".to(lineNumbers.toString())
+                                    "autoFormat" to fileTag.autoFormat.toString(),
+                                    "lineNumbers" to fileTag.lineNumbers.toString()
                                 )
                             )
                         )

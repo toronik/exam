@@ -61,7 +61,7 @@ fun renderBody(msg: ParametrizedTypedMessage): String =
     """<div class="${msg.type}"></div>""".toHtml().text(msg.body.pretty(msg.type)).el.toXML()
 
 // language=html
-private fun renderHeaders(headers: Map<String, String>) =
+private fun renderHeaders(headers: Map<String, String?>) =
     if (headers.isNotEmpty()) {
         """
     <tr><td> 
@@ -74,6 +74,6 @@ private fun renderHeaders(headers: Map<String, String>) =
     } else ""
 
 // language=html
-private fun toRows(headers: Map<String, String>) = headers.entries.joinToString("\n") { (k, v) ->
-    """<tr><td>$k</td><td>${v.escapeHtml()}</td></tr>"""
+private fun toRows(headers: Map<String, String?>) = headers.entries.joinToString("\n") { (k, v) ->
+    """<tr><td>$k</td><td>${v?.escapeHtml()}</td></tr>"""
 }

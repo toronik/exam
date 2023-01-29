@@ -84,7 +84,7 @@ data class SetAttrs(val seedStrategy: SeedStrategy) {
 
         fun from(root: CommandCall, allowedSeedStrategies: List<SeedStrategy>) = SetAttrs(
             SeedStrategy.valueOf(root.attr(OPERATION, SeedStrategy.CLEAN_INSERT.name).uppercase())
-                .isAllowed(allowedSeedStrategies),
+                .isAllowed(allowedSeedStrategies)
         )
 
         private fun SeedStrategy.isAllowed(allowed: List<SeedStrategy>): SeedStrategy =

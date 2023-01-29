@@ -20,20 +20,20 @@ class Handlebar : Specs() {
         }.let { (custom, date, datetime) -> // language=json
             """
             { 
-              "formattedAs": "$custom",
-              "isoLocalDate": "$date",
-              "isoLocalDateTime": "$datetime",
+              "customFormat": "$custom",
+              "isoDate": "$date",
+              "iso": "$datetime",
               
-              "formattedAndWithinNow": "$custom",
-              "isoLocalDateAndWithinNow": "$date",
-              "isoLocalDateTimeAndWithinNow": "$datetime",
+              "customFormatAndWithinNow": "$custom",
+              "isoDateAndWithinNow": "$date",
+              "isoAndWithinNow": "$datetime",
               
-              "formattedAndWithin": "$custom",
-              "isoLocalDateAndWithin": "$date",
-              "isoLocalDateTimeAndWithin": "$datetime",
+              "customFormatAndWithinSpecifiedDate": "$custom",
+              "isoDateAndWithinSpecifiedDate": "$date",
+              "isoAndWithinSpecifiedDate": "$datetime",
               
-              "after": "$datetime",
-              "before": "$datetime"
+              "afterSpecifiedDate": "$datetime",
+              "beforeSpecifiedDate": "$datetime"
             }
             """.trimIndent()
         }

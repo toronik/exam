@@ -32,6 +32,7 @@ import java.io.InputStream
 import java.net.URL
 import java.util.concurrent.atomic.AtomicBoolean
 
+@Suppress("TooManyFunctions")
 class DataSetExecutor(private val dbTester: DbTester) {
     private val printDBUnitConfig = AtomicBoolean(true)
 
@@ -51,8 +52,6 @@ class DataSetExecutor(private val dbTester: DbTester) {
     private fun printDBUnitConfiguration() {
         if (printDBUnitConfig.compareAndSet(true, false)) {
             val sb = StringBuffer()
-            sb // .append("caseInsensitiveStrategy: ").append(dbTester.getDbUnitConfig().getCaseInsensitiveStrategy()).append("\n")
-                // .append("leakHunter: ").append("" + dbUnitConfig.isLeakHunter()).append("\n")
                 .append("columnSensing: ").append("" + dbTester.dbUnitConfig.isColumnSensing).append("\n")
             for ((key, value) in dbTester.dbUnitConfig.databaseConfigProperties) {
                 sb.append(key).append(": ").append(value ?: "").append("\n")
@@ -93,6 +92,7 @@ class DataSetExecutor(private val dbTester: DbTester) {
                             .build(getDataSetStream(name))
                     }
                 }
+
                 "json" -> JSONDataSet(getDataSetStream(name))
                 "xls" -> XlsDataSet(getDataSetStream(name))
                 "csv" -> CsvDataSet(File(name.findResource().file).parentFile)

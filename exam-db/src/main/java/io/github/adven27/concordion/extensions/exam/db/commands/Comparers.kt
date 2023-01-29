@@ -41,14 +41,24 @@ open class ExamMatchersAwareValueComparer : IsActualEqualToExpectedValueComparer
         expected.isError() -> false
         expected.isNumber() -> checkAndSet(evaluator, actual, expected.toString()) { a, _ -> matchesAnyNumber(a) }
         expected.isString() -> checkAndSet(evaluator, actual, expected.toString()) { a, _ -> matchesAnyString(a) }
-        expected.isRegex() -> checkAndSet(evaluator, actual, expected.toString()) { a, e -> matchesRegex(e.expression(), a) }
+        expected.isRegex() -> checkAndSet(evaluator, actual, expected.toString()) { a, e ->
+            matchesRegex(e!!.expression(), a)
+        }
+
         expected.isNotNull() -> checkAndSet(evaluator, actual, expected.toString()) { a, _ -> a != null }
         expected.isUuid() -> checkAndSet(evaluator, actual, expected.toString()) { a, _ -> matchesAnyUuid(a) }
         expected.isWithin() -> checkAndSet(evaluator, actual, expected.toString()) { a, e ->
             WithinValueComparer(expected.toString().withinPeriod()).isExpected(
-                expectedTable, actualTable, rowNum, columnName, dataType, resolve(e), a
+                expectedTable,
+                actualTable,
+                rowNum,
+                columnName,
+                dataType,
+                resolve(e!!),
+                a
             )
         }
+
         else -> super.isExpected(expectedTable, actualTable, rowNum, columnName, dataType, expected, actual)
     }
 
@@ -91,8 +101,11 @@ class WithinValueComparer(tolerance: Long) : IsActualWithinToleranceOfExpectedTi
     ) = super.isExpected(expectedTable, actualTable, rowNum, columnName, dataType, expectedValue, actualValue)
 
     override fun convertValueToTimeInMillis(timestampValue: Any?) =
-        if (timestampValue is java.sql.Date) timestampValue.time
-        else super.convertValueToTimeInMillis(timestampValue)
+        if (timestampValue is java.sql.Date) {
+            timestampValue.time
+        } else {
+            super.convertValueToTimeInMillis(timestampValue)
+        }
 }
 
 /**
@@ -108,8 +121,11 @@ abstract class AbstractFallbackComparer : ExamMatchersAwareValueComparer() {
         dataType: DataType,
         expected: Any?,
         actual: Any?
-    ): Boolean = if (super.isExpected(expectedTable, actualTable, rowNum, columnName, dataType, expected, actual)) true
-    else compare(expected, actual)
+    ): Boolean = if (super.isExpected(expectedTable, actualTable, rowNum, columnName, dataType, expected, actual)) {
+        true
+    } else {
+        compare(expected, actual)
+    }
 
     abstract fun compare(expected: Any?, actual: Any?): Boolean
 }

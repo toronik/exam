@@ -64,25 +64,35 @@ fun matchesAnyUuid(a: Any?) = a is String && try {
 fun <T> checkAndSet(
     eval: Evaluator,
     actual: T,
-    expected: String,
-    check: (actual: T, expected: String) -> Boolean = { a, e ->
+    expected: String?,
+    check: (actual: T, expected: String?) -> Boolean = { a, e ->
         when {
+            e == null -> a == null
             e == "\${text-unit.any-string}" -> matchesAnyString(a)
             e == "\${text-unit.any-number}" -> matchesAnyNumber(a)
             e == "\${text-unit.any-boolean}" -> matchesAnyBoolean(a)
             e == "\${text-unit.ignore}" -> true
             e.startsWith("\${text-unit.regex}") -> matchesRegex(e.substringAfter("}"), a)
-            e.startsWith("\${text-unit.matches:after}") -> After().apply { setParameter(e.substringAfter("}")) }.matches(a!!)
-            e.startsWith("\${text-unit.matches:before}") -> Before().apply { setParameter(e.substringAfter("}")) }.matches(a!!)
+            e.startsWith("\${text-unit.matches:after}") ->
+                After().apply { setParameter(e.substringAfter("}")) }.matches(a!!)
+
+            e.startsWith("\${text-unit.matches:before}") ->
+                Before().apply { setParameter(e.substringAfter("}")) }.matches(a!!)
+
             else -> a == e
         }
     }
 ): Boolean {
-    val split = expected.split(">>")
-    if (split.size > 1) eval.setVariable("#${split[1]}", actual)
-    return check(actual, split[0])
+    val exp = if (expected != null) {
+        val split = expected.split(">>")
+        if (split.size > 1) eval.setVariable("#${split[1]}", actual)
+        split[0]
+    } else {
+        null
+    }
+    return check(actual, exp)
 }
 
-fun CommandCall.swapText(value: String) {
-    Html(descendantTextContainer(element)).removeChildren().text(value).el.appendNonBreakingSpaceIfBlank()
+fun Element.swapText(value: String) {
+    Html(descendantTextContainer(this)).removeChildren().text(value).el.appendNonBreakingSpaceIfBlank()
 }

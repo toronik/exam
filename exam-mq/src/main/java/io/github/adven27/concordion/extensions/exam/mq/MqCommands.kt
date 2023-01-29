@@ -31,7 +31,7 @@ open class ParametrizedTypedMessage(
 ) : TypedMessage(type, body, headers)
 
 data class VerifyPair(val actual: MqTester.Message, val expected: TypedMessage) {
-    override fun toString() = "actual={$actual}, expected={$expected}"
+    override fun toString() = "ACTUAL:\n\n$actual\n\nEXPECTED:\n\n$expected"
 }
 
 class MessageAttrs(root: Html, evaluator: Evaluator) {
@@ -83,9 +83,11 @@ private fun String?.attrToMap(): Map<String, String> = this?.headers()?.mapValue
 private fun Map<String, MqTester>.getOrFail(mqName: String?): MqTester = this[mqName]
     ?: throw IllegalArgumentException("MQ with name '$mqName' not registered in MqPlugin")
 
+@Suppress("unused")
 private fun container(text: String, type: String, collapsable: Boolean) =
     if (collapsable) collapsableContainer(text, type) else fixedContainer(text, type)
 
+@Suppress("unused")
 private fun collapsed(container: Html) = td("class" to "exp-body")(
     div().style("position: relative")(
         divCollapse("", container.attr("id").toString()).css("default-collapsed"),

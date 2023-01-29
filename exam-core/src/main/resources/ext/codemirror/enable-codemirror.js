@@ -83,7 +83,7 @@ function enableCodeMirrorMerge(selector, mode) {
             readOnly: true,
             origLeft: null,
             orig: actualValue,
-            lineNumbers: true,
+            lineNumbers: false,
             mode: mode,
             connect: true,
             highlightDifferences: true,

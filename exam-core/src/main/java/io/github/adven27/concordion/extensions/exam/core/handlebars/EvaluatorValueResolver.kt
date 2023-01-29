@@ -17,7 +17,7 @@ enum class EvaluatorValueResolver : ValueResolver {
 
     private fun Evaluator.tryEval(name: String): Any? = try {
         evaluate(name)
-    } catch (e: InvalidExpressionException) {
+    } catch (ignore: InvalidExpressionException) {
         null
     }
 

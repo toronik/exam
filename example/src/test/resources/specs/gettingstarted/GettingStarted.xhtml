@@ -37,12 +37,12 @@
                     {"name" : "widget1", "quantity": "10"}
                 </e:body>
                 <e:expected statusCode="201" reasonPhrase="Created">
-                    {
+                {
                     "id": "{{number}}",
                     "name": "widget1",
                     "quantity": 10,
-                    "updatedAt": "{{isoLocalDateTimeAndWithinNow "5s"}}"
-                    }
+                    "updatedAt": "{{iso '5s'}}"
+                }
                 </e:expected>
                 <e:check>
                     <e:db-check caption="Widget was created:" table="widgets" cols="id, name, quantity, updated" orderBy="name">
@@ -267,7 +267,7 @@
             <e:case desc="Update">
                 <e:body>{"id": {{id}}, "name": "new name", "quantity": "0"}</e:body>
                 <e:expected>
-                    { "id": {{id}}, "name": "new name", "quantity": 0, "updatedAt": "{{formattedAndWithinNow "yyyy-MM-dd'T'HH:mm:ss.SSS" "5s"}}" }
+                    { "id": {{id}}, "name": "new name", "quantity": 0, "updatedAt": "{{iso '5s'}}" }
                 </e:expected>
             </e:case>
         </e:put>
@@ -280,7 +280,7 @@
         <e:get url="/widgets">
             <e:case desc="Read">
                 <e:expected>
-                    [{ "id": {{id}}, "name": "new name", "quantity": 0, "updatedAt": "{{formattedAndWithinNow "yyyy-MM-dd'T'HH:mm:ss.SSS" "5s"}}" }]
+                    [{ "id": {{id}}, "name": "new name", "quantity": 0, "updatedAt": "{{iso '5s'}}" }]
                 </e:expected>
             </e:case>
         </e:get>

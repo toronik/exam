@@ -31,7 +31,7 @@ class MqVerifier : AwaitVerifier<Expected, Actual> {
                 expected.messages.sortedTyped(expected.exact)
                     .zip(actual.messages.sorted(expected.exact)) { e, a -> VerifyPair(a, e) }
                     .map {
-                        logger.info("Verifying {}", it)
+                        logger.debug("Verifying message:\n{}", it)
                         val typeConfig = ExamExtension.contentTypeConfig(it.expected.type)
                         MessageVerifyResult(
                             checkHeaders(it.actual.headers, it.expected.headers, eval),
@@ -51,14 +51,14 @@ class MqVerifier : AwaitVerifier<Expected, Actual> {
     }
 
     @Suppress("SpreadOperator", "NestedBlockDepth")
-    private fun checkHeaders(actual: Map<String, String>, expected: Map<String, String>, eval: Evaluator) =
+    private fun checkHeaders(actual: Map<String, String?>, expected: Map<String, String?>, eval: Evaluator) =
         if (expected.isEmpty()) Result.success(emptyMap())
         else try {
             assertEquals("Different headers size", expected.size, actual.size)
-            expected.entries.partition { actual[it.key] != null }.let { (matched, absentInActual) ->
+            expected.toList().partition { actual[it.first] != null }.let { (matched, absentInActual) ->
                 (
-                    matched.map { (it.key to it.value) to (it.key to actual[it.key]) } +
-                        absentInActual.map { it.toPair() }.zip(absentInExpected(actual, matched))
+                    matched.toMap().map { (it.key to it.value) to (it.key to actual[it.key]) } +
+                        absentInActual.zip(absentInExpected(actual, matched.toMap()))
                     ).map { (expected, actual) -> headerCheckResult(expected, actual, eval) }
                     .let { results ->
                         if (results.any { it.actualValue != null || it.actualKey != null }) {
@@ -72,22 +72,26 @@ class MqVerifier : AwaitVerifier<Expected, Actual> {
             Result.failure(HeadersSizeVerifyingError(expected, actual, e.message!!, e))
         }
 
-    private fun headerCheckResult(expected: Pair<String, String>, actual: Pair<String, String?>, eval: Evaluator) =
+    private fun headerCheckResult(expected: Pair<String, String?>, actual: Pair<String, String?>, eval: Evaluator) =
         if (expected.first == actual.first) {
-            if (checkAndSet(eval, eval.resolveToObj(actual.second), eval.resolveNoType(expected.second))) HeaderCheckResult(expected)
+            if (checkAndSet(eval, evalActual(eval, actual), evalExpected(expected, eval))) HeaderCheckResult(expected)
             else HeaderCheckResult(expected, actualValue = actual.second)
         } else HeaderCheckResult(expected, actualKey = actual.first)
 
+    private fun evalExpected(expected: Pair<String, String?>, eval: Evaluator) =
+        expected.second?.let { eval.resolveNoType(it) }
+
+    private fun evalActual(eval: Evaluator, actual: Pair<String, String?>) =
+        eval.resolveToObj(actual.second)
+
     data class HeaderCheckResult(
-        val header: Pair<String, String>,
+        val header: Pair<String, String?>,
         val actualKey: String? = null,
         val actualValue: String? = null
     )
 
-    private fun absentInExpected(actual: Map<String, String>, matched: List<Map.Entry<String, String>>) =
-        actual.entries.filterNot { matched.hasKey(it) }.map { it.toPair() }
-
-    private fun List<Map.Entry<String, String>>.hasKey(it: Map.Entry<String, String>) = map { it.key }.contains(it.key)
+    private fun absentInExpected(actual: Map<String, String?>, matched: Map<String, String?>) =
+        actual.filterNot { matched.containsKey(it.key) }.toList()
 
     private fun List<Message>.sorted(exactMatch: Boolean) = if (!exactMatch) sortedBy { it.body } else this
     private fun List<TypedMessage>.sortedTyped(exactMatch: Boolean) =
@@ -106,6 +110,7 @@ class MqVerifier : AwaitVerifier<Expected, Actual> {
                         }
                         prevActual = currentActual!!
                     }
+                    // FIXME все равно одинаковые сообщения при таймаутй и в логах не ясно что упало
                     currentActual = prevActual
                     assertEquals(expected.messages.size, currentActual!!.messages.size)
                 }
@@ -124,7 +129,7 @@ class MqVerifier : AwaitVerifier<Expected, Actual> {
     override fun verify(eval: Evaluator, expected: Expected, actual: Actual) =
         verify(eval, expected) { false to actual }
 
-    data class MessageVerifyResult(val headers: Result<Map<String, String>>, val content: Result<ExpectedContent>)
+    data class MessageVerifyResult(val headers: Result<Map<String, String?>>, val content: Result<ExpectedContent>)
 
     class MessageVerifyingError(val expected: List<MessageVerifyResult>) : java.lang.AssertionError()
 
@@ -136,8 +141,8 @@ class MqVerifier : AwaitVerifier<Expected, Actual> {
     ) : java.lang.AssertionError(message, exception)
 
     class HeadersSizeVerifyingError(
-        val expected: Map<String, String>,
-        val actual: Map<String, String>,
+        val expected: Map<String, String?>,
+        val actual: Map<String, String?>,
         message: String,
         exception: Throwable
     ) : java.lang.AssertionError(message, exception)

@@ -32,8 +32,8 @@ open class SetVarCommand(
         val vars = el.takeAwayAttr("vars").vars(eval, separator = el.takeAwayAttr("varsSeparator", ","))
         vars.forEach {
             val key = "#${it.key}"
-            if (eval.getVariable(key) != null) {
-                throw IllegalStateException("Variable $key already exists and will be shadowed in set command context. Use different variable name.")
+            check(eval.getVariable(key) != null) {
+                "Variable $key already exists and will be shadowed in set command context. Use different variable name."
             }
             eval.setVariable(key, it.value)
         }
@@ -45,17 +45,23 @@ open class SetVarCommand(
 
         eval.setVariable(varExp(varAttr(el) ?: cmd.expression), value)
         vars.forEach { eval.setVariable("#${it.key}", null) }
-        cmd.swapText(value.toString())
+
+        cmd.element.appendSister(
+            cmd.element.deepClone().apply { swapText(value.toString()) }
+        )
+        cmd.element.addAttribute("hidden", "true")
     }
 
     private fun varAttr(el: Html) = el.attr("var") ?: el.el.getAttributeValue("set", ExamExtension.NS)
     private fun varExp(varName: String) = if (varName.startsWith("#")) varName else "#$varName"
 
     override fun beforeParse(elem: Element) {
-        if (elem.localName == "set") super.beforeParse(elem)
+        org.concordion.api.Element(elem).appendNonBreakingSpaceIfBlank()
+        super.beforeParse(elem)
     }
 }
 
+@Suppress("MagicNumber")
 class WaitCommand(tag: String) : ExamCommand("await", tag) {
     override fun setUp(cmd: CommandCall, eval: Evaluator, resultRecorder: ResultRecorder, fixture: Fixture) {
         val el = cmd.html()

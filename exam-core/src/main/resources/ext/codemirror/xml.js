@@ -1,5 +1,5 @@
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: https://codemirror.net/LICENSE
+// Distributed under an MIT license: https://codemirror.net/5/LICENSE
 
 (function (mod) {
     if (typeof exports == "object" && typeof module == "object") // CommonJS
@@ -194,6 +194,10 @@
             };
         }
 
+        function lower(tagName) {
+            return tagName && tagName.toLowerCase();
+        }
+
         function Context(state, tagName, startOfLine) {
             this.prev = state.context;
             this.tagName = tagName || "";
@@ -214,8 +218,8 @@
                     return;
                 }
                 parentTagName = state.context.tagName;
-                if (!config.contextGrabbers.hasOwnProperty(parentTagName) ||
-                    !config.contextGrabbers[parentTagName].hasOwnProperty(nextTagName)) {
+                if (!config.contextGrabbers.hasOwnProperty(lower(parentTagName)) ||
+                    !config.contextGrabbers[lower(parentTagName)].hasOwnProperty(lower(nextTagName))) {
                     return;
                 }
                 popContext(state);
@@ -251,7 +255,7 @@
             if (type == "word") {
                 var tagName = stream.current();
                 if (state.context && state.context.tagName != tagName &&
-                    config.implicitlyClosed.hasOwnProperty(state.context.tagName))
+                    config.implicitlyClosed.hasOwnProperty(lower(state.context.tagName)))
                     popContext(state);
                 if ((state.context && state.context.tagName == tagName) || config.matchClosing === false) {
                     setStyle = "tag";
@@ -291,7 +295,7 @@
                 var tagName = state.tagName, tagStart = state.tagStart;
                 state.tagName = state.tagStart = null;
                 if (type == "selfcloseTag" ||
-                    config.autoSelfClosers.hasOwnProperty(tagName)) {
+                    config.autoSelfClosers.hasOwnProperty(lower(tagName))) {
                     maybePopContext(state, tagName);
                 } else {
                     maybePopContext(state, tagName);
@@ -379,7 +383,7 @@
                         if (context.tagName == tagAfter[2]) {
                             context = context.prev;
                             break;
-                        } else if (config.implicitlyClosed.hasOwnProperty(context.tagName)) {
+                        } else if (config.implicitlyClosed.hasOwnProperty(lower(context.tagName))) {
                             context = context.prev;
                         } else {
                             break;
@@ -387,8 +391,8 @@
                     }
                 } else if (tagAfter) { // Opening tag spotted
                     while (context) {
-                        var grabbers = config.contextGrabbers[context.tagName];
-                        if (grabbers && grabbers.hasOwnProperty(tagAfter[2]))
+                        var grabbers = config.contextGrabbers[lower(context.tagName)];
+                        if (grabbers && grabbers.hasOwnProperty(lower(tagAfter[2])))
                             context = context.prev;
                         else
                             break;

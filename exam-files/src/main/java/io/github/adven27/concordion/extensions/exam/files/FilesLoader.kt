@@ -20,8 +20,7 @@ interface FilesLoader {
 
     fun readFileTag(f: Html, eval: Evaluator): FileTag
 
-    data class FileTag
-    @JvmOverloads constructor(
+    data class FileTag @JvmOverloads constructor(
         var name: String? = null,
         var content: String? = null,
         var autoFormat: Boolean = false,

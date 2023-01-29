@@ -34,7 +34,7 @@ open class DbTester @JvmOverloads constructor(
     password: String,
     schema: String? = null,
     val dbUnitConfig: DbUnitConfig = DbUnitConfig(),
-    private val dataTypeConfig: Map<String, (DatabaseConfig) -> DatabaseConfig> = DATA_TYPES,
+    private val dataTypeConfig: Map<String, (DatabaseConfig) -> DatabaseConfig> = DATA_TYPES
 ) : JdbcDatabaseTester(driver, url, user, password, schema), AutoCloseable {
 
     companion object : KLogging() {
@@ -107,7 +107,7 @@ class JsonbPostgresqlDataTypeFactory : PostgresqlDataTypeFactory() {
     class JsonbDataType : AbstractDataType("jsonb", Types.OTHER, String::class.java, false) {
         override fun typeCast(obj: Any?): Any = obj.toString()
 
-        override fun getSqlValue(column: Int, resultSet: ResultSet): Any = resultSet.getString(column)
+        override fun getSqlValue(column: Int, resultSet: ResultSet): Any? = resultSet.getString(column)
 
         override fun setSqlValue(value: Any?, column: Int, statement: PreparedStatement) = statement.setObject(
             column,

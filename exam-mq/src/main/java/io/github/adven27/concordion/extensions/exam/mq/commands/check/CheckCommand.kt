@@ -29,7 +29,7 @@ class CheckCommand(
     resultRenderer: VerifyListener<Expected, Actual> = FirstSuitableResultRenderer(
         MdResultRenderer(),
         HtmlResultRenderer()
-    ),
+    )
 ) : ExamAssertCommand<Expected, Actual>(commandParser, verifier, actualProvider, resultRenderer),
     NamedExamCommand,
     BeforeParseExamCommand {

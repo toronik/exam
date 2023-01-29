@@ -39,7 +39,7 @@ class HtmlCheckRenderer : VerifyListener<Expected, Actual> {
                     is DocumentVerifyingError -> renderMessageContentError(event)
                     else -> div()(
                         pre(event.fail.toString()),
-                        pre(event.expected.toString()),
+                        pre(event.expected.toString())
                     ).el
                 }
             )
@@ -64,7 +64,7 @@ class HtmlCheckRenderer : VerifyListener<Expected, Actual> {
                     (event.fail as SizeVerifyingError).actual.map {
                         Result.success(ExpectedContent("text", it.body))
                     }
-                ).toHtml(),
+                ).toHtml()
             )
         ).second.el
 
@@ -99,9 +99,10 @@ class HtmlCheckRenderer : VerifyListener<Expected, Actual> {
             type = "json",
             html = div("class" to "${error.type} rest-failure")(
                 Html("del", error.expected, "class" to "expected"),
-                Html("ins", error.actual, "class" to "actual"),
+                Html("ins", error.actual, "class" to "actual")
             )
         ).second.el.toXML()
+
         else -> """<div class="json exp-body rest-failure">${error.message?.escapeHtml()}</div>"""
     }
 }

@@ -12,6 +12,7 @@ import org.concordion.api.Fixture;
 import org.concordion.api.ResultRecorder;
 import org.jetbrains.annotations.NotNull;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.io.File;
@@ -59,7 +60,7 @@ public class BrowserCommand extends ExamVerifyCommand {
 
     private static void runCustomDriverIfSet(DesiredCapabilities capabilities) {
         if (!(capabilities == null || alreadyRunning)) {
-            ChromeDriver webDriver = new ChromeDriver(capabilities);
+            ChromeDriver webDriver = new ChromeDriver(new ChromeOptions().merge(capabilities));
             WebDriverRunner.setWebDriver(webDriver);
             driverContainer.setWebDriver(webDriver);
             alreadyRunning = true;

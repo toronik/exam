@@ -17,7 +17,8 @@ class DBCleanCommand(name: String, tag: String, private val dbTester: DbTester) 
         val el = cmd.html()
         val ds = el.takeAwayAttr("ds", DbTester.DEFAULT_DATASOURCE)
         val builder = DataSetBuilder()
-        val tables = el.takeAwayAttr("tables", eval)?.also { cmd.swapText(it) } ?: eval.evaluate(cmd.expression).toString()
+        val tables = el.takeAwayAttr("tables", eval)?.also { cmd.element.swapText(it) }
+            ?: eval.evaluate(cmd.expression).toString()
         tables.split(",").map { builder.newRowTo(it.trim()).add() }
         dbTester.executors[ds]!!.apply {
             setUpOperation = DatabaseOperation.DELETE_ALL

@@ -29,7 +29,7 @@ class WsPlugin @JvmOverloads constructor(
     private val contentTypeConfigs: MutableMap<ContentType, ContentTypeConfig> = mutableMapOf(
         ContentType.JSON to contentTypeConfig("json"),
         ContentType.XML to contentTypeConfig("xml"),
-        ContentType.TEXT to contentTypeConfig("text"),
+        ContentType.TEXT to contentTypeConfig("text")
     )
 
     init {
@@ -64,6 +64,8 @@ class WsPlugin @JvmOverloads constructor(
         } else super.resolve(contentType)
     }
 }
+
+/* ktlint-disable enum-entry-name-case */
 
 @Suppress("EnumNaming")
 enum class WsHelperSource(
