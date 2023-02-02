@@ -12,7 +12,7 @@ import org.concordion.api.Evaluator
 
 class SetCommand(
     override val name: String = "nosql-set",
-    val dbTester: NoSqlDBTester,
+    private val dbTesters: Map<String, NoSqlDBTester>,
     commandParser: CommandParser<Operation> = SetParser(HtmlNoSqlParser()),
     listener: SetUpListener<Operation> = HtmlSetRenderer()
 ) : ExamSetUpCommand<SetCommand.Operation>(commandParser, listener), NamedExamCommand, BeforeParseExamCommand {
@@ -20,11 +20,15 @@ class SetCommand(
     override val tag = "div"
 
     override fun setUp(target: Operation, eval: Evaluator) {
-        target.executeSet(dbTester)
+        target.executeSet(
+            dbTesters[target.dsName]
+                ?: throw IllegalArgumentException("NoSqlDBTester with name ${target.dsName} is not registered")
+        )
     }
 
     class Operation(
         val collection: String,
+        val dsName: String,
         val documents: List<NoSqlDocument>,
         val appendMode: Boolean
     ) {

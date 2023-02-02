@@ -5,6 +5,10 @@ interface NoSqlDBTester {
     fun setWithAppend(collection: String, documents: List<NoSqlDocument>)
     fun read(collection: String): List<NoSqlDocument>
     fun clean(collections: Collection<String>)
+
+    companion object {
+        const val DEFAULT_DATASOURCE = "nosql-default"
+    }
 }
 
 class NoSqlDefaultTester : NoSqlDBTester {

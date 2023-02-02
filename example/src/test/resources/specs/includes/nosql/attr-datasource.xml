@@ -1,0 +1,13 @@
+<ignored xmlns:e="http://exam.extension.io" xmlns:cc="http://www.concordion.org/2007/concordion">
+    <tr>
+        <td><code>ds</code></td>
+        <td>
+            <span>
+                Name of the data source, to which command is applied.
+                If you're using default configuration of plugin (1 tester), can be omitted,
+                otherwise should be one of the names provided in plugin constructor
+            </span>
+        </td>
+        <td><var>Optional</var>. <var>Default: -</var><pre class="doc-code language-json"><code>ds="nosql-default"</code></pre></td>
+    </tr>
+</ignored>

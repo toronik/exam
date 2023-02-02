@@ -6,9 +6,7 @@ public class Specs extends AbstractSpecs {
     protected ExamExtension init() {
         return new ExamExtension(
             new NoSqlPlugin(
-                    new MongoTester(
-                            new MongoConfig("localhost:27017/mydb")
-                    )
+                    new MongoTester("localhost:27017", "myDB")
             )
         );
     }

@@ -7,14 +7,20 @@ import io.github.adven27.concordion.extensions.exam.nosql.commands.clean.CleanCo
 import io.github.adven27.concordion.extensions.exam.nosql.commands.set.SetCommand
 import io.github.adven27.concordion.extensions.exam.nosql.commands.show.ShowCommand
 
-class NoSqlPlugin constructor(private val dbTester: NoSqlDBTester) : ExamPlugin {
+class NoSqlPlugin constructor(
+    private val dbTesters: Map<String, NoSqlDBTester>
+) : ExamPlugin {
+
+    constructor(dbTester: NoSqlDBTester) : this(
+        mapOf(NoSqlDBTester.DEFAULT_DATASOURCE to dbTester)
+    )
 
     override fun commands(): List<NamedExamCommand> =
         listOf(
-            SetCommand("nosql-set", dbTester),
-            CheckCommand("nosql-check", dbTester),
-            CleanCommand("nosql-clean", "pre", dbTester),
-            ShowCommand("nosql-show", dbTester)
+            SetCommand("nosql-set", dbTesters),
+            CheckCommand("nosql-check", dbTesters),
+            CleanCommand("nosql-clean", "pre", dbTesters),
+            ShowCommand("nosql-show", dbTesters)
         )
 
     @Suppress("EmptyFunctionBlock")

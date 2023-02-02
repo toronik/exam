@@ -11,10 +11,10 @@
 
 [<exam>NoSqlPlugin]uses->[NoSqlDBTester]
 [NoSqlDBTester]<:-- implements[<class> MongoTesterImpl]
-[NoSqlDBTester]<:-- implements[<class> CassandraTesterImpl]
+[NoSqlDBTester]<:-- implements[<class> ElasticSearchTesterImpl]
 [NoSqlDBTester]<:--[<label> ...]
 [NoSqlDBTester]<:-- implements[<class> AnyCustomImpl]
 
 [MongoTesterImpl]interacts with->[<db> Mongo DB]
-[CassandraTesterImpl]interacts with->[<db> Cassandra]
+[ElasticSearchTesterImpl]interacts with->[<db> ElasticSearch]
 [AnyCustomImpl]interacts with->[<db> Any other NoSql DB]
