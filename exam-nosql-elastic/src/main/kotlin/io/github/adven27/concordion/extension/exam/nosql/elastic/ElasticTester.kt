@@ -65,7 +65,7 @@ class ElasticTester(
     fun client() = client
     private fun initClient(): ElasticsearchClient {
         val credentialsProvider = credentialsProvider()
-        val client = RestClient.builder(HttpHost(url, port))
+        val client = RestClient.builder(httpHost())
             .setHttpClientConfigCallback { httpClientBuilder ->
                 if (nonNull(sslContext)) {
                     httpClientBuilder.setSSLContext(sslContext)
@@ -78,6 +78,12 @@ class ElasticTester(
             .build()
         val transport: ElasticsearchTransport = RestClientTransport(client, JacksonJsonpMapper())
         return ElasticsearchClient(transport)
+    }
+
+    private fun httpHost() = if (nonNull(sslContext)) {
+        HttpHost(url, port, "https")
+    } else {
+        HttpHost(url, port)
     }
 
     private fun credentialsProvider(): BasicCredentialsProvider? {
