@@ -23,7 +23,7 @@ class MongoTester(
         insert(collection, documents)
     }
 
-    fun insert(collection: String, documents: List<NoSqlDocument>) {
+    private fun insert(collection: String, documents: List<NoSqlDocument>) {
         db.getCollection(collection)
             .insertMany(
                 documents.map { Document.parse(it.body) }
