@@ -1,0 +1,11 @@
+plugins {
+    id 'java-library'
+}
+
+apply from: "$rootDir/gradle/publish.gradle"
+
+dependencies {
+    api project(':exam-nosql')
+    api 'co.elastic.clients:elasticsearch-java:8.6.1'
+    api 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+}
