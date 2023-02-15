@@ -30,7 +30,7 @@ class HandlebarsResolverTest {
         )
         assertEquals(
             "today is ${LocalDate.now().toDate()}; var1 is v; var2 is ${LocalDate.now().toDate()}",
-            sut("{{resolveFile '/hb/resolve-file-vars.txt' var1='v' var2='{{today}}'}}")
+            sut("{{file '/hb/resolve-file-vars.txt' var1='v' var2='{{today}}'}}")
         )
     }
 

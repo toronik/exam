@@ -16,15 +16,15 @@ enum class MiscHelpers(
     override val expected: Any? = "",
     override val options: Map<String, String> = emptyMap()
 ) : ExamHelper {
-    set("""{{set 1 "someVar"}}""", mapOf(), 1, mapOf()) {
+    set("""{{set 1 "someVar"}}""", mapOf(), 1) {
         override fun invoke(context: Any?, options: Options): Any? = options.params.map {
             options.evaluator().setVariable("#$it", context)
         }.let { context }
     },
-    getOr("""{{getOr var "default value"}}""", mapOf(), "default value", mapOf()) {
+    getOr("""{{getOr var "default value"}}""", mapOf(), "default value") {
         override fun invoke(context: Any?, options: Options): Any? = context ?: options.param<String>(0)
     },
-    map("""{{map key='value'}}""", mapOf(), mapOf("key" to "value"), mapOf()) {
+    map("""{{map key='value'}}""", mapOf(), mapOf("key" to "value")) {
         override fun invoke(context: Any?, options: Options): Map<*, *> =
             if (context is Map<*, *>) context + options.hash else options.hash
     },
@@ -37,7 +37,7 @@ enum class MiscHelpers(
     eval("{{eval '#var'}}", mapOf("var" to 2), 2) {
         override fun invoke(context: Any?, options: Options): Any? = options.evaluator().evaluate("$context")
     },
-    resolve("{{resolve 'today is {{today}}'}}", emptyMap(), "today is ${LocalDate.now().toDate()}") {
+    resolve("{{resolve 'today is {{today}}' var='val'}}", mapOf(), "today is ${LocalDate.now().toDate()}") {
         override fun invoke(context: Any?, options: Options): Any? {
             val evaluator = options.evaluator()
             options.hash.forEach { (key, value) ->
@@ -46,7 +46,7 @@ enum class MiscHelpers(
             return evaluator.resolveToObj("$context")
         }
     },
-    resolveFile("{{resolveFile '/hb/some-file.txt'}}", emptyMap(), "today is ${LocalDate.now().toDate()}") {
+    file("{{file '/hb/some-file.txt' var='val'}}", mapOf(), "today is ${LocalDate.now().toDate()}") {
         override fun invoke(context: Any?, options: Options): Any? {
             val evaluator = options.evaluator()
             options.hash.forEach { (key, value) ->
@@ -55,15 +55,15 @@ enum class MiscHelpers(
             return evaluator.resolveToObj(context.toString().readFile())
         }
     },
-    prop("{{prop 'system.property' 'optional default'}}", emptyMap(), "optional default") {
+    prop("{{prop 'system.property' 'optional default'}}", mapOf(), "optional default") {
         override fun invoke(context: Any?, options: Options) = System.getProperty(context.toString(), options.param(0))
     },
-    env("{{env 'env.property' 'optional default'}}", emptyMap(), "optional default") {
+    env("{{env 'env.property' 'optional default'}}", mapOf(), "optional default") {
         override fun invoke(context: Any?, options: Options) = System.getenv(context.toString()) ?: options.param(0)
     };
 
     override fun apply(context: Any?, options: Options): Any? {
-        if (name !in setOf("resolveFile", "resolve", "map")) validate(options)
+        if (name !in setOf("file", "resolve", "map")) validate(options)
         val result = try {
             this(context, options)
         } catch (expected: Exception) {
