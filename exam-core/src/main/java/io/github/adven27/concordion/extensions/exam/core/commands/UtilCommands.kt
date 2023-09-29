@@ -2,6 +2,7 @@ package io.github.adven27.concordion.extensions.exam.core.commands
 
 import io.github.adven27.concordion.extensions.exam.core.ExamExtension
 import io.github.adven27.concordion.extensions.exam.core.JsonContentTypeConfig
+import io.github.adven27.concordion.extensions.exam.core.TextContentTypeConfig
 import io.github.adven27.concordion.extensions.exam.core.XmlContentTypeConfig
 import io.github.adven27.concordion.extensions.exam.core.html.Html
 import io.github.adven27.concordion.extensions.exam.core.html.html
@@ -20,16 +21,13 @@ import org.concordion.api.ResultRecorder
 import org.concordion.internal.command.SetCommand
 import org.junit.Assert.assertEquals
 
-open class SetVarCommand(
-    override val name: String,
-    override val tag: String
-) : SetCommand(), NamedExamCommand, BeforeParseExamCommand {
+open class SetVarCommand(override val tag: String) : SetCommand(), BeforeParseExamCommand {
 
     override fun setUp(cmd: CommandCall, eval: Evaluator, resultRecorder: ResultRecorder, fixture: Fixture) {
         val el = cmd.html()
         val valueAttr = el.attr("value")
         val valueFrom = el.attr("from")
-        val vars = el.takeAwayAttr("vars").vars(eval, separator = el.takeAwayAttr("varsSeparator", ","))
+        val vars = el.getAttr("vars").vars(eval, separator = el.getAttr("varsSeparator", ","))
         vars.forEach {
             val key = "#${it.key}"
             check(eval.getVariable(key) != null) {
@@ -40,7 +38,7 @@ open class SetVarCommand(
         val value = when {
             valueAttr != null -> eval.resolveToObj(valueAttr)
             valueFrom != null -> eval.resolveNoType(valueFrom.readFile())
-            else -> eval.resolveToObj(el.text().trimIndent())
+            else -> eval.resolveToObj(el.text().trim())
         }
 
         eval.setVariable(varExp(varAttr(el) ?: cmd.expression), value)
@@ -62,31 +60,79 @@ open class SetVarCommand(
 }
 
 @Suppress("MagicNumber")
-class WaitCommand(tag: String) : ExamCommand("await", tag) {
-    override fun setUp(cmd: CommandCall, eval: Evaluator, resultRecorder: ResultRecorder, fixture: Fixture) {
-        val el = cmd.html()
-        val untilTrue = el.takeAwayAttr("untilTrue")
-        val untilGet = eval.resolveToObj(el.takeAwayAttr("untilHttpGet", "")).toString()
-        val untilPost = eval.resolveToObj(el.takeAwayAttr("untilHttpPost", "")).toString()
-        val withBody = (el.takeAwayAttr("withBodyFrom")?.readFile() ?: el.text()).let {
-            eval.resolveToObj(it).toString()
-        }
-        val withContentType = eval.resolveToObj(el.takeAwayAttr("withContentType", "application/json")).toString()
-        val hasBody = el.takeAwayAttr("hasBody") ?: el.takeAwayAttr("hasBodyFrom")?.readFile()?.let {
-            eval.resolveToObj(it).toString()
-        }
-        val hasStatus = el.takeAwayAttr("hasStatusCode")
+class AwaitCommand(tag: String) : ExamCommand<AwaitCommand.Model, Unit>(
+    setOf(
+        UNTIL_TRUE,
+        UNTIL_HTTP_POST,
+        UNTIL_HTTP_GET,
+        SECONDS,
+        WITH_BODY_FROM,
+        WITH_CONTENT_TYPE,
+        HAS_BODY_FROM,
+        HAS_BODY,
+        HAS_STATUS_CODE
+    ),
+    tag
+) {
+    companion object {
+        const val UNTIL_TRUE = "untilTrue"
+        const val UNTIL_HTTP_GET = "untilHttpGet"
+        const val UNTIL_HTTP_POST = "untilHttpPost"
+        const val SECONDS = "seconds"
+        const val WITH_BODY_FROM = "withBodyFrom"
+        const val WITH_CONTENT_TYPE = "withContentType"
+        const val HAS_BODY_FROM = "hasBodyFrom"
+        const val HAS_BODY = "hasBody"
+        const val HAS_STATUS_CODE = "hasStatusCode"
+    }
 
-        el.removeChildren()
+    override fun model(context: Context): Model {
+        val untilTrue = context[UNTIL_TRUE]
+        val untilGet = context[UNTIL_HTTP_GET]
+        val untilPost = context[UNTIL_HTTP_POST]
+        val withBody = (context[WITH_BODY_FROM]?.readFile() ?: context.el.text()).let {
+            context.eval.resolveToObj(it).toString()
+        }
+        val hasBody = context[HAS_BODY] ?: context[HAS_BODY_FROM]?.readFile()?.let {
+            context.eval.resolveToObj(it).toString()
+        }
+        val hasStatus = context[HAS_STATUS_CODE]
+        val seconds = context[SECONDS]?.toInt() ?: 0
+        val config = context.el.awaitConfig("") ?: AwaitConfig()
 
-        Thread.sleep(1000L * eval.resolveToObj(el.takeAwayAttr("seconds", "0")).toString().toInt())
-        (cmd.html().awaitConfig("") ?: AwaitConfig()).await().let { await ->
-            when {
-                untilTrue != null -> await.alias(untilTrue).until { eval.evaluate(untilTrue) == true }
-                untilGet.isNotEmpty() -> await.get(eval, untilGet, hasBody, hasStatus)
-                untilPost.isNotEmpty() -> await.post(eval, withBody, withContentType, untilPost, hasBody, hasStatus)
+        return when {
+            untilTrue != null -> UntilTrue(untilTrue, config, context.eval)
+            !untilGet.isNullOrBlank() -> UntilHttpGet(untilGet, hasBody, hasStatus, config, context.eval)
+            !untilPost.isNullOrBlank() -> UntilHttpPost(
+                untilPost,
+                withBody,
+                context[WITH_CONTENT_TYPE] ?: "application/json",
+                hasBody,
+                hasStatus,
+                config,
+                context.eval
+            )
+
+            seconds > 0 -> Delay(seconds, config, context.eval)
+            else -> error("Required one of the attributes: $UNTIL_TRUE/$UNTIL_HTTP_GET/$UNTIL_HTTP_POST/$SECONDS")
+        }
+    }
+
+    override fun process(model: Model, eval: Evaluator, recorder: ResultRecorder) {
+        with(model) {
+            when (this) {
+                is Delay -> Thread.sleep(1000L * seconds)
+                is UntilTrue -> config.await().alias(expression).until { eval.evaluate(expression) == true }
+                is HttpReq -> when (this) {
+                    is UntilHttpGet -> config.await().get(eval, url, hasBody, hasStatus)
+                    is UntilHttpPost -> config.await().post(eval, body, contentType, url, hasBody, hasStatus)
+                }
             }
         }
+    }
+
+    override fun render(commandCall: CommandCall, result: Unit) {
+        commandCall.html().removeChildren()
     }
 
     @Suppress("LongParameterList")
@@ -119,9 +165,41 @@ class WaitCommand(tag: String) : ExamCommand("await", tag) {
                 if (expectedBody != null) assertEquals(expectedBody, it.extract().body().asString())
             }
     }
+
+    class UntilTrue(val expression: String, config: AwaitConfig, eval: Evaluator) : Model(config, eval)
+    class UntilHttpGet(
+        url: String,
+        hasBody: String?,
+        hasStatus: String?,
+        config: AwaitConfig,
+        eval: Evaluator
+    ) : HttpReq(url, hasBody, hasStatus, config, eval)
+
+    @Suppress("LongParameterList")
+    class UntilHttpPost(
+        url: String,
+        val body: String,
+        val contentType: String,
+        hasBody: String?,
+        hasStatus: String?,
+        config: AwaitConfig,
+        eval: Evaluator
+    ) : HttpReq(url, hasBody, hasStatus, config, eval)
+
+    class Delay(val seconds: Int, config: AwaitConfig, eval: Evaluator) : Model(config, eval)
+
+    sealed class HttpReq(
+        val url: String,
+        val hasBody: String?,
+        val hasStatus: String?,
+        config: AwaitConfig,
+        eval: Evaluator
+    ) : Model(config, eval)
+
+    sealed class Model(val config: AwaitConfig, val eval: Evaluator)
 }
 
-class BeforeEachExampleCommand(tag: String) : ExamCommand("before-each", tag) {
+class BeforeEachExampleCommand : SimpleCommand() {
     override fun beforeParse(elem: Element) {
         super.beforeParse(elem)
         examples(elem).apply { elem.detach() }.forEach { (it as Element).insertChild(elem.copy(), 0) }
@@ -132,9 +210,9 @@ class BeforeEachExampleCommand(tag: String) : ExamCommand("before-each", tag) {
             .query(".//e:example", XPathContext("e", ExamExtension.NS))
 }
 
-class XmlEqualsCommand : ExamAssertEqualsCommand("xmlEquals", XmlContentTypeConfig())
-class XmlEqualsFileCommand : ExamAssertEqualsCommand("xmlEqualsFile", XmlContentTypeConfig(), { it.readFile() })
-class JsonEqualsCommand : ExamAssertEqualsCommand("jsonEquals", JsonContentTypeConfig())
-class JsonEqualsFileCommand : ExamAssertEqualsCommand("jsonEqualsFile", JsonContentTypeConfig(), { it.readFile() })
-class TextEqualsCommand : ExamAssertEqualsCommand("equals")
-class TextEqualsFileCommand : ExamAssertEqualsCommand("equalsFile", content = { it.readFile() })
+class XmlEqualsCommand : ExamAssertEqualsCommand(XmlContentTypeConfig())
+class XmlEqualsFileCommand : ExamAssertEqualsCommand(XmlContentTypeConfig(), { it.readFile() })
+class JsonEqualsCommand : ExamAssertEqualsCommand(JsonContentTypeConfig())
+class JsonEqualsFileCommand : ExamAssertEqualsCommand(JsonContentTypeConfig(), { it.readFile() })
+class TextEqualsCommand : ExamAssertEqualsCommand(TextContentTypeConfig())
+class TextEqualsFileCommand : ExamAssertEqualsCommand(TextContentTypeConfig(), { it.readFile() })

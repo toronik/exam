@@ -5,7 +5,6 @@ import io.github.adven27.concordion.extensions.exam.core.commands.AwaitConfig
 import io.github.adven27.concordion.extensions.exam.core.commands.BeforeParseExamCommand
 import io.github.adven27.concordion.extensions.exam.core.commands.CommandParser
 import io.github.adven27.concordion.extensions.exam.core.commands.ExamAssertCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.NamedExamCommand
 import io.github.adven27.concordion.extensions.exam.core.commands.VerifyListener
 import io.github.adven27.concordion.extensions.exam.nosql.NoSqlDBTester
 import io.github.adven27.concordion.extensions.exam.nosql.NoSqlDocument
@@ -14,7 +13,6 @@ import io.github.adven27.concordion.extensions.exam.nosql.commands.check.CheckCo
 import io.github.adven27.concordion.extensions.exam.nosql.commands.check.CheckCommand.Expected
 
 class CheckCommand(
-    override val name: String = "nosql-check",
     private val dbTesters: Map<String, NoSqlDBTester>,
     verifier: NoSqlVerifier = NoSqlVerifier(),
     actualProvider: ActualProvider<Expected, Pair<Boolean, Actual>> = NoSqlActualProvider(dbTesters),

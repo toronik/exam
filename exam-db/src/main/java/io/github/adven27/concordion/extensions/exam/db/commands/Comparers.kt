@@ -47,6 +47,8 @@ open class ExamMatchersAwareValueComparer : IsActualEqualToExpectedValueComparer
 
         expected.isNotNull() -> checkAndSet(evaluator, actual, expected.toString()) { a, _ -> a != null }
         expected.isUuid() -> checkAndSet(evaluator, actual, expected.toString()) { a, _ -> matchesAnyUuid(a) }
+        expected.isJson() -> checkAndSet(evaluator, actual, expected.toString()) { a, _ -> matchesAnyUuid(a) }
+        expected.isXml() -> checkAndSet(evaluator, actual, expected.toString()) { a, _ -> matchesAnyUuid(a) }
         expected.isWithin() -> checkAndSet(evaluator, actual, expected.toString()) { a, e ->
             WithinValueComparer(expected.toString().withinPeriod()).isExpected(
                 expectedTable,
@@ -66,6 +68,7 @@ open class ExamMatchersAwareValueComparer : IsActualEqualToExpectedValueComparer
         Timestamp((if (it.isBlank()) Date() else (evaluator.resolveToObj(it) as Date)).time)
     }
 
+    @Suppress("TooManyFunctions")
     companion object {
         @JvmField
         var ERROR_MARKER = "ERROR RETRIEVING VALUE: "
@@ -84,6 +87,8 @@ open class ExamMatchersAwareValueComparer : IsActualEqualToExpectedValueComparer
         fun Any?.isUuid() = this != null && toString().startsWith("!{uuid}")
         fun Any?.isRegex() = this != null && toString().startsWith("!{regex}")
         fun Any?.isWithin() = this != null && toString().startsWith("!{within ")
+        fun Any?.isJson() = this != null && toString().startsWith("!{json ")
+        fun Any?.isXml() = this != null && toString().startsWith("!{xml ")
         fun Any?.isDbMatcher() =
             this is String && (isUuid() || isRegex() || isWithin() || isNumber() || isString() || isNotNull())
     }
@@ -101,11 +106,7 @@ class WithinValueComparer(tolerance: Long) : IsActualWithinToleranceOfExpectedTi
     ) = super.isExpected(expectedTable, actualTable, rowNum, columnName, dataType, expectedValue, actualValue)
 
     override fun convertValueToTimeInMillis(timestampValue: Any?) =
-        if (timestampValue is java.sql.Date) {
-            timestampValue.time
-        } else {
-            super.convertValueToTimeInMillis(timestampValue)
-        }
+        if (timestampValue is java.sql.Date) timestampValue.time else super.convertValueToTimeInMillis(timestampValue)
 }
 
 /**

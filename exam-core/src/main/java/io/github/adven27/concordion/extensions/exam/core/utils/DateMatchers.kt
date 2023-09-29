@@ -101,7 +101,10 @@ class XMLDateWithin : BaseMatcher<Any>(), ParametrizedMatcher {
     }
 }
 
-class After : ExpectedDateMatcher("The date should be after ", { expected, actual -> actual.isAfter(expected) })
+class After : ExpectedDateMatcher("The date should be after ", {
+        expected, actual ->
+    actual.isAfter(expected)
+})
 class Before : ExpectedDateMatcher("The date should be before ", { expected, actual -> actual.isBefore(expected) })
 
 abstract class ExpectedDateMatcher(

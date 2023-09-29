@@ -3,10 +3,15 @@ package io.github.adven27.concordion.extensions.exam.core.html
 import io.github.adven27.concordion.extensions.exam.core.resolveToObj
 import org.concordion.api.Evaluator
 
-class DbRowParser(private val el: Html, private val tag: String, ignoreRowsBefore: String?, ignoreRowsAfter: String?) {
+class DbRowParser(
+    private val el: Html,
+    private val tag: String,
+    ignoreRowsBefore: String? = null,
+    ignoreRowsAfter: String? = null
+) {
     private val ignoreBefore: Int = if (ignoreRowsBefore != null) Integer.parseInt(ignoreRowsBefore) else 1
     private val ignoreAfter: Int = if (ignoreRowsAfter != null) Integer.parseInt(ignoreRowsAfter) else 0
-    private val separator: Char = el.takeAwayAttr("separator", ",").first()
+    private val separator: Char = el.getAttr("separator", ",").first()
 
     fun parse(): List<List<Any?>> {
         val result = ArrayList<List<Any?>>()
@@ -23,7 +28,7 @@ class DbRowParser(private val el: Html, private val tag: String, ignoreRowsBefor
 }
 
 class RowParserEval(private val el: Html, private val tag: String, private val eval: Evaluator) {
-    private val separator: Char = el.takeAwayAttr("separator", ",").first()
+    private val separator: Char = el.getAttr("separator", ",").first()
 
     fun parse(): Map<String, List<Any?>> = el.childs().filter { it.localName().contains(tag) }
         .mapIndexed { i, html ->

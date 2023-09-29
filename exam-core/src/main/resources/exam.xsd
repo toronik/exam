@@ -55,7 +55,9 @@
                 <xs:element name="nosql-set" type="nosql-info"/>
                 <xs:element name="nosql-clean" type="nosql-clean-info"/>
                 <xs:element name="mq-send" type="mq-info"/>
+                <xs:element name="mq-set" type="mq-info"/>
                 <xs:element name="mq-purge" type="mq-purge-info"/>
+                <xs:element name="mq-clean" type="mq-purge-info"/>
                 <xs:element name="include" type="include-info"/>
             </xs:all>
         </xs:complexType>
@@ -77,7 +79,9 @@
             <xs:element name="nosql-clean" type="nosql-clean-info"/>
             <xs:element name="nosql-show" type="nosql-info"/>
             <xs:element name="mq-send" type="mq-info"/>
+            <xs:element name="mq-set" type="mq-info"/>
             <xs:element name="mq-purge" type="mq-purge-info"/>
+            <xs:element name="mq-clean" type="mq-purge-info"/>
             <xs:element name="include" type="include-info"/>
             <xs:element name="browser" type="browser-info"/>
         </xs:all>
@@ -309,7 +313,10 @@
                     <xs:simpleContent>
                         <xs:extension base="xs:string">
                             <xs:attribute type="xs:anyURI" name="from" default="/data/mq/msg.json"/>
-                            <xs:attribute type="xs:string" name="headers" default="type=String, contentEncoding=UTF-8"/>
+                            <xs:attribute type="xs:string" name="vars" default="v1=1, v2={{now}}"/>
+                            <xs:attribute type="xs:string" name="varsSeparator" default=","/>
+                            <xs:attribute type="xs:string" name="contentType" default="json"/>
+                            <xs:attribute type="xs:string" name="headers" default="type=String,contentEncoding=UTF-8"/>
                         </xs:extension>
                     </xs:simpleContent>
                 </xs:complexType>
@@ -319,13 +326,13 @@
         <xs:attribute type="xs:string" name="vars" default="v1=1, v2={{now}}"/>
         <xs:attribute type="xs:string" name="varsSeparator" default=","/>
         <xs:attribute type="xs:string" name="name" use="required"/>
-        <xs:attribute type="xs:string" name="formatAs" default="json"/>
+        <xs:attribute type="xs:string" name="contentType" default="json"/>
         <xs:attribute type="xs:boolean" name="collapsable" default="false"/>
         <xs:attribute type="xs:string" name="headers" default="type=String, contentEncoding=UTF-8"/>
         <xs:attribute type="xs:string" name="params" default="param1=1, param2=2"/>
     </xs:complexType>
     <xs:complexType name="mq-purge-info">
-        <xs:attribute type="xs:string" name="name" use="required"/>
+        <xs:attribute type="xs:string" name="names" use="required"/>
     </xs:complexType>
     <xs:complexType name="mq-check-info">
         <xs:sequence>
@@ -336,7 +343,7 @@
                             <xs:attribute type="xs:anyURI" name="from" default="/data/mq/msg.json"/>
                             <xs:attribute type="xs:string" name="vars" default="v1=1, v2={{now}}"/>
                             <xs:attribute type="xs:string" name="varsSeparator" default=","/>
-                            <xs:attribute type="xs:string" name="verifyAs" default="json"/>
+                            <xs:attribute type="xs:string" name="contentType" default="json"/>
                             <xs:attribute type="xs:string" name="headers" default="type=String,contentEncoding=UTF-8"/>
                         </xs:extension>
                     </xs:simpleContent>
@@ -347,14 +354,13 @@
         <xs:attribute type="xs:string" name="vars" default="v1=1, v2={{now}}"/>
         <xs:attribute type="xs:string" name="varsSeparator" default=","/>
         <xs:attribute type="xs:string" name="name" use="required"/>
-        <xs:attribute type="xs:string" name="verifyAs" default="json"/>
+        <xs:attribute type="xs:string" name="contentType" default="json"/>
         <xs:attribute type="xs:integer" name="awaitAtMostSec" default="4"/>
         <xs:attribute type="xs:integer" name="awaitPollDelayMillis" default="0"/>
         <xs:attribute type="xs:integer" name="awaitPollIntervalMillis" default="1000"/>
         <xs:attribute type="xs:string" name="headers" default="type=String,contentEncoding=UTF-8"/>
         <xs:attribute type="xs:boolean" name="collapsable" default="false"/>
-        <xs:attribute type="xs:string" name="jsonUnitOptions"
-                      default="IGNORING_EXTRA_FIELDS;TREATING_NULL_AS_ABSENT">
+        <xs:attribute type="xs:string" name="jsonUnitOptions" default="IGNORING_EXTRA_FIELDS;TREATING_NULL_AS_ABSENT">
             <xs:annotation>
                 <xs:documentation>
                     With Options you can configure different compare modes
@@ -447,9 +453,10 @@
         <xs:simpleContent>
             <xs:extension base="xs:string">
                 <xs:attribute type="xs:anyURI" name="from" default="/data/ws/expected.json"/>
+                <xs:attribute type="xs:string" name="vars" default="v1=value1, v2={{now}}"/>
                 <xs:attribute type="xs:string" name="reasonPhrase" default="Server Error"/>
                 <xs:attribute type="xs:integer" name="statusCode" default="500"/>
-                <xs:attribute type="xs:string" name="verifyAs"/>
+                <xs:attribute type="xs:string" name="contentType"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
@@ -490,7 +497,7 @@
                         <xs:element name="check" type="check-info"/>
                     </xs:sequence>
                     <xs:attribute type="xs:string" name="desc"/>
-                    <xs:attribute type="xs:string" name="urlParams" default="param1=1&amp;param2=2"/>
+                    <xs:attribute type="xs:string" name="query" default="param1=1&amp;param2=2"/>
                 </xs:complexType>
             </xs:element>
             <xs:element name="check" type="check-info"/>
@@ -513,7 +520,7 @@
                     <xs:attribute type="xs:string" name="cookies" default="one=1, two=2"/>
                     <xs:attribute type="xs:string" name="headers"
                                   default="Authorization = Bearer 111, Accept-Language = en"/>
-                    <xs:attribute type="xs:string" name="urlParams" default="param1=1&amp;param2=2"/>
+                    <xs:attribute type="xs:string" name="query" default="param1=1&amp;param2=2"/>
                 </xs:complexType>
             </xs:element>
         </xs:sequence>

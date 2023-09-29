@@ -1,19 +1,26 @@
 package io.github.adven27.concordion.extensions.exam.db
 
+import com.fasterxml.jackson.core.JacksonException
+import com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.jknack.handlebars.Options
 import io.github.adven27.concordion.extensions.exam.core.ExamPlugin
-import io.github.adven27.concordion.extensions.exam.core.commands.NamedExamCommand
+import io.github.adven27.concordion.extensions.exam.core.commands.AwaitConfig
 import io.github.adven27.concordion.extensions.exam.core.html.span
-import io.github.adven27.concordion.extensions.exam.core.utils.toDatePattern
-import io.github.adven27.concordion.extensions.exam.db.builder.SeedStrategy
-import io.github.adven27.concordion.extensions.exam.db.commands.DBCleanCommand
-import io.github.adven27.concordion.extensions.exam.db.commands.DataSetExecuteCommand
-import io.github.adven27.concordion.extensions.exam.db.commands.DataSetVerifyCommand
+import io.github.adven27.concordion.extensions.exam.db.builder.CompareOperation
+import io.github.adven27.concordion.extensions.exam.db.builder.ContainsFilterTable
+import io.github.adven27.concordion.extensions.exam.db.commands.DbCleanCommand
+import io.github.adven27.concordion.extensions.exam.db.commands.DbExecuteCommand
+import io.github.adven27.concordion.extensions.exam.db.commands.DbSetCommand
+import io.github.adven27.concordion.extensions.exam.db.commands.DbShowCommand
+import io.github.adven27.concordion.extensions.exam.db.commands.DbVerifyCommand
 import io.github.adven27.concordion.extensions.exam.db.commands.ExamMatchersAwareValueComparer
-import io.github.adven27.concordion.extensions.exam.db.commands.check.CheckCommand
-import io.github.adven27.concordion.extensions.exam.db.commands.set.SetCommand
-import io.github.adven27.concordion.extensions.exam.db.commands.show.ShowCommand
+import io.github.adven27.concordion.extensions.exam.db.commands.check.DbCheckCommand
+import io.github.adven27.concordion.extensions.exam.db.commands.columnNamesArray
+import io.github.adven27.concordion.extensions.exam.db.commands.sortedTable
 import mu.KLogging
+import org.concordion.api.Command
 import org.concordion.api.Element
 import org.dbunit.assertion.DiffCollectingFailureHandler
 import org.dbunit.dataset.Column
@@ -23,7 +30,16 @@ import org.dbunit.dataset.SortedTable
 import java.sql.ResultSet
 import java.sql.Statement
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 import java.util.Date
+import org.concordion.api.Evaluator
+import org.dbunit.Assertion
+import org.dbunit.assertion.DbComparisonFailure
+import org.dbunit.assertion.Difference
+import org.dbunit.dataset.CompositeTable
+import org.dbunit.dataset.IDataSet
+import org.dbunit.dataset.filter.DefaultColumnFilter
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
@@ -31,8 +47,8 @@ import kotlin.collections.set
 class DbPlugin @JvmOverloads constructor(
     val dbTester: DbTester,
     private val connectOnDemand: Boolean = true,
-    private val valuePrinter: ValuePrinter = ValuePrinter.Simple(),
-    private val allowedSeedStrategies: List<SeedStrategy> = SeedStrategy.values().toList()
+    private val valuePrinter: ValuePrinter = ValuePrinter.Default(),
+    private val override: Map<String, Command> = mapOf()
 ) : ExamPlugin {
 
     /**
@@ -47,28 +63,15 @@ class DbPlugin @JvmOverloads constructor(
         password: String,
         schema: String? = null,
         connectOnDemand: Boolean = true,
-        valuePrinter: ValuePrinter = ValuePrinter.Simple(),
+        valuePrinter: ValuePrinter = ValuePrinter.Default(),
         dbUnitConfig: DbUnitConfig = DbUnitConfig(),
-        allowedSeedStrategies: List<SeedStrategy> = SeedStrategy.values().toList()
+        override: Map<String, Command> = mapOf()
     ) : this(
         DbTester(driver, url, user, password, schema, dbUnitConfig),
         connectOnDemand,
         valuePrinter,
-        allowedSeedStrategies
+        override
     )
-
-    @JvmOverloads
-    @Suppress("unused")
-    constructor(dbTester: DbTester, allowedSeedStrategies: List<SeedStrategy>, connectOnDemand: Boolean = true) : this(
-        dbTester,
-        connectOnDemand,
-        ValuePrinter.Simple(),
-        allowedSeedStrategies
-    )
-
-    init {
-        dbTester.executors[DbTester.DEFAULT_DATASOURCE] = dbTester
-    }
 
     /**
      * @param defaultTester Default datasource, used when `ds` attribute is omitted: `<e:db-set ...>`
@@ -88,53 +91,61 @@ class DbPlugin @JvmOverloads constructor(
         defaultTester: DbTester,
         others: Map<String, DbTester>,
         connectOnDemand: Boolean = true,
-        valuePrinter: ValuePrinter = ValuePrinter.Simple(),
-        allowedSeedStrategies: List<SeedStrategy> = SeedStrategy.values().toList()
-    ) : this(defaultTester, connectOnDemand, valuePrinter, allowedSeedStrategies) {
+        valuePrinter: ValuePrinter = ValuePrinter.Default()
+    ) : this(defaultTester, connectOnDemand, valuePrinter) {
         for ((key, value) in others) {
             dbTester.executors[key] = value
         }
     }
 
-    @JvmOverloads
-    @Suppress("unused")
-    constructor(
-        defaultTester: DbTester,
-        others: Map<String, DbTester>,
-        allowedSeedStrategies: List<SeedStrategy>,
-        connectOnDemand: Boolean = true
-    ) : this(defaultTester, others, connectOnDemand, ValuePrinter.Simple(), allowedSeedStrategies)
+    init {
+        dbTester.executors[DbTesterBase.DEFAULT_DATASOURCE] = dbTester
+    }
 
-    override fun commands(): List<NamedExamCommand> = listOf(
-        DataSetExecuteCommand("db-execute", "span", dbTester, valuePrinter, allowedSeedStrategies),
-        DataSetVerifyCommand("db-verify", "span", dbTester, valuePrinter),
-        ShowCommand("db-show", dbTester, valuePrinter),
-        CheckCommand("db-check", dbTester, valuePrinter),
-        SetCommand("db-set", dbTester, valuePrinter, allowedSeedStrategies),
-        DBCleanCommand("db-clean", "pre", dbTester)
-    )
+    override fun commands(): Map<String, Command> = mapOf(
+        "db-execute" to DbExecuteCommand(dbTester, valuePrinter),
+        "db-verify" to DbVerifyCommand(dbTester, valuePrinter),
+        "db-show" to DbShowCommand(dbTester, valuePrinter),
+        "db-check" to DbCheckCommand(dbTester, valuePrinter),
+        "db-set" to DbSetCommand(dbTester, valuePrinter),
+        "db-clean" to DbCleanCommand(dbTester)
+    ) + override
 
     override fun setUp() {
         if (!connectOnDemand) dbTester.connection
     }
 
-    override fun tearDown() {
-        dbTester.close()
-    }
+    override fun tearDown() = dbTester.close()
 
     /**
      * Defines how to print and render values in '<e:db-*' commands
-     * @see JsonValuePrinter
      */
     interface ValuePrinter {
-        open class Simple @JvmOverloads constructor(dateFormat: String = "yyyy-MM-dd HH:mm:ss.SSS") :
-            AbstractDefault(dateFormat) {
+        open class Default @JvmOverloads constructor(
+            formatter: DateTimeFormatter = ISO_LOCAL_DATE_TIME,
+            private val detectJson: Boolean = false
+        ) : AbstractDefault(formatter) {
+            private val mapper: ObjectMapper = jacksonObjectMapper().configure(FAIL_ON_TRAILING_TOKENS, true)
+
             override fun orElse(value: Any): String = value.toString()
+
+            override fun wrap(value: Any?): Element = if (detectJson && isJson(value)) {
+                Element("pre").addStyleClass("json").appendText(print(value))
+            } else {
+                super.wrap(value)
+            }
+
+            protected fun isJson(value: Any?): Boolean = value is String && valid(value)
+
+            private fun valid(json: String) = try {
+                mapper.readTree(json)
+                true
+            } catch (ignore: JacksonException) {
+                false
+            }
         }
 
-        abstract class AbstractDefault @JvmOverloads constructor(
-            private val dateFormat: String = "yyyy-MM-dd'T'HH:mm:ss.SSS"
-        ) : ValuePrinter {
+        abstract class AbstractDefault(private val formatter: DateTimeFormatter) : ValuePrinter {
             override fun print(value: Any?): String = when (value) {
                 null -> "(null)"
                 is Array<*> -> value.contentToString()
@@ -143,30 +154,20 @@ class DbPlugin @JvmOverloads constructor(
                 else -> orElse(value)
             }
 
-            private fun printDate(value: Date) =
-                dateFormat.toDatePattern().withZone(ZoneId.systemDefault()).format(value.toInstant())
-
+            private fun printDate(value: Date) = formatter.withZone(ZoneId.systemDefault()).format(value.toInstant())
             override fun wrap(value: Any?): Element = span(print(value)).el
-
             abstract fun orElse(value: Any): String
         }
 
         fun print(value: Any?): String
         fun wrap(value: Any?): Element
     }
-
-    open class JsonValuePrinter : ValuePrinter.Simple() {
-        override fun wrap(value: Any?): Element =
-            if (isJson(value)) Element("pre").addStyleClass("json").appendText(print(value)) else super.wrap(value)
-
-        protected fun isJson(value: Any?): Boolean = value is String && value.startsWith("{") && value.endsWith("}")
-    }
 }
 
 data class DbUnitConfig @JvmOverloads constructor(
     val databaseConfigProperties: Map<String, Any?> = mapOf(),
-    val valueComparer: ExamMatchersAwareValueComparer = ExamMatchersAwareValueComparer(),
     val columnValueComparers: Map<String, ExamMatchersAwareValueComparer> = emptyMap(),
+    val valueComparer: ExamMatchersAwareValueComparer = ExamMatchersAwareValueComparer(),
     val overrideRowSortingComparer: RowComparator = RowComparator(),
     val diffFailureHandler: DiffCollectingFailureHandler = DiffCollectingFailureHandler(),
     val isColumnSensing: Boolean = false
@@ -198,8 +199,8 @@ data class DbUnitConfig @JvmOverloads constructor(
         fun columnSensing(columnSensing: Boolean) = apply { this.columnSensing = columnSensing }
         fun build() = DbUnitConfig(
             databaseConfigProperties,
-            valueComparer,
             columnValueComparers,
+            valueComparer,
             overrideRowSortingComparer,
             diffFailureHandler,
             columnSensing

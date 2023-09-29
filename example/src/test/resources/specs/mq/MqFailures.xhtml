@@ -34,7 +34,7 @@
     <e:example name="extra-3" status="ExpectedToFail">
         <e:when>
             Queue has the messages:
-            <e:mq-send name="myQueue">{ "message": "1" }</e:mq-send>
+            <e:mq-send name="myQueue">{ "message": "{{matches 'ignoreSet'}}" }</e:mq-send>
             <e:mq-send name="myQueue">{ "message": "2" }</e:mq-send>
             <e:mq-send name="myQueue">{ "message": "3" }</e:mq-send>
         </e:when>

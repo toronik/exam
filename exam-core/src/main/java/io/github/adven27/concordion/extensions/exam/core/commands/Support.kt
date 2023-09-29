@@ -1,6 +1,7 @@
 package io.github.adven27.concordion.extensions.exam.core.commands
 
-import io.github.adven27.concordion.extensions.exam.core.commands.Verifier.Success
+import io.github.adven27.concordion.extensions.exam.core.commands.ExamCommand.Context
+import io.github.adven27.concordion.extensions.exam.core.commands.Verifier.Check
 import io.github.adven27.concordion.extensions.exam.core.html.Html
 import io.github.adven27.concordion.extensions.exam.core.html.descendantTextContainer
 import io.github.adven27.concordion.extensions.exam.core.utils.After
@@ -9,6 +10,7 @@ import org.concordion.api.CommandCall
 import org.concordion.api.Element
 import org.concordion.api.Evaluator
 import org.concordion.api.listener.AbstractElementEvent
+import java.math.BigDecimal
 import java.util.EventListener
 import java.util.UUID
 import java.util.regex.Pattern
@@ -17,26 +19,13 @@ interface CommandParser<T> {
     fun parse(command: CommandCall, evaluator: Evaluator): T
 }
 
-interface SuitableCommandParser<T> : CommandParser<T> {
-    fun isSuitFor(element: Element): Boolean
-}
-
-class FirstSuitableCommandParser<T>(private vararg val parsers: SuitableCommandParser<T>) : CommandParser<T> {
-    override fun parse(command: CommandCall, evaluator: Evaluator): T =
-        parsers.first { it.isSuitFor(command.element) }.parse(command, evaluator)
-}
-
-interface ActualProvider<S, R> {
-    fun provide(source: S): R
+interface ContextParser<T> {
+    fun parse(context: Context): T
 }
 
 interface Verifier<E, A> {
-    fun verify(eval: Evaluator, expected: E, actual: A): Result<Success<E, A>>
-    data class Success<E, A>(val expected: E, val actual: A)
-}
-
-interface AwaitVerifier<E, A> : Verifier<E, A> {
-    fun verify(eval: Evaluator, expected: E, getActual: () -> Pair<Boolean, A>): Result<Success<E, A>>
+    fun verify(eval: Evaluator, expected: E, actual: (E) -> A): Check<E, A>
+    data class Check<E, A>(val expected: E, val actual: A?, val fail: Throwable? = null)
 }
 
 interface SetUpListener<T> : EventListener {
@@ -48,7 +37,12 @@ class SetUpEvent<T>(element: Element, val target: T) : AbstractElementEvent(elem
 fun String.expression() = substring(indexOf("}") + 1).trim()
 
 fun matchesRegex(pattern: String, actualValue: Any?): Boolean =
-    if (actualValue == null) false else Pattern.compile(pattern).matcher(actualValue.toString()).matches()
+    if (actualValue == null) false else Pattern.compile(pattern).matcher(asString(actualValue)).matches()
+
+private fun asString(actualValue: Any) = when (actualValue) {
+    is BigDecimal -> actualValue.toPlainString()
+    else -> actualValue.toString()
+}
 
 fun matchesAnyNumber(actual: Any?) = matchesRegex("^\\d+\$", actual)
 fun matchesAnyString(actual: Any?) = matchesRegex("^\\w+\$", actual)

@@ -2,22 +2,29 @@ package io.github.adven27.concordion.extensions.exam.core
 
 import org.concordion.api.AfterSuite
 import org.concordion.api.BeforeSuite
+import org.concordion.api.ConcordionFixture
 import org.concordion.api.ConcordionResources
 import org.concordion.api.extension.Extension
 import org.concordion.api.option.ConcordionOptions
+import org.concordion.api.option.MarkdownExtensions.ABBREVIATIONS
 import org.concordion.api.option.MarkdownExtensions.AUTOLINKS
 import org.concordion.api.option.MarkdownExtensions.DEFINITIONS
 import org.concordion.api.option.MarkdownExtensions.FENCED_CODE_BLOCKS
 import org.concordion.api.option.MarkdownExtensions.FORCELISTITEMPARA
 import org.concordion.api.option.MarkdownExtensions.TASKLISTITEMS
 import org.concordion.api.option.MarkdownExtensions.WIKILINKS
-import org.concordion.integration.junit4.ConcordionRunner
-import org.junit.runner.RunWith
+import java.lang.annotation.Inherited
+
+@Inherited
+@ConcordionFixture
+annotation class InheritedConcordionFixture
 
 @Suppress("unused")
-@RunWith(ConcordionRunner::class)
+@InheritedConcordionFixture
 @ConcordionOptions(
-    markdownExtensions = [WIKILINKS, AUTOLINKS, FENCED_CODE_BLOCKS, DEFINITIONS, FORCELISTITEMPARA, TASKLISTITEMS],
+    markdownExtensions = [
+        WIKILINKS, AUTOLINKS, FENCED_CODE_BLOCKS, DEFINITIONS, FORCELISTITEMPARA, TASKLISTITEMS, ABBREVIATIONS
+    ],
     declareNamespaces = ["c", "http://www.concordion.org/2007/concordion", "e", ExamExtension.NS]
 )
 @ConcordionResources(includeDefaultStyling = false)

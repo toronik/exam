@@ -8,7 +8,7 @@ import org.dbunit.dataset.datatype.DataType
 import java.util.HashMap
 import java.util.LinkedHashMap
 
-class TableMetaDataBuilder(private val tableName: String, private val policy: IStringPolicy) {
+class TableMetaDataBuilder(private val tableName: String, private val policy: StringPolicy) {
     private val keysToColumns = LinkedHashMap<String, Column>()
 
     @Suppress("SpreadOperator")
@@ -20,9 +20,7 @@ class TableMetaDataBuilder(private val tableName: String, private val policy: IS
     }
 
     fun with(column: Column): TableMetaDataBuilder {
-        if (column.isUnknown()) {
-            add(column)
-        }
+        if (column.isUnknown()) add(column)
         return this
     }
 
@@ -53,10 +51,7 @@ class DataRowBuilder(private val dataSet: DataSetBuilder, tableName: String) : B
     }
 
     @Throws(DataSetException::class)
-    fun add(): DataSetBuilder {
-        dataSet.add(this)
-        return dataSet
-    }
+    fun add() = dataSet.also { it.add(this) }
 }
 
 open class BasicDataRowBuilder(val tableName: String) {
@@ -108,11 +103,6 @@ open class BasicDataRowBuilder(val tableName: String) {
         columnNameToValue[columnName] = value
     }
 
-    protected fun getValue(column: Column): Any? {
-        return getValue(column.columnName)
-    }
-
-    protected fun getValue(columnName: String): Any? {
-        return columnNameToValue[columnName]
-    }
+    protected fun getValue(column: Column): Any? = getValue(column.columnName)
+    protected fun getValue(columnName: String): Any? = columnNameToValue[columnName]
 }

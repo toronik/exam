@@ -92,8 +92,7 @@ private val engine = embeddedServer(Netty, port = System.getProperty("server.por
 
         get("/widgets/{id}") {
             val widget = widgetService.getBy(call.parameters["id"]?.toInt()!!)
-            if (widget == null) call.respond(HttpStatusCode.NotFound)
-            else call.respond(widget)
+            if (widget == null) call.respond(HttpStatusCode.NotFound) else call.respond(widget)
         }
 
         post("/widgets") {
@@ -119,8 +118,7 @@ private val engine = embeddedServer(Netty, port = System.getProperty("server.por
 
         delete("/widgets/{id}") {
             val removed = widgetService.delete(call.parameters["id"]?.toInt()!!)
-            if (removed) call.respond(HttpStatusCode.OK)
-            else call.respond(HttpStatusCode.NotFound)
+            if (removed) call.respond(HttpStatusCode.OK) else call.respond(HttpStatusCode.NotFound)
         }
 
         post("/mirror/body") { call.respond(call.receiveText()) }
@@ -135,9 +133,9 @@ private val engine = embeddedServer(Netty, port = System.getProperty("server.por
         get("/ignoreJson") {
             call.respond(
                 """
-                    { 
-                    "param1":"value1", 
-                    "param2":"value2", 
+                    {
+                    "param1":"value1",
+                    "param2":"value2",
                     "arr": [{"param3":"value3", "param4":"value4"}, {"param3":"value3", "param4":"value4"}]
                     }
                 """.trimIndent()

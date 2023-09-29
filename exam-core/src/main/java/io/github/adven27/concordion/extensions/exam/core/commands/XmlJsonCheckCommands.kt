@@ -21,9 +21,10 @@ import org.concordion.api.CommandCall
 import org.concordion.api.Evaluator
 import org.concordion.api.Fixture
 import org.concordion.api.ResultRecorder
+/*
 
 class XmlCheckCommand(tag: String, private val verifier: ContentVerifier) :
-    ExamVerifyCommand("xml-check", tag, ExamResultRenderer()) {
+    ExamVerifyCommand(tag, ExamResultRenderer()) {
 
     override fun verify(cmd: CommandCall, eval: Evaluator, resultRecorder: ResultRecorder, fixture: Fixture) {
         val root = cmd.html()
@@ -51,8 +52,8 @@ class XmlCheckCommand(tag: String, private val verifier: ContentVerifier) :
     }
 }
 
-class JsonCheckCommand(tag: String, private val verifier: ContentVerifier) :
-    ExamVerifyCommand("json-check", tag, ExamResultRenderer()) {
+class JsonCheckCommand(private val verifier: ContentVerifier) :
+    ExamVerifyCommand(ExamResultRenderer()) {
 
     override fun verify(cmd: CommandCall, eval: Evaluator, resultRecorder: ResultRecorder, fixture: Fixture) {
         val root = cmd.html()
@@ -85,6 +86,7 @@ class JsonCheckCommand(tag: String, private val verifier: ContentVerifier) :
             }
     }
 }
+*/
 
 fun container(root: Html, type: String, collapsable: Boolean = false): Html {
     return if (collapsable) collapsableContainer(root, type) else fixedContainer(root, type)

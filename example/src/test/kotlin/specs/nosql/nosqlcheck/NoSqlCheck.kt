@@ -11,6 +11,6 @@ open class NoSqlCheck : Specs() {
         get() = "/specs/nosql/nosqlcheck/data/".findResource().path
 
     fun cleanCollection(collection: String) {
-        nosqlTester.clean(listOf(collection))
+//        nosqlTester.clean(listOf(collection))
     }
 }

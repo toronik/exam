@@ -3,11 +3,11 @@ package specs.core
 import org.concordion.api.FullOGNL
 import specs.Specs
 
-class CoreDecor : Specs()
-class CoreSet : Specs()
+class CoreDecorTest : Specs()
+class CoreSetTest : Specs()
 
 @FullOGNL
-class CoreVerify : Specs() {
+class CoreVerifyTest : Specs() {
     fun lowercase(name: String): Result = name.lowercase().let {
         Result(it, """{ "result": "$it" }""", """<result>$it</result>""")
     }

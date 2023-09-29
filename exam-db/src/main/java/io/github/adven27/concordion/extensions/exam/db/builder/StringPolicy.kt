@@ -1,16 +1,16 @@
 package io.github.adven27.concordion.extensions.exam.db.builder
 
-interface IStringPolicy {
+interface StringPolicy {
     fun areEqual(first: String, second: String): Boolean
     fun toKey(value: String): String
 }
 
-class CaseInsensitiveStringPolicy : IStringPolicy {
+class CaseInsensitiveStringPolicy : StringPolicy {
     override fun areEqual(first: String, second: String): Boolean = first.equals(second, ignoreCase = true)
     override fun toKey(value: String): String = value.uppercase()
 }
 
-class CaseSensitiveStringPolicy : IStringPolicy {
+class CaseSensitiveStringPolicy : StringPolicy {
     override fun areEqual(first: String, second: String): Boolean = first == second
     override fun toKey(value: String): String = value
 }

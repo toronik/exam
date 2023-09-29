@@ -1,8 +1,10 @@
 package io.github.adven27.concordion.extensions.exam.core.handlebars.misc
 
 import com.github.jknack.handlebars.Options
+import io.github.adven27.concordion.extensions.exam.core.ExamExtension
 import io.github.adven27.concordion.extensions.exam.core.handlebars.ExamHelper
 import io.github.adven27.concordion.extensions.exam.core.handlebars.evaluator
+import io.github.adven27.concordion.extensions.exam.core.prettyJson
 import io.github.adven27.concordion.extensions.exam.core.readFile
 import io.github.adven27.concordion.extensions.exam.core.resolveToObj
 import io.github.adven27.concordion.extensions.exam.core.utils.toDate
@@ -27,6 +29,16 @@ enum class MiscHelpers(
     map("""{{map key='value'}}""", mapOf(), mapOf("key" to "value")) {
         override fun invoke(context: Any?, options: Options): Map<*, *> =
             if (context is Map<*, *>) context + options.hash else options.hash
+    },
+    ls("""{{ls '1' '2'}}""", mapOf(), listOf("1", "2")) {
+        override fun invoke(context: Any?, options: Options): List<*> =
+            if (context is List<*>) context + options.params.toList() else listOf(context) + options.params.toList()
+    },
+    json("""{{json (map f1='1' f2=(ls '1' '2'))}}""", mapOf(), "1") {
+        override fun invoke(context: Any?, options: Options): String =
+            ExamExtension.JACKSON_2_OBJECT_MAPPER_PROVIDER.getObjectMapper(false).writeValueAsString(
+                if (options.params.isEmpty()) context else listOf(context) + options.params
+            ).prettyJson()
     },
     NULL("{{NULL}}", emptyMap(), null) {
         override fun invoke(context: Any?, options: Options): Any = Result.success(null)

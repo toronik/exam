@@ -11,13 +11,15 @@
     </figure>
 
     <h4>Usage</h4>
-    <p>1. Add dependency <pre class="doc-code language-java"><code>testImplementation "io.github.adven27:exam-db:{{version}}"</code></pre></p>
-    <p>2. Configure and attach the <a cc:run="concordion" href="db/DbPlugin.xhtml">DbPlugin</a></p>
+    <ol>
+        <li>1. Add dependency <pre class="doc-code language-java"><code>testImplementation "io.github.adven27:exam-db:{{version}}"</code></pre></li>
+        <li>2. Configure and attach the <a cc:run="concordion" href="db/DbPlugin.xhtml">DbPlugin</a></li>
+    </ol>
 
     <h4>Commands</h4>
     <p>
         There are commands for setting up and verifying database state.
-        Also there is a command to just show current database state and generate dataset files based on it.
+        Also, there is a command to just show current database state and generate dataset files based on it.
     </p>
 
     <h5>Set up database</h5>

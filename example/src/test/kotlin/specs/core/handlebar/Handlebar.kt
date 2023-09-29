@@ -9,7 +9,7 @@ import io.github.adven27.concordion.extensions.exam.core.utils.toString
 import specs.Specs
 import java.util.Date
 
-class Handlebar : Specs() {
+class HandlebarTest : Specs() {
     companion object {
         val JSON_DATE = Date().let {
             Triple(
@@ -19,19 +19,19 @@ class Handlebar : Specs() {
             )
         }.let { (custom, date, datetime) -> // language=json
             """
-            { 
+            {
               "customFormat": "$custom",
               "isoDate": "$date",
               "iso": "$datetime",
-              
+
               "customFormatAndWithinNow": "$custom",
               "isoDateAndWithinNow": "$date",
               "isoAndWithinNow": "$datetime",
-              
+
               "customFormatAndWithinSpecifiedDate": "$custom",
               "isoDateAndWithinSpecifiedDate": "$date",
               "isoAndWithinSpecifiedDate": "$datetime",
-              
+
               "afterSpecifiedDate": "$datetime",
               "beforeSpecifiedDate": "$datetime"
             }

@@ -27,16 +27,16 @@
 </p>
 <e:example name="before" print="true">
     The variable <code>fromConcordionBefore</code> will be reset
-    to <code e:set="#fromConcordionBefore = now()">{{now "HH:mm:ss.SSS"}}</code> before each example.
+    to <code e:set="#fromConcordionBefore">ccBefore</code> before each example.
 </e:example>
 
 <p>
     In the following <var>example 1</var> the <code>fromConcordionBefore</code> variable is available but <code>fromExamBefore</code> is not.
 </p>
 <e:example name="example 1">
-    Echo <code>fromConcordionBefore</code>: <code cc:echo="#fromConcordionBefore"/>
+    <code>fromConcordionBefore</code> = <code cc:assertEquals="#fromConcordionBefore">ccBefore</code>
     <br/>
-    Echo <code>fromExamBefore</code>: <code cc:echo="#fromExamBefore"/>
+    <code>fromExamBefore</code> = <code cc:assertEquals="#fromExamBefore">(null)</code>
 </e:example>
 
 <h2>Exam "before"</h2>
@@ -49,23 +49,23 @@
     For example let's (re)set <code>fromExamBefore</code> variable before each example.
 </p>
 <e:before-each print="true">
-    The variable <code>fromExamBefore</code> will be reset to <code e:set="#fromExamBefore">{{now "HH:mm:ss.SSS"}}</code>
+    The variable <code>fromExamBefore</code> will be reset to <code e:set="#fromExamBefore">examBefore</code>
     before each example.
 </e:before-each>
 
 <p>
-    Both variables are available, <code>e:before-each</code> block embedded at the beginning of the each subsequent example.
+    Both variables are available, <code>e:before-each</code> block embedded at the beginning of the subsequent examples.
 </p>
 <e:example name="example 2">
-    Echo <code>fromConcordionBefore</code>: <code cc:echo="#fromConcordionBefore"/>
+    <code>fromConcordionBefore</code> = <code cc:assertEquals="#fromConcordionBefore">ccBefore</code>
     <br/>
-    Echo <code>fromExamBefore</code>: <code cc:echo="#fromExamBefore"/>
+    <code>fromExamBefore</code> = <code cc:assertEquals="#fromExamBefore">examBefore</code>
 </e:example>
 
 <e:example name="example 3">
-    Echo <code>fromConcordionBefore</code>: <code cc:echo="#fromConcordionBefore"/>
+    <code>fromConcordionBefore</code> = <code cc:assertEquals="#fromConcordionBefore">ccBefore</code>
     <br/>
-    Echo <code>fromExamBefore</code>: <code cc:echo="#fromExamBefore"/>
+    <code>fromExamBefore</code> = <code cc:assertEquals="#fromExamBefore">examBefore</code>
 </e:example>
 
 </body>

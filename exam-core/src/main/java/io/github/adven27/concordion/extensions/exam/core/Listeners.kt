@@ -217,13 +217,13 @@ internal class ExamDocumentParsingListener(private val registry: CommandRegistry
 
     private fun visit(elem: Element) {
         elem.childElements.forEach { visit(it) }
-        if (ExamExtension.NS == elem.namespaceURI && registry.commands().map { it.name }.contains(elem.localName)) {
+        if (ExamExtension.NS == elem.namespaceURI && registry.commands().map { it.key }.contains(elem.localName)) {
             val cmdId = UUID.randomUUID().toString()
             PARSED_COMMANDS[cmdId] = elem.toXML().let {
                 it.lines().last().takeWhile { c -> c == ' ' } + it
             }.trimIndent()
             elem.addAttribute(Attribute("cmdId", cmdId))
-            registry.getBy(elem.localName)?.let { if (it is BeforeParseExamCommand) it.beforeParse(elem) }
+            registry[elem.localName]?.let { if (it is BeforeParseExamCommand) it.beforeParse(elem) }
         }
     }
 }

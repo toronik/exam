@@ -63,11 +63,14 @@ enum class DateHelpers(
                 options.hash(MINUS, ""),
                 options.hash(TZ)
             )
-        } else LocalDateTime.now()
-            .plus(parsePeriodFrom(options.hash(PLUS, "")))
-            .minus(parsePeriodFrom(options.hash(MINUS, "")))
-            .toDate(options.hash<String?>(TZ)?.timeZoneId() ?: ZoneId.systemDefault())
+        } else {
+            LocalDateTime.now()
+                .plus(parsePeriodFrom(options.hash(PLUS, "")))
+                .minus(parsePeriodFrom(options.hash(MINUS, "")))
+                .toDate(options.hash<String?>(TZ)?.timeZoneId() ?: ZoneId.systemDefault())
+        }
     },
+
     today(
         example = """{{today "yyyy-MM-dd" minus="1 y, 2 months, d 3"}}""",
         expected = ZonedDateTime.now(ZoneId.systemDefault())
@@ -84,10 +87,12 @@ enum class DateHelpers(
                 options.hash(MINUS, ""),
                 options.hash(TZ)
             )
-        } else now().atStartOfDay()
-            .plus(parsePeriodFrom(options.hash(PLUS, "")))
-            .minus(parsePeriodFrom(options.hash(MINUS, "")))
-            .toLocalDate().toDate()
+        } else {
+            now().atStartOfDay()
+                .plus(parsePeriodFrom(options.hash(PLUS, "")))
+                .minus(parsePeriodFrom(options.hash(MINUS, "")))
+                .toLocalDate().toDate()
+        }
     },
     date(
         example = """{{date '01.02.2000 10:20' format="dd.MM.yyyy HH:mm" minus="1 h" plus="1 h"}}""",

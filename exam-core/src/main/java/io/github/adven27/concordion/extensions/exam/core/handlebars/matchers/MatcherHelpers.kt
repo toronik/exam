@@ -58,8 +58,11 @@ enum class MatcherHelpers(
         expected = "\${json-unit.regex}\\d+"
     ) {
         override fun invoke(context: Any?, options: Options): Any =
-            if (placeholderType(options.context) == "db") regexMatches(context.toString(), dbActual(options.context))
-            else "\${${placeholderType(options.context)}-unit.regex}$context"
+            if (placeholderType(options.context) == "db") {
+                regexMatches(context.toString(), dbActual(options.context))
+            } else {
+                "\${${placeholderType(options.context)}-unit.regex}$context"
+            }
     },
     matches(
         example = "{{matches 'name' 'params'}}",

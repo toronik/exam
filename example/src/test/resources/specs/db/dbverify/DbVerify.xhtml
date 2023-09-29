@@ -39,7 +39,7 @@
     <h3>Basic example</h3>
     <e:example name="Basic example">
         <e:given>
-            <e:db-execute dir="/specs/db/data/" datasets="adam.xml, bob.json, carl/person.csv"
+            <e:db-execute datasets="adam.xml, bob.json, carl/person.csv"
                           vars="a1=1, a2=2" varsSeparator=","/>
             And following dataset files:
             <e:fl-check dir="dir">
@@ -51,8 +51,30 @@
             </e:fl-check>
         </e:given>
         <e:then>
-            <e:db-verify dir="/specs/db/data/" datasets="adam.xml, bob.json, carl/person.csv"
-                         orderBy="person_fields.val, person.birthday"
+            <e:db-verify datasets="adam.xml, bob-expected.json, carl/person.csv"
+                         orderBy="person_fields.val, person.id"
+                         vars="a1=1, a2=2" varsSeparator=","
+                         print="true"/>
+        </e:then>
+    </e:example>
+
+    <h3>Fail</h3>
+    <e:example name="Failed" status="ExpectedToFail">
+        <e:given>
+            <e:db-execute datasets="adam.xml, bob.json, carl/person.csv"
+                          vars="a1=1, a2=2" varsSeparator=","/>
+            And following dataset files:
+            <e:fl-check dir="dir">
+                <e:file name="adam.xml"/>
+                <e:file name="bob.json"/>
+                <e:file name="carl/table-ordering.txt"/>
+                <e:file name="carl/person.csv"/>
+                <e:file name="carl/person_fields.csv"/>
+            </e:fl-check>
+        </e:given>
+        <e:then>
+            <e:db-verify datasets="adam-wrong.xml, bob-wrong-id.json, carl/person.csv"
+                         orderBy="person_fields.val, person.id"
                          vars="a1=1, a2=2" varsSeparator=","
                          print="true"/>
         </e:then>

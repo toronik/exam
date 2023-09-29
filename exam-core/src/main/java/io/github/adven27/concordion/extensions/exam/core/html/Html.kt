@@ -7,8 +7,7 @@ import io.github.adven27.concordion.extensions.exam.core.resolveToObj
 import org.concordion.api.CommandCall
 import org.concordion.api.Element
 import org.concordion.api.Evaluator
-import java.util.Optional
-import java.util.UUID
+import java.util.*
 
 const val ID = "id"
 const val ONCLICK = "onclick"
@@ -65,6 +64,8 @@ class Html(val el: Element) {
 
     fun attr(name: String): String? = el.getAttributeValue(name)
 
+    operator fun get(name: String): String? = attr(name)
+
     fun attrOrFail(name: String): String =
         el.getAttributeValue(name) ?: throw IllegalArgumentException("Attribute $name not found")
 
@@ -108,7 +109,7 @@ class Html(val el: Element) {
     }
 
     @JvmOverloads
-    fun takeAwayAttr(name: String, eval: Evaluator? = null): String? {
+    fun getAttr(name: String, eval: Evaluator? = null): String? {
         var attr = attr(name)
         if (attr != null) {
             attr = eval?.resolveToObj(attr)?.toString() ?: attr
@@ -117,8 +118,8 @@ class Html(val el: Element) {
         return attr
     }
 
-    fun takeAwayAttr(name: String, def: String): String = takeAwayAttr(name) ?: def
-    fun takeAwayAttr(attrName: String, def: String, eval: Evaluator? = null) = takeAwayAttr(attrName, eval) ?: def
+    fun getAttr(name: String, def: String): String = getAttr(name) ?: def
+    fun getAttr(attrName: String, def: String, eval: Evaluator? = null) = getAttr(attrName, eval) ?: def
 
     fun el() = el
 
@@ -218,10 +219,6 @@ class Html(val el: Element) {
     }
 
     fun descendants(tag: String) = this.el.getDescendantElements(tag).toList().map(::Html)
-
-    fun span(txt: String? = null, vararg attrs: Pair<String, String>) {
-        (Html("span", txt, *attrs))
-    }
 
     fun tooltip(text: String, decorate: Boolean = false) = attrs(
         "title" to text,
@@ -381,7 +378,7 @@ fun footerOf(card: Html) = Html(card.el.getChildElements("div")[2])
 fun stat() = Html("small")
 
 fun CommandCall?.html() = Html(this!!.element)
-fun CommandCall?.takeAttr(name: String) = html().takeAwayAttr(name)
+fun CommandCall?.takeAttr(name: String) = html().getAttr(name)
 fun CommandCall?.attr(name: String, def: String) = html().attr(name) ?: def
 
 fun generateId(): String = "e${UUID.randomUUID()}"

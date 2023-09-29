@@ -13,7 +13,7 @@
 [Definition list form](https://www.markdownguide.org/extended-syntax/#definition-lists):
 
 <pre class="code language-markdown">
-[Send/check](- "mq-send/check=queueName")
+[Send/check](- "mq-set/check=queueName")
 :
 ```json
  {"a" :  1}
@@ -25,7 +25,7 @@
 
 __When__
 
-[Given messages]
+[Given messages2]
 :
 ```json
 {"a" :  1}
@@ -47,7 +47,7 @@ Regular list form:
 
 ```markdown
 
-- [Send/check](- "mq-send/check=queueName")
+- [Send/check](- "mq-set/check=queueName")
 -   ```json
     {"a" :  1}
     ```
@@ -55,12 +55,29 @@ Regular list form:
 ```
 
 #### [Basic ul](-)
+```json
+[{"name":"n1","secIds":["ISIN1","ISIN2"],"fields":[{"code":"INDUSTRY_AC","value":"Холдинги","timestamp":"2022-04-27T17:20:01"},{"code":"COUNTRY_AC","value":"RU","timestamp":"2022-04-27T17:20:02"}]},{"name":null,"secIds":["1","2","3"]}]
+```
+
 
 __When__
 
 - [Given messages]
--   ```json
-    {"a" :  1}
+-   ```handlebars
+      {{json
+        (map name='n1' secIds=(ls 'ISIN1' 'ISIN2') fields=(ls
+            (map code='INDUSTRY_AC' value='Холдинги' timestamp='2022-04-27T17:20:01')
+            (map code='COUNTRY_AC' value='RU' timestamp=(iso (at '-2d')))))
+        (map name=(NULL) secIds=(ls '1' '2'))
+      }}
+    ```
+-   ```handlebars
+      {{json
+        (map name='n1' secIds=(ls 'ISIN1' 'ISIN2') fields=(ls
+            (map 'code=value' INDUSTRY_AC='Холдинги' COUNTRY_AC='RU' timestamp='2022-04-27T17:20:01')
+            (map code='COUNTRY_AC' value='RU' timestamp=(iso (at '-2d')))))
+        (map name=(NULL) secIds=(ls '1' '2'))
+      }}
     ```
 - [my message]
 
@@ -108,7 +125,7 @@ __Then__
 -   ```json
     {"a" :  1}
     ```
-- `verifyAs=xml` 
+- `verifyAs=xml`
     ```xml
     <message>123</message>
     ```
@@ -119,5 +136,6 @@ __Then__
 
 
 [my message]: /data/mq/msg.json
-[Given messages]: - "e:mq-send=myQueue"
+[Given messages]: - "e:mq-set=myQueue"
+[Given messages2]: - "e:mq-set2=myQueue"
 [Expected messages]: - "e:mq-check=myQueue awaitAtMostSec=4"

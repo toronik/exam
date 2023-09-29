@@ -28,7 +28,7 @@ import org.xmlunit.diff.ElementSelectors.byNameAndText
 import org.xmlunit.diff.NodeMatcher
 import java.util.function.Consumer
 
-class ExamExtension constructor(private vararg var plugins: ExamPlugin) : ConcordionExtension {
+class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtension {
     private var focusOnError: Boolean = true
     private var nodeMatcher: NodeMatcher = DEFAULT_NODE_MATCHER
     private var skipDecider: SkipDecider = SkipDecider.NoSkip()
@@ -122,8 +122,8 @@ class ExamExtension constructor(private vararg var plugins: ExamPlugin) : Concor
         plugins.forEach { registry.register(it.commands()) }
 
         registry.commands()
-            .filter { "example" != it.name }
-            .forEach { ex.withCommand(NS, it.name, it) }
+            .filter { "example" != it.key }
+            .forEach { ex.withCommand(NS, it.key, it.value) }
 
         CommandPrinterExtension().addTo(ex)
         IncludesExtension().addTo(ex)

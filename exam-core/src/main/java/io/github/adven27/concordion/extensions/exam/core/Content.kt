@@ -61,6 +61,12 @@ open class XmlResolver : ContentResolver {
     override fun resolve(content: String, evaluator: Evaluator): String = evaluator.resolveXml(content)
 }
 
+open class Content(val body: String, val type: String) {
+    class Json(content: String) : Content(content, "json")
+    class Xml(content: String) : Content(content, "xml")
+    class Text(content: String) : Content(content, "text")
+}
+
 interface ContentPrinter {
     open class AsIs : ContentPrinter {
         override fun print(content: String): String = content
@@ -81,7 +87,9 @@ open class XmlPrinter : ContentPrinter {
     override fun style(): String = "xml"
 }
 
-fun String.prettyXml(): String = Builder().build(StringReader(this.trim())).prettyXml().let { removeXmlTag(it) }
+fun String.prettyXml(): String =
+    if (isBlank()) "" else Builder().build(StringReader(this.trim())).prettyXml().let { removeXmlTag(it) }
+
 private fun removeXmlTag(it: String) = it.substring(it.indexOf('\n') + 1)
 
 fun String.prettyJson() = JsonPrettyPrinter().prettyPrint(this)
@@ -200,7 +208,7 @@ open class JsonVerifier(protected val configuration: Configuration) : ContentVer
 
 fun Html.content(eval: Evaluator? = null) = content(this.attr("from"), eval)
 fun Html.content(from: String?, eval: Evaluator? = null) =
-    (from?.findResource(eval)?.readText() ?: this.text()).trimIndent()
+    (from?.findResource(eval)?.readText() ?: text()).trimIndent()
 
 fun String.findResource(eval: Evaluator? = null) =
     ExamExtension::class.java.getResource(eval?.resolveJson(this) ?: this)
