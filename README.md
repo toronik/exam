@@ -27,7 +27,7 @@ testImplementation "io.github.adven27:exam-ms:<version>"
 ```
 ### 2) Use
 
- [see live spec](https://adven27.github.io/Exam/specs/Specs.html) and [demo project](https://github.com/Adven27/service-tests/blob/master/demo/src/test/resources/specs/Specs.md)
+ [see live spec](https://toronik.github.io/exam/specs/Specs.html) and [demo project](https://github.com/Adven27/service-tests/blob/master/demo/src/test/resources/specs/Specs.md)
 
 ## Help
 Telegram https://t.me/joinchat/DClprRZ1xDCBtjGexhZOGw
