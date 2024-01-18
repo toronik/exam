@@ -7,15 +7,11 @@ import io.github.adven27.concordion.extensions.exam.core.handlebars.matchers.PLA
 import io.github.adven27.concordion.extensions.exam.core.handlebars.resolveObj
 import org.concordion.api.Evaluator
 
-fun Evaluator.resolveForContentType(body: String, type: String): String =
-    if (type.contains("xml", true)) resolveXml(body) else resolveJson(body)
-
-fun Evaluator.resolveNoType(body: String): String = resolveTxt(body, "text", this)
-fun Evaluator.resolveJson(body: String): String = resolveTxt(body, "json", this)
-fun Evaluator.resolveXml(body: String): String = resolveTxt(body, "xml", this)
-
-private fun resolveTxt(body: String, type: String, eval: Evaluator): String =
-    eval.apply { setVariable("#$PLACEHOLDER_TYPE", type) }.resolveToObj(body).toString()
+fun Evaluator.resolve(content: Content) = Content(resolve(content.body, content.type), content.type)
+fun Evaluator.resolve(template: String): String = resolveToObj(template).toString()
+fun Evaluator.resolve(body: String, type: String): String =
+    apply { setVariable("#$PLACEHOLDER_TYPE", type) }.resolveToObj(body).toString()
+        .also { setVariable("#$PLACEHOLDER_TYPE", null) }
 
 fun Evaluator.resolveToObj(placeholder: String?): Any? = HANDLEBARS.resolveObj(this, placeholder)
 
@@ -23,8 +19,7 @@ fun String?.vars(eval: Evaluator, setVar: Boolean = false, separator: String = "
     pairs(separator)
         .mapValues { (k, v) -> k to eval.resolveToObj(v).apply { if (setVar) eval.setVariable("#$k", this) } }
 
-fun String?.headers(separator: String = ","): Map<String, String> =
-    pairs(separator)
+fun String?.headers(separator: String = ","): Map<String, String> = pairs(separator)
 
 private fun String?.pairs(separator: String) = this?.split(separator)
     ?.map { it.split('=', limit = 2) }

@@ -1,0 +1,282 @@
+== Message Queue plugin
+
+`MqPlugin` enables to set up and verify the state of some message queue. A message queue is represented
+as an implementation of the `io.github.adven27.concordion.extensions.exam.mq.MqTester` interface
+and that *implementation is responsible for interacting with that specific queue*.
+
+[plantuml, mq]
+----
+include::diagram/mq-plugin.puml[]
+----
+
+There are several out-of-the-box implementations that can be used directly or as an example for custom ones:
+
+- https://github.com/Adven27/Exam/tree/master/exam-mq-kafka[exam-mq-kafka]
+- https://github.com/Adven27/Exam/tree/master/exam-mq-rabbit[exam-mq-rabbit]
+- https://github.com/Adven27/Exam/tree/master/exam-mq-ibmmq[exam-mq-ibmmq]
+- https://github.com/Adven27/Exam/tree/master/exam-mq-redis[exam-mq-redis]
+
+.Dependency
+[source,groovy,subs="attributes+"]
+testImplementation "io.github.adven27:exam-mq:{version}"
+
+.Configuration
+[source,kotlin]
+--
+open class Specs : AbstractSpecs() {
+    override fun init() = ExamExtension(
+        MqPlugin(
+            mapOf(
+                "someRabbitQueue" to RabbitTester(
+                    port = 5432,
+                    sendConfig = SendConfig("someRoutingKey"),
+                    receiveConfig = ReceiveConfig("someQueueName")
+                ),
+                "dummyQueue" to object : MqTester {
+                    private val queue = ArrayDeque<Message>()
+
+                    /* open connection*/
+                    override fun start() = Unit
+
+                    /* close connection*/
+                    override fun stop() = Unit
+
+                    override fun send(message: Message) {
+                        queue += message
+                    }
+
+                    override fun receive(): List<Message> = queue.map { queue.poll() }
+                    override fun purge() = queue.clear()
+                    override fun accumulateOnRetries(): Boolean = true
+                }
+            )
+        )
+    )
+--
+
+NOTE: `MqPlugin` accepts a map of a `<queue alias name>` to a `MqTester` implementation.
+_Queue alias_ is a queue logical name: `<e e:mq-set="out"/>`
+
+.Commands
+[unstyled]
+- `<<e-mq-set>>`
+- `<<e-mq-check>>`
+- `<<e-mq-clean>>`
+
+:queue2: myAnotherQueue
+
+=== e-mq-set [[e-mq-set]]
+
+Sends messages to specified queue.
+
+.Usage
+[source,asciidoc]
+-----
+include::plugin-mq.adoc[tags=mq-set-1]
+-----
+
+====
+//tag::mq-set-1[]
+.Sending message to {queue2}
+[source,json,e-mq-set={queue2}]
+----
+{ "a": 1, "d": "dd" }
+----
+//end::mq-set-1[]
+====
+
+.Sending message with headers and params which could be used by `MqTester`:
+[source,asciidoc]
+-----
+include::plugin-mq.adoc[tags=mq-set-1-h]
+-----
+
+====
+//tag::mq-set-1-h[]
+.Sending message with headers and params to {queue2}
+[e-mq-set={queue2}]
+--
+[.params]
+.Params
+[cols="h,1", caption=]
+,===
+key, some-kafka-message-key
+partition, 1
+,===
+
+[.headers]
+.Headers
+[cols="h,1", caption=]
+,===
+h1, 1
+h2, 2
+,===
+
+[source,json]
+----
+{"timestamp": "{{iso (at '-1h')}}"}
+----
+--
+//end::mq-set-1-h[]
+====
+
+.Sending several messages:
+[source,asciidoc]
+-----
+include::plugin-mq.adoc[tags=mq-set-many]
+-----
+
+====
+//tag::mq-set-many[]
+.Sending several messages to myQueue
+[cols="a", grid=rows, frame=ends, caption=, e-mq-set=myQueue]
+|===
+| Message without headers:
+[source,json]
+----
+include::../data/mq/msg.json/[msg=(map v1='a' v2='b')]
+----
+
+| Message with headers and params which could be used by `MqTester`
+
+[.params]
+.Params
+[cols="h,1", caption=]
+,===
+key, some-kafka-message-key
+partition, 1
+,===
+
+[.headers]
+.Headers
+[cols="h,1", caption=]
+,===
+h1, {{isoDate (at '-1d')}}
+h2, 2
+,===
+
+[source,json]
+----
+include::../data/mq/msg.json/[msg=(map v1='c' v2='d')]
+----
+|===
+//end::mq-set-many[]
+====
+
+=== e-mq-check [[e-mq-check]]
+
+Check messages in queue.
+
+.Attributes
+[horizontal]
+include::attr-contains.adoc[]
+include::attr-verifier.adoc[]
+include::attr-await.adoc[]
+
+.Usage
+[source,asciidoc]
+-----
+include::plugin-mq.adoc[tags=mq-check]
+-----
+
+====
+//tag::mq-check[]
+.Check messages in myQueue
+[cols="a", grid=rows, frame=ends, caption=, e-mq-check=myQueue]
+|===
+| Expected message ignore headers:
+
+[source,json]
+----
+include::../data/mq/msg.json/[msg=(map v1='a' v2='b')]
+----
+
+| Expected message containing headers and params:
+
+[.params]
+.Params
+[cols="h,1", caption=]
+,===
+key, some-kafka-message-key
+,===
+
+[.headers]
+[cols="h,1"]
+,===
+h1, {{isoDate (at '-1d')}}
+,===
+
+[source,json]
+----
+include::../data/mq/msg.json/[msg=(map v1='c' v2='d')]
+----
+|===
+//end::mq-check[]
+====
+
+.Check emptiness
+[source,asciidoc]
+-----
+include::plugin-mq.adoc[tags=mq-check-empty]
+-----
+
+====
+//tag::mq-check-empty[]
+.Check myQueue is empty
+[caption=, e-mq-check=myQueue]
+|===
+|{empty}
+|===
+//end::mq-check-empty[]
+====
+
+.Custom content type verifier
+[source,kotlin]
+-----
+include::../specs/code/VerifierConfig.kt[]
+-----
+
+.Use custom content verifier
+[source,asciidoc]
+-----
+include::plugin-mq.adoc[tags=mq-check-custom]
+-----
+
+====
+[.given]
+.myQueue has message
+[source,json,e-mq-set=myQueue]
+include::../data/mq/msg.json[]
+
+[.then]
+{blank}
+
+//tag::mq-check-custom[]
+.Check with registered `jsonIgnoreExtraFields` verifier
+[cols="a", grid=rows, frame=ends, caption=, e-mq-check=myQueue]
+|===
+| Expected ISO-formatted `date` and ignore extra fields:
+
+[source,json,e-verifier=jsonIgnoreExtraFields]
+----
+{"date":  "{{isoDate}}"}
+----
+|===
+//end::mq-check-custom[]
+====
+
+=== e-mq-clean [[e-mq-clean]]
+
+Cleans specified queues.
+
+.Usage
+[source,asciidoc]
+-----
+include::plugin-mq.adoc[tags=mq-clean]
+-----
+
+====
+//tag::mq-clean[]
+Queues are empty: [e-mq-clean]_myQueue, myAnotherQueue_
+//end::mq-clean[]
+====

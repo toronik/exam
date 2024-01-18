@@ -1,17 +1,14 @@
-window.addEventListener('load', ready, false);
-
-function ready() {
-    enableCodeMirror('.json:not(.rest-failure)', {name: 'javascript', json: true});
-    enableCodeMirrorMerge('.json.rest-failure', {name: 'javascript', json: true});
-    enableCodeMirror('.xml:not(.rest-failure)', 'application/xml');
-    enableCodeMirrorMerge('.xml.rest-failure', 'application/xml');
-    enableCodeMirror('.text:not(.rest-failure)', 'text/plain');
-    enableCodeMirrorMerge('.text.rest-failure', 'text/plain');
+function enableCM() {
+    enableCodeMirror('.json:not(.failure)', {name: 'javascript', json: true});
+    enableCodeMirrorMerge('.json.failure', {name: 'javascript', json: true});
+    enableCodeMirror('.xml:not(.failure)', 'application/xml');
+    enableCodeMirrorMerge('.xml.failure', 'application/xml');
     enableCodeMirrorWithTheme('.htmlmixed.darcula', 'text/html', 'darcula');
     enableCodeMirrorWithTheme('.handlebars.darcula', {name: "handlebars", base: "text/html"}, 'darcula');
-    enableCodeMirror('.htmlmixed:not(.rest-failure) .htmlmixed:not(.darcula)', 'text/html');
-    enableCodeMirrorMerge('.htmlmixed.rest-failure', 'text/html');
-    enableCodeMirrorHttp('.http:not(.rest-failure)');
+    enableCodeMirror('.htmlmixed:not(.failure) .htmlmixed:not(.darcula)', 'text/html');
+    enableCodeMirrorMerge('.htmlmixed.failure', 'text/html');
+    enableCodeMirrorHttp('.http:not(.failure)');
+    enableCodeMirrorMerge('.http.failure');
     document.querySelectorAll('.http, .text, .json, .xml, .htmlmixed').forEach(function (el) {
         el.style.visibility = "visible";
     });
@@ -45,7 +42,7 @@ function enableCodeMirrorWithTheme(selector, mode, theme) {
     for (let i = 0; i < jsons.length; i++) {
         const el = jsons[i];
         value = unescape(el.innerHTML);
-        el.innerHTML = "";
+        if( el.childNodes.length === 1 ) el.innerHTML = "";
 
         editor = CodeMirror(el, {
             lineNumbers: (el.getAttribute("lineNumbers") === 'true'),

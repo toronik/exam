@@ -6,5 +6,5 @@ apply from: "$rootDir/gradle/publish.gradle"
 
 dependencies {
     api project(':exam-core')
-    api "io.rest-assured:rest-assured:$restAssured_version"
+    implementation"com.athaydes.rawhttp:rawhttp-core:2.6.0"
 }

@@ -1,7 +1,7 @@
 package io.github.adven27.concordion.extensions.exam.db.builder
 
+import io.github.adven27.concordion.extensions.exam.core.html.rootCauseMessage
 import io.github.adven27.concordion.extensions.exam.core.resolveToObj
-import io.github.adven27.concordion.extensions.exam.core.rootCauseMessage
 import io.github.adven27.concordion.extensions.exam.db.commands.ExamMatchersAwareValueComparer.Companion.ERROR_MARKER
 import mu.KLogging
 import org.concordion.api.Evaluator
@@ -50,15 +50,11 @@ class ScriptableDataSetIterator(private val delegate: ITableIterator) : ITableIt
 }
 
 class ScriptableTable(private val delegate: ITable) : ITable {
-    private var manager: ScriptEngineManager
-    private val engines: MutableMap<String, ScriptEngine>
-    override fun getTableMetaData(): ITableMetaData {
-        return delegate.tableMetaData
-    }
+    private var manager: ScriptEngineManager = ScriptEngineManager()
+    private val engines: MutableMap<String, ScriptEngine> = mutableMapOf()
+    override fun getTableMetaData(): ITableMetaData = delegate.tableMetaData
 
-    override fun getRowCount(): Int {
-        return delegate.rowCount
-    }
+    override fun getRowCount(): Int = delegate.rowCount
 
     @Throws(DataSetException::class)
     override fun getValue(row: Int, column: String): Any {
@@ -119,19 +115,13 @@ class ScriptableTable(private val delegate: ITable) : ITable {
         // e.g: js: new Date().toString()
         private val scriptEnginePattern = Pattern.compile("^(?!regex)[a-zA-Z]+:.+")
     }
-
-    init {
-        engines = HashMap()
-        manager = ScriptEngineManager()
-    }
 }
 
 class ExamDataSet(
     caseSensitiveTableNames: Boolean = false,
     private val delegate: IDataSet,
     private val eval: Evaluator
-) :
-    AbstractDataSet(caseSensitiveTableNames) {
+) : AbstractDataSet(caseSensitiveTableNames) {
     constructor(
         table: ITable,
         eval: Evaluator,
@@ -155,13 +145,8 @@ class ExamDataSetIterator(private val delegate: ITableIterator, private val eval
 }
 
 class ExamTable(private val delegate: ITable, private val eval: Evaluator) : ITable {
-    override fun getTableMetaData(): ITableMetaData {
-        return delegate.tableMetaData
-    }
-
-    override fun getRowCount(): Int {
-        return delegate.rowCount
-    }
+    override fun getTableMetaData(): ITableMetaData = delegate.tableMetaData
+    override fun getRowCount(): Int = delegate.rowCount
 
     @Throws(DataSetException::class)
     override fun getValue(row: Int, column: String): Any? {
@@ -178,10 +163,10 @@ class ExamTable(private val delegate: ITable, private val eval: Evaluator) : ITa
         }
     }
 
-    private fun String.isRange() = this.matches("^[0-9]+[.]{2}[0-9]+$".toRegex())
+    private fun String.isRange() = matches("^[0-9]+[.]{2}[0-9]+$".toRegex())
 
     private fun String.toRange(): IntProgression = when {
-        this.isRange() -> {
+        isRange() -> {
             val (start, end) = this.split("[.]{2}".toRegex()).map(String::toInt)
             IntProgression.fromClosedRange(start, end, end.compareTo(start))
         }
@@ -308,15 +293,8 @@ class ContainsFilterTable(actualTable: ITable?, expectedTable: ITable?, ignoredC
         return pattern.matcher(actualValue).matches()
     }
 
-    override fun getTableMetaData(): ITableMetaData {
-        logger.debug("getTableMetaData() - start")
-        return originalTable.tableMetaData
-    }
-
-    override fun getRowCount(): Int {
-        logger.debug("getRowCount() - start")
-        return filteredRowIndexes.size
-    }
+    override fun getTableMetaData(): ITableMetaData = originalTable.tableMetaData
+    override fun getRowCount(): Int = filteredRowIndexes.size
 
     @Throws(DataSetException::class)
     override fun getValue(row: Int, column: String): Any {
@@ -354,18 +332,8 @@ enum class SeedStrategy(val operation: DatabaseOperation) {
     REFRESH(DatabaseOperation.REFRESH),
     DELETE(DatabaseOperation.DELETE),
     DELETE_ALL(DatabaseOperation.DELETE_ALL),
-    TRUNCATE_TABLE(DatabaseOperation.TRUNCATE_TABLE);
+    TRUNCATE_TABLE(DatabaseOperation.TRUNCATE_TABLE)
 }
 
 enum class CompareOperation { EQUALS, CONTAINS }
-
 class DataBaseSeedingException(message: String?, cause: Throwable?) : RuntimeException(message, cause)
-
-data class DataSetConfig(
-    val datasets: List<String>,
-    val strategy: SeedStrategy = SeedStrategy.CLEAN_INSERT,
-    val isUseSequenceFiltering: Boolean = true,
-    val isFillIdentityColumns: Boolean = false,
-    val tableOrdering: List<String> = listOf(),
-    val debug: Boolean = false
-)

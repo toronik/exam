@@ -5,11 +5,6 @@ import io.github.adven27.concordion.extensions.exam.core.html.ID
 import io.github.adven27.concordion.extensions.exam.core.html.ONCLICK
 import io.github.adven27.concordion.extensions.exam.core.html.button
 import io.github.adven27.concordion.extensions.exam.core.html.italic
-import nu.xom.Attribute
-import nu.xom.Document
-import nu.xom.Element
-import nu.xom.XPathContext
-import nu.xom.converters.DOMConverter
 import org.concordion.api.Resource
 import org.concordion.api.extension.ConcordionExtender
 import org.concordion.api.extension.ConcordionExtension
@@ -46,35 +41,6 @@ class CodeMirrorExtension : ConcordionExtension {
     }
 }
 
-class HighlightExtension : ConcordionExtension {
-    override fun addTo(e: ConcordionExtender) {
-        e.linkedCss(BASE, "stackoverflow-light.min.css")
-        e.linkedJs(BASE, "highlight.min.js", "http.min.js", "java.min.js")
-        e.withEmbeddedJavaScript( // language=js
-            """
-            document.addEventListener('DOMContentLoaded', function (event) {
-                hljs.configure({
-                    cssSelector: 'pre code, pre.code'
-                });
-                hljs.highlightAll();
-            });
-            """.trimIndent()
-        )
-        e.withDocumentParsingListener { doc ->
-            doc.query("//pre/code").forEach {
-                (it as Element).html().content().apply {
-                    it.removeChildren()
-                    it.appendChild(this)
-                }
-            }
-        }
-    }
-
-    companion object {
-        const val BASE = "ext/highlight"
-    }
-}
-
 class TocbotExtension : ConcordionExtension {
     override fun addTo(e: ConcordionExtender) {
         e.linkedCss(BASE, "tocbot.css")
@@ -97,7 +63,7 @@ class TocbotExtension : ConcordionExtension {
                     fixedSidebarOffset: 'auto',
                     includeHtml: true
                 });
-                var collapseDepth = 3; 
+                var collapseDepth = 3;
                 jQuery( "#example-summary-badge" ).click(function() {
                     if (collapseDepth === 3) {
                         collapseDepth = 30;
@@ -116,45 +82,21 @@ class TocbotExtension : ConcordionExtension {
                     });
                     if (collapseDepth === 30) {
                         jQuery( ".toc-link" ).filter(function( index ) {
-                            return jQuery( "i", this ).length !== 1
+                            return jQuery( "span", this ).length === 0
                         }).css("display", "none");
                     } else {
                         jQuery( ".toc-link" ).filter(function( index ) {
-                            return jQuery( "i", this ).length !== 1
+                            return jQuery( "span", this ).length === 0
                         }).css("display", "unset");
                     }
                 });
-            }); 
+            });
             """.trimIndent()
         )
     }
 
     companion object {
         const val BASE = "ext/tocbot"
-    }
-}
-
-class DetailsExtension : ConcordionExtension {
-    override fun addTo(e: ConcordionExtender) {
-        e.withEmbeddedJavaScript( // language=js
-            """
-            window.addEventListener('DOMContentLoaded', function (event) {
-                 jQuery(".details").wrap(unescape("<details></details>"));
-            }); 
-            """.trimIndent()
-        )
-    }
-}
-
-class ResponsiveTableExtension : ConcordionExtension {
-    override fun addTo(e: ConcordionExtender) {
-        e.withEmbeddedJavaScript( // language=js
-            """
-            window.addEventListener('DOMContentLoaded', function (event) {
-                 jQuery("table").wrap(unescape("<div class='table-responsive'></div>"));
-            }); 
-            """.trimIndent()
-        )
     }
 }
 
@@ -187,47 +129,6 @@ class FontAwesomeExtension : ConcordionExtension {
     }
 }
 
-class BootstrapExtension : ConcordionExtension {
-    override fun addTo(e: ConcordionExtender) {
-        e.linkedCss(BASE, "bootstrap.min.css", "enable-bootstrap.css", "doc.min.css", "scrollToTop.css")
-        e.linkedJs(
-            BASE,
-            "bootstrap.bundle.min.js",
-            "jquery-3.2.1.slim.min.js",
-            "sidebar.js",
-            "doc.min.js",
-            "scrollToTop.js"
-        )
-    }
-
-    companion object {
-        const val BASE = "ext/bootstrap"
-    }
-}
-
-class NomNomlExtension : ConcordionExtension {
-    override fun addTo(e: ConcordionExtender) {
-        e.linkedJs("ext/nomnoml", "graphre.js", "nomnoml.min.js")
-        e.withEmbeddedJavaScript( // language=js
-            """
-            document.addEventListener('DOMContentLoaded', function (event) {
-                Array.from(document.getElementsByClassName("nomnoml")).forEach(function(el) {
-                    nomnoml.draw(el, el.textContent); 
-                });  
-            });
-            """.trimIndent()
-        )
-        e.withDocumentParsingListener { doc ->
-            doc.queryExamTag("canvas").forEach {
-                (it as Element).html().content().apply {
-                    it.removeChildren()
-                    it.appendChild(this)
-                }
-            }
-        }
-    }
-}
-
 class TopButtonExtension : ConcordionExtension {
     override fun addTo(e: ConcordionExtender) {
         e.withDocumentParsingListener {
@@ -240,82 +141,14 @@ class TopButtonExtension : ConcordionExtension {
     }
 }
 
-class IncludesExtension : ConcordionExtension {
-    override fun addTo(e: ConcordionExtender) {
-        e.withDocumentParsingListener { doc ->
-            doc.queryExamTag("include")?.forEach {
-                val template = DOMConverter.convert(
-                    loadXMLFromString((it as Element).html().content())
-                ).rootElement
-                val parent = it.parent
-                val position = parent.indexOf(it)
-                for (j in template.childElements.size() - 1 downTo 0) {
-                    parent.insertChild(template.childElements[j].apply { detach() }, position)
-                }
-                parent.removeChild(it)
-            }
-        }
-    }
-}
-
-class CommandPrinterExtension : ConcordionExtension {
-    override fun addTo(e: ConcordionExtender) {
-        e.withDocumentParsingListener { visit(it.rootElement) }
-    }
-
-    private fun visit(elem: Element) {
-        print(elem)
-        elem.childElements.forEach { visit(it) }
-    }
-
-    fun print(elem: Element) {
-        if ((elem.getAttributeValue("print") ?: "false").toBoolean()) {
-            (elem.parent as Element).also {
-                it.insertChild(
-                    Element("div").apply {
-                        addAttribute(Attribute("class", "mb-4 mt-4"))
-                        appendChild(Element("mark").apply { appendChild("The following markup:") })
-                        appendChild(codeOf(elem))
-                        appendChild(Element("mark").apply { appendChild("will be rendered as:") })
-                    },
-                    it.indexOf(elem)
-                )
-            }
-        }
-    }
-
-    private fun codeOf(elem: Element) = Element("pre").apply {
-        addAttribute(Attribute("class", "doc-code language-xml mt-2"))
-        appendChild(
-            Element("code").apply {
-                appendChild(
-                    Document(elem.copy() as Element).prettyXml()
-                        .replace(" xmlns:e=\"http://exam.extension.io\"", "")
-                        .replace(" xmlns:cc=\"http://www.concordion.org/2007/concordion\"", "")
-                        .replace(" print=\"true\"", "")
-                        .lines()
-                        .filterNot { it.startsWith("<?xml version") }
-                        .filterNot { it.isBlank() }
-                        .joinToString(separator = "\n")
-                )
-            }
-        )
-    }
-}
-
-private fun ConcordionExtender.linkedCss(base: String, vararg css: String) = css.forEach {
+fun ConcordionExtender.linkedCss(base: String, vararg css: String) = css.forEach {
     withLinkedCSS("\\$base\\$it", Resource("\\$base\\$it"))
 }
 
-private fun ConcordionExtender.linkedJs(base: String, vararg js: String) = js.forEach {
+fun ConcordionExtender.linkedJs(base: String, vararg js: String) = js.forEach {
     withLinkedJavaScript("\\$base\\$it", Resource("\\$base\\$it"))
 }
 
-private fun ConcordionExtender.resources(base: String, vararg resources: String) = resources.forEach {
+fun ConcordionExtender.resources(base: String, vararg resources: String) = resources.forEach {
     withResource("\\$base\\$it", Resource("\\$base\\$it"))
 }
-
-private fun Document.queryExamTag(name: String) =
-    rootElement.query(".//$name | .//e:$name", XPathContext("e", ExamExtension.NS))
-
-fun Element.html() = Html(ConcordionElement(this))

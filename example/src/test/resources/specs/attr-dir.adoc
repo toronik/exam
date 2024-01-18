@@ -1,0 +1,3 @@
+`dir`:: _Optional. Default: empty string._
++
+Set directory in `src/test/resources` as working directory so that all datasets from `datasets` attribute will be relative to it: `src/test/resources[dir][item in datasets]`

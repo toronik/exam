@@ -1,1 +1,1 @@
-File template:  ccVar = {{ccVar}}
+File template: v = {{v}}, someText = {{someText}}

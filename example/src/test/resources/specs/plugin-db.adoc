@@ -1,0 +1,252 @@
+== SQL Database plugin
+
+`DbPlugin` is a wrapper around http://dbunit.sourceforge.net[DbUnit] library that enables setting up and verification of database.
+
+.Exam integration with database
+[plantuml, db]
+--
+allowmixing
+left to right direction
+
+component DbPlugin #AFF {
+    class DbTester
+    component DbUnit
+}
+
+file Datasets #d1e7dd
+database DB #d1e7dd
+
+DbTester --> DbUnit :configures
+DbUnit --> Datasets :uses
+DbUnit --> DB :interacts with
+--
+
+.Dependency
+[source,groovy,subs="attributes+"]
+testImplementation "io.github.adven27:exam-db:{version}"
+
+.Configuration
+[source,java]
+--
+public class Specs extends AbstractSpecs {
+    @Override
+    protected ExamExtension init() {
+        return new ExamExtension(
+            new DbPlugin(
+                "org.postgresql.Driver",                     // driver class
+                "jdbc:postgresql://localhost:5432/postgres", // jdbc url
+                "postgres",                                  // user
+                "postgres"                                   // password
+            )
+        );
+    }
+}
+--
+
+.Commands
+[unstyled]
+- `<<e-db-set>>`
+- `<<e-db-check>>`
+- `<<e-db-clean>>`
+- `<<e-db-execute>>`
+- `<<e-db-verify>>`
+- `<<e-db-show>>`
+
+=== e-db-set [[e-db-set]]
+
+Creates http://dbunit.sourceforge.net/[DbUnit] dataset for specified table and applies it to database.
+
+.Attributes
+[horizontal]
+include::attr-operation.adoc[]
+include::attr-ds.adoc[]
+
+.Usage
+[source,asciidoc]
+--
+include::plugin-db.adoc[tags=db-set]
+--
+
+====
+//tag::db-set[]
+.Set up table `ANDROIDS_TABLE`
+[e-db-set=ANDROIDS_TABLE]
+,===
+id, name, height, manufactured
+
+1, Adam, 170, {{at}}
+2, Bob, 200, {{at '-1h'}}
+,===
+//end::db-set[]
+====
+
+=== e-db-check [[e-db-check]]
+
+Creates http://dbunit.sourceforge.net/[DbUnit] dataset for table and verifies it against a database.
+
+.Attributes
+[horizontal]
+include::attr-where.adoc[]
+include::attr-orderBy.adoc[]
+include::attr-ds.adoc[]
+include::attr-await.adoc[]
+
+.Usage
+[source,asciidoc]
+--
+include::plugin-db.adoc[tags=db-check]
+--
+
+====
+//tag::db-check[]
+.Check table
+[e-db-check=ANDROIDS_TABLE]
+,===
+id, name, height, manufactured
+
+1, Adam, 170, {{at}}
+2, Bob, 200, {{at '-1h'}}
+,===
+//end::db-check[]
+====
+
+=== e-db-clean [[e-db-clean]]
+
+Cleans specified tables in a database.
+
+.Attributes
+[horizontal]
+include::attr-ds.adoc[]
+
+.Usage
+[source,asciidoc]
+--
+include::plugin-db.adoc[tags=db-clean]
+--
+
+NOTE: Tables will be cleaned up in the order opposite to declaration, hence the "referenced" tables should go first and the "referencing" - last.
+
+====
+//tag::db-clean[]
+Clean tables: [e-db-clean]#person, person_fields#
+//end::db-clean[]
+====
+
+=== e-db-execute [[e-db-execute]]
+
+Applies specified http://dbunit.sourceforge.net/[DbUnit] datasets to database.
+
+.Attributes
+[horizontal]
+include::attr-operation.adoc[]
+include::attr-ds.adoc[]
+include::attr-dir.adoc[]
+
+.Usage
+[source,asciidoc]
+--
+include::plugin-db.adoc[tags=db-execute]
+--
+
+====
+[.given]
+
+.adam.xml
+[source,xml]
+--
+include::../data/db/adam.xml[]
+--
+
+.bob.json
+[source,json]
+--
+include::../data/db/bob.json[]
+--
+
+[e-set=a1 hide]#1#
+[e-set=a2 hide]#2#
+
+[.then]
+//tag::db-execute[]
+Execute datasets: +++<e e:db-execute='adam.xml, bob.json' dir='/data/db/'/>+++
+//end::db-execute[]
+====
+
+=== e-db-verify [[e-db-verify]]
+
+Verifies specified http://dbunit.sourceforge.net/[DbUnit] datasets against database.
+
+.Attributes
+[horizontal]
+include::attr-dir.adoc[]
+include::attr-orderBy.adoc[]
+include::attr-ds.adoc[]
+include::attr-await.adoc[]
+
+.Usage
+[source,asciidoc]
+....
+include::plugin-db.adoc[tags=db-verify]
+....
+
+====
+[.given]
+
+.adam.xml
+[source,xml]
+--
+include::../data/db/adam.xml[]
+--
+
+.bob.json
+[source,json]
+--
+include::../data/db/bob.json[]
+--
+
+[.then]
+//tag::db-verify[]
+Verify datasets: +++<e e:db-verify='adam.xml, bob.json' dir='/data/db/'/>+++
+//end::db-verify[]
+====
+
+=== e-db-show [[e-db-show]]
+
+Prints content of specified database table and optionally generates DbUnit dataset.
+
+.Attributes
+[horizontal]
+include::attr-where.adoc[]
+include::attr-ds.adoc[]
+`saveToResources`:: _Optional. Default: not set._
++
+Path in 'srs/test/resources/' to store generated dataset
+
+.Usage
+[source,asciidoc]
+--
+include::plugin-db.adoc[tags=db-show]
+--
+
+====
+//tag::db-show[]
+.Show all and generate dataset
+[e-db-show=ANDROIDS_TABLE, e-saveToResources=/data/db/ANDROIDS_TABLE.xml]
+,===
+,===
+
+.Show specific columns
+[e-db-show=ANDROIDS_TABLE]
+,===
+id, name
+
+,===
+
+.Show specific rows
+[e-db-show=ANDROIDS_TABLE, e-where="name='Bob'"]
+,===
+id, name
+
+,===
+//end::db-show[]
+====

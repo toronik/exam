@@ -1,0 +1,3 @@
+`ds`:: _Optional. Default: `default`._
++
+Datasource to apply dataset. By default, only 1 datasource with name `default` exists, more can be configured in `DbPlugin`.

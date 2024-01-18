@@ -1,0 +1,7 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <ns2:getItemRequest xmlns:ns2="http://ws.io">
+            <date>{{iso (at)}}</date>
+        </ns2:getItemRequest>
+    </soap:Body>
+</soap:Envelope>

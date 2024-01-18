@@ -1,0 +1,118 @@
+== Overview
+
+Exam is oriented on *declarative end-to-end https://en.wikipedia.org/wiki/Gray_box_testing[gray-box application testing]*
+in a way a manual tester would do it: send request, verify response/database/message queue etc.
+
+.Manual testing
+[plantuml, manual]
+--
+skinparam actorStyle awesome
+
+actor "Manual Tester" as Tester #AFF
+usecase "Test cases" #transparent;line.dashed
+component "System Under Test" as SUT #d1e7dd
+
+together {
+    database DB #d1e7dd
+    interface "REST API" as WS #d1e7dd
+    interface "MQ API" as MQ #d1e7dd
+}
+
+Team -> "Test cases" #line.dashed
+"Test cases" -> Tester #line.dashed
+
+DB -[hidden]- WS
+WS -[hidden]- MQ
+
+WS <.> Tester
+MQ <.> Tester
+Tester <.> DB
+
+WS - SUT
+MQ - SUT
+SUT <-> DB
+--
+
+Hence, the Exam functionality falls apart in *different libraries (plugins)* that are tailored
+for specific kinds of checks: _database interactions, message queue interactions,
+http interactions, file system interactions etc._ and may be used separately.
+
+.Exam testing
+[plantuml, exam]
+--
+skinparam actorStyle awesome
+
+usecase TC as "Specification with examples" #transparent;line.dashed
+component "System Under Test" as SUT #d1e7dd
+component Exam #AFF {
+    component WsPlugin #AFF
+    component DbPlugin #AFF
+    component MqPlugin #AFF
+}
+together {
+    database DB #d1e7dd
+    interface "REST API" as WS #d1e7dd
+    interface "MQ API" as MQ #d1e7dd
+}
+
+Team .> TC
+TC -> Exam
+
+DB -[hidden]- WS
+WS -[hidden]- MQ
+
+DbPlugin -[hidden]- WsPlugin
+WsPlugin -[hidden]- MqPlugin
+
+WS <.> WsPlugin
+MQ <.> MqPlugin
+DbPlugin <.> DB
+
+MQ - SUT
+SUT - WS
+SUT <-> DB
+--
+
+Each library consist of a *plugin class* that should be configured and attached to `ExamExtension`
+and *set of commands* that can be used for instrumenting _.adoc_ specification files.
+
+Exam could be enabled by implementing `io.github.adven27.concordion.extensions.exam.core.AbstractSpecs` class:
+[source, kotlin]
+--
+class Specs : AbstractSpecs() {
+
+    override fun init() = ExamExtension(
+        WsPlugin(
+            host = "localhost",
+            port = 8080
+        ),
+        DbPlugin(
+            driver = "org.postgresql.Driver",
+            url = "jdbc:postgresql://localhost:5432/postgres",
+            user = "postgres",
+            password = "postgres"
+        )
+    )
+
+    /*  Methods in order of execution: */
+
+    override fun beforeSetUp() {
+        // Optional: Run some actions BEFORE Exam set up
+    }
+    override fun beforeSutStart() {
+        // Optional: Run some actions AFTER Exam set up and BEFORE start of a System Under Test (SUT)
+    }
+    override fun startSut() {
+        // Start SUT before specs suite if needed
+    }
+    override fun stopSut() {
+        // Stop SUT after specs suite if needed
+    }
+    override fun afterSutStop() {
+        // Optional: Run some actions AFTER stop of a SUT and BEFORE Exam tear down
+    }
+    override fun afterTearDown() {
+        // Optional: Run some actions AFTER Exam tear down
+    }
+}
+--

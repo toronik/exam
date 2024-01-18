@@ -1,50 +1,29 @@
 package io.github.adven27.concordion.extensions.exam.core
 
-import io.github.adven27.concordion.extensions.exam.core.commands.BeforeEachExampleCommand
+import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.contentVerifier
+import io.github.adven27.concordion.extensions.exam.core.commands.EchoCommand
+import io.github.adven27.concordion.extensions.exam.core.commands.EqCommand
 import io.github.adven27.concordion.extensions.exam.core.commands.ExamExampleCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.GivenCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.JsonCheckCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.JsonEqualsCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.JsonEqualsFileCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.NamedExamCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.SetVarCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.TextEqualsCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.TextEqualsFileCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.ThenCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.WaitCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.WhenCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.XmlCheckCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.XmlEqualsCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.XmlEqualsFileCommand
+import io.github.adven27.concordion.extensions.exam.core.commands.SetCommand
+import org.concordion.api.Command
+import org.concordion.internal.command.VerifyRowsCommand
+import org.concordion.internal.command.executeCommand.ExecuteCommand
 
-class CommandRegistry(jsonVerifier: ContentVerifier, xmlVerifier: ContentVerifier) {
-    private val commands = mutableListOf<NamedExamCommand>(
-        GivenCommand(),
-        WhenCommand(),
-        ThenCommand(),
+class CommandRegistry {
+    private val commands = mutableMapOf<String, Command>(
+        "example" to ExamExampleCommand(),
 
-        ExamExampleCommand("div"),
-        BeforeEachExampleCommand("div"),
+        "set" to SetCommand(),
+        "echo" to EchoCommand(),
+        "execute" to ExecuteCommand(),
+        "verify-rows" to VerifyRowsCommand(),
 
-        SetVarCommand("set", "pre"),
-        WaitCommand("span"),
-
-        JsonCheckCommand("div", jsonVerifier),
-        XmlCheckCommand("div", xmlVerifier),
-
-        TextEqualsCommand(),
-        TextEqualsFileCommand(),
-        XmlEqualsCommand(),
-        XmlEqualsFileCommand(),
-        JsonEqualsCommand(),
-        JsonEqualsFileCommand()
+        "eq" to EqCommand(contentVerifier("text")),
+        "eq-xml" to EqCommand(contentVerifier("xml")),
+        "eq-json" to EqCommand(contentVerifier("json"))
     )
 
-    fun getBy(name: String): NamedExamCommand? = commands.firstOrNull { it.name == name }
-
-    fun register(cmds: List<NamedExamCommand>) {
-        commands.addAll(cmds)
-    }
-
-    fun commands(): List<NamedExamCommand> = ArrayList(commands)
+    operator fun get(name: String) = commands[name]
+    fun commands() = commands.toMap()
+    fun register(cmds: Map<String, Command>) = commands.putAll(cmds)
 }

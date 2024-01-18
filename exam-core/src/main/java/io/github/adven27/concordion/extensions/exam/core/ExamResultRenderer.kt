@@ -11,8 +11,8 @@ open class ExamResultRenderer : AssertEqualsListener, AssertTrueListener, Assert
 
     override fun failureReported(event: AssertFailureEvent) {
         val element = event.element
-        addFailMarker(event)
-        element.addStyleClass("rest-failure")
+//        addFailMarker(event)
+        element.addStyleClass("failure")
 
         val expected = expectedElement(event)
         element.moveChildrenTo(expected)
@@ -34,13 +34,10 @@ open class ExamResultRenderer : AssertEqualsListener, AssertTrueListener, Assert
         appendNonBreakingSpaceIfBlank()
     }
 
-    private fun addFailMarker(event: AssertFailureEvent) =
-        event.element.appendChild(Element("fail").apply { addAttribute("style", "display: none;") })
-
     protected open fun actualText(event: AssertFailureEvent): String = event.actual.toStringOr("(null)")
 
     override fun successReported(event: AssertSuccessEvent) {
-        event.element.addStyleClass("rest-success").appendNonBreakingSpaceIfBlank()
+        event.element.addStyleClass("success").appendNonBreakingSpaceIfBlank()
     }
 }
 

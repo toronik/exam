@@ -24,7 +24,7 @@ class NoSqlVerifier : AwaitVerifier<Expected, Actual> {
         eval: Evaluator,
         expected: Expected,
         getActual: () -> Pair<Boolean, Actual>
-    ): Result<Verifier.Success<Expected, Actual>> {
+    ): Result<Verifier.Check<Expected, Actual>> {
         try {
             return awaitSize(expected, getActual).let { actual ->
                 expected.documents.sortedBy { it.body }
@@ -36,7 +36,7 @@ class NoSqlVerifier : AwaitVerifier<Expected, Actual> {
                         if (results.any { it.isFailure }) {
                             Result.failure(DocumentVerifyingError(results))
                         } else {
-                            Result.success(Verifier.Success(expected, actual))
+                            Result.success(Verifier.Check(expected, actual))
                         }
                     }
             }

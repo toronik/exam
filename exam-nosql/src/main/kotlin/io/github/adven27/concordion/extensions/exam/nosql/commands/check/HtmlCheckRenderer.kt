@@ -90,19 +90,19 @@ class HtmlCheckRenderer : VerifyListener<Expected, Actual> {
 
     // language=html
     private fun renderBody(body: ExpectedContent) =
-        """<div class="${body.type} rest-success"></div>""".toHtml().text(body.pretty()).el.toXML()
+        """<div class="${body.type} success"></div>""".toHtml().text(body.pretty()).el.toXML()
 
     // language=html
     private fun renderBodyError(error: Throwable) = when (error) {
         is ContentVerifier.Fail -> errorMessage(
             message = error.details,
             type = "json",
-            html = div("class" to "${error.type} rest-failure")(
+            html = div("class" to "${error.type} failure")(
                 Html("del", error.expected, "class" to "expected"),
                 Html("ins", error.actual, "class" to "actual")
             )
         ).second.el.toXML()
 
-        else -> """<div class="json exp-body rest-failure">${error.message?.escapeHtml()}</div>"""
+        else -> """<div class="json exp-body failure">${error.message?.escapeHtml()}</div>"""
     }
 }

@@ -9,8 +9,7 @@ import java.util.Date
 fun parsePeriodFrom(v: String): Pair<Period, Duration> = v.split(",").filter { it.isNotBlank() }
     .map {
         val (p1, p2) = it.trim().split(" ")
-        if (p1.toIntOrNull() != null) periodBy(Integer.parseInt(p1), p2)
-        else periodBy(Integer.parseInt(p2), p1)
+        if (p1.toIntOrNull() != null) periodBy(Integer.parseInt(p1), p2) else periodBy(Integer.parseInt(p2), p1)
     }.fold(Pair(Period.ZERO, Duration.ZERO)) { a, n ->
         if (n is Period) a.first + n to a.second else a.first to a.second + (n as Duration)
     }

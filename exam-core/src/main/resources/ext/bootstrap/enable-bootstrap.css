@@ -1,3 +1,4 @@
+/*
 p {
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     font-size: 16px;
@@ -6,6 +7,7 @@ p {
     line-height: unset;
 }
 
+*/
 .alert-warning pre {
     background: inherit;
 }
@@ -125,8 +127,12 @@ div.fa-caret-square-down {
 }
 
 .badge {
-    margin: 1px;
     font-size: xx-small;
+    margin: 0;
+}
+
+.nav-tabs{
+    margin: 0;
 }
 
 li.nav-item {
@@ -160,7 +166,7 @@ li > a {
 }
 
 a.success {
-    border-bottom: 2px solid #afa;
+    border-bottom: 2px solid #9c9;
     background-color: transparent !important;
 }
 
@@ -240,6 +246,7 @@ table {
     vertical-align: top;
     border-color: #dee2e6;
     font-size: small;
+    caption-side: top;
 }
 
 .breadcrumbs {
@@ -250,18 +257,20 @@ p.success {
     padding: 2px;
 }
 .success, .success * {
-    background-color: #afa !important;
+    background-color: #d1e7dd !important;
+    border-color: #9c9 !important;
 }
 .success pre {
-    background-color: #bbffbb;
+    background-color: #d1e7dd !important;
 }
 .failure, .failure * {
-    background-color: #ffb0b0;
+    background-color: #fdd !important;
+    border-color: #c99 !important;
     padding: 1px;
 }
 .failure .expected {
     text-decoration: line-through;
-    color: #bb5050;
+    color: #c99;
 }
 .ignored, .ignored * {
     background-color: #f0f0f0 !important;
@@ -319,13 +328,13 @@ ins {
 }
 
 .missing, .missing * {
-    background-color: #ff9999;
-    color:#bb5050;
+    background-color: #fdd !important;
+    color:#c99;
     text-decoration: line-through;
 }
 
 .surplus, .surplus * {
-    background-color: #ff9999;
+    background-color: #fdd !important;
 }
 
 .tight li {

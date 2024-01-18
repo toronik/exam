@@ -1,0 +1,4 @@
+POST /mirror/request?p=1
+Content-Type: application/json
+
+{ "a": "ok", "b": 1 }

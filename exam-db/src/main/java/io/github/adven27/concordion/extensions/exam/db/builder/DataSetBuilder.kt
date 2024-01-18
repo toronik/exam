@@ -8,7 +8,7 @@ import org.dbunit.dataset.stream.IDataSetConsumer
 import java.util.HashMap
 
 @Suppress("TooManyFunctions")
-class DataSetBuilder(private val stringPolicy: IStringPolicy = CaseInsensitiveStringPolicy()) : IDataSetManipulator {
+class DataSetBuilder(private val stringPolicy: StringPolicy = CaseInsensitiveStringPolicy()) : IDataSetManipulator {
     private var dataSet = CachedDataSet()
     private var consumer: IDataSetConsumer = BufferedConsumer(dataSet)
     private val tableNameToMetaData = HashMap<String, TableMetaDataBuilder>()

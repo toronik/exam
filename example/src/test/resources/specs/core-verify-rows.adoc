@@ -1,0 +1,34 @@
+=== e-verify-rows [[e-verify-rows]]
+
+Wrapper of https://concordion.org/instrumenting/java/html/#verify-rows-command[concordion verify-rows command]
+
+.Usage
+[source,asciidoc]
+--
+include::core-verify-rows.adoc[tags=vr]
+--
+
+====
+//tag::vr[]
+.Set up users
+[e-execute=setUpUser(#TEXT)]
+1. john.lennon
+2. ringo.starr
+
+.Add more users
+[e-execute=setUpUser(#TEXT)]
+- george.harrison
+- paul.mccartney
+
+Searching for [e-set=searchString]*arr* will return:
+
+.Search result
+[e-verify-rows="#username : search(#searchString)", e-match-strategy=BestMatch]
+,===
+[e-eq=#username]#Matching Usernames#
+
+george.harrison
+ringo.starr
+,===
+//end::vr[]
+====

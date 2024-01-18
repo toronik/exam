@@ -1,0 +1,53 @@
+=== e-eq [[e-eq]]
+
+Verifies an equality of instrumented block and instrumentation expression result.
+
+.Attributes
+[horizontal]
+include::attr-verifier.adoc[]
+include::attr-await.adoc[]
+
+.Usage
+[source,asciidoc]
+include::core-equals.adoc[tags=eq-text]
+
+====
+//tag::eq-text[]
+Given `greeting()` method returns `Hello World!`
+expected result is: [e-eq=greeting()]_Hello World!_
+//end::eq-text[]
+====
+
+.JSON verifying
+[source,asciidoc]
+include::core-equals.adoc[tags=eq-json]
+
+====
+//tag::eq-json[]
+Given `someJson()` method returns `{"result": 1}`
+expected result is: [e-verifier=json e-eq=someJson()]_{"result": "{{number}}" }_. +
+Short version: [e-eq-json=someJson()]_{"result": "{{number}}"}_. +
+On listing:
+[source,json,e-eq-json=someJson()]
+--
+{"result": "{{number}}"}
+--
+//end::eq-json[]
+====
+
+.XML verifying
+[source,asciidoc]
+include::core-equals.adoc[tags=eq-xml]
+
+====
+//tag::eq-xml[]
+Given `someXml()` method returns `<result>1</result>`
+expected result is: [e-verifier=xml e-eq=someXml()]_<result>{{number}}</result>_. +
+Short version: [e-eq-xml=someXml()]_<result>{{number}}</result>_. +
+On listing:
+[source,xml,e-eq-xml=someXml()]
+--
+<result>{{number}}</result>
+--
+//end::eq-xml[]
+====

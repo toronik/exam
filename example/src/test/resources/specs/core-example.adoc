@@ -1,0 +1,41 @@
+=== example command [[e-example]]
+
+Asciidoc *named* examples interpreted as https://concordion.org/instrumenting/java/html/#example-command[Concordion examples].
+
+Sidebar with id `before` transformed to _“before” examples_ command.
+
+.Usage
+[source,asciidoc]
+--
+include::core-example.adoc[tags=e]
+--
+
+=====
+//tag::e[]
+[#before]
+.Before each example
+****
+[.given]
+Split the full name [c-execute=#result = split(#TEXT)]_Jane Smith_
+****
+
+.Dummy
+====
+Result contains first name [c-assert-equals=#result.first]_Jane_
+and last name [c-assert-equals=#result.second]_Smith_
+====
+
+[.ExpectedToFail]
+.Dummy
+====
+
+[.when]
+Wrong expectations
+
+[.then]
+Result contains first name [c-assert-equals=#result.first]_Wrong_
+and last name [c-assert-equals=#result.second]_Wrong_
+
+====
+//end::e[]
+=====

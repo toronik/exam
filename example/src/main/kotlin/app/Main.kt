@@ -21,10 +21,11 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.header
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.receive
-import io.ktor.server.request.receiveOrNull
+import io.ktor.server.request.receiveNullable
 import io.ktor.server.request.receiveText
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -44,7 +45,6 @@ import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter.ofPattern
 import java.util.TimeZone
-import kotlin.collections.ArrayList
 
 private val engine = embeddedServer(Netty, port = System.getProperty("server.port").toInt(), host = "") {
     install(ContentNegotiation) {
@@ -67,7 +67,9 @@ private val engine = embeddedServer(Netty, port = System.getProperty("server.por
     val jobService = JobService()
     routing {
         post("/jobs") {
-            call.application.environment.log.info("trigger job " + call.receiveOrNull<NewWidget>())
+            call.application.environment.log.info(
+                "trigger job " + runCatching { call.receiveNullable<NewWidget>() }.getOrNull()
+            )
             val id = jobService.add()
             jobs.add(id)
 
@@ -92,8 +94,7 @@ private val engine = embeddedServer(Netty, port = System.getProperty("server.por
 
         get("/widgets/{id}") {
             val widget = widgetService.getBy(call.parameters["id"]?.toInt()!!)
-            if (widget == null) call.respond(HttpStatusCode.NotFound)
-            else call.respond(widget)
+            if (widget == null) call.respond(HttpStatusCode.NotFound) else call.respond(widget)
         }
 
         post("/widgets") {
@@ -119,11 +120,12 @@ private val engine = embeddedServer(Netty, port = System.getProperty("server.por
 
         delete("/widgets/{id}") {
             val removed = widgetService.delete(call.parameters["id"]?.toInt()!!)
-            if (removed) call.respond(HttpStatusCode.OK)
-            else call.respond(HttpStatusCode.NotFound)
+            if (removed) call.respond(HttpStatusCode.OK) else call.respond(HttpStatusCode.NotFound)
         }
 
-        post("/mirror/body") { call.respond(call.receiveText()) }
+        post("/mirror/soap") {
+            call.respondText(call.receiveText(), io.ktor.http.ContentType.parse("application/soap+xml; charset=utf-8"))
+        }
         put("/mirror/body") { call.respond(call.receiveText()) }
         post("/mirror/request") { mirrorRequestWithBody() }
         put("/mirror/request") { mirrorRequestWithBody() }
@@ -135,9 +137,9 @@ private val engine = embeddedServer(Netty, port = System.getProperty("server.por
         get("/ignoreJson") {
             call.respond(
                 """
-                    { 
-                    "param1":"value1", 
-                    "param2":"value2", 
+                    {
+                    "param1":"value1",
+                    "param2":"value2",
                     "arr": [{"param3":"value3", "param4":"value4"}, {"param3":"value3", "param4":"value4"}]
                     }
                 """.trimIndent()
