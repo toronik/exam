@@ -1,19 +1,20 @@
 package io.github.adven27.concordion.extensions.exam.mq.commands
 
-import io.github.adven27.concordion.extensions.exam.core.ContentVerifier.ExpectedContent
-import io.github.adven27.concordion.extensions.exam.core.ExamExtension
+import io.github.adven27.concordion.extensions.exam.core.Content
+import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.contentVerifier
 import io.github.adven27.concordion.extensions.exam.core.commands.Verifier
 import io.github.adven27.concordion.extensions.exam.core.commands.Verifier.Check
-import io.github.adven27.concordion.extensions.exam.core.commands.checkAndSet
-import io.github.adven27.concordion.extensions.exam.core.resolveNoType
-import io.github.adven27.concordion.extensions.exam.core.resolveToObj
-import io.github.adven27.concordion.extensions.exam.core.rootCauseMessage
+import io.github.adven27.concordion.extensions.exam.core.html.rootCauseMessage
+import io.github.adven27.concordion.extensions.exam.core.resolve
+import io.github.adven27.concordion.extensions.exam.core.utils.MapContentMatchers
 import io.github.adven27.concordion.extensions.exam.mq.MqTester.Message
 import io.github.adven27.concordion.extensions.exam.mq.commands.MqCheckCommand.Actual
 import io.github.adven27.concordion.extensions.exam.mq.commands.MqCheckCommand.Expected
-import io.github.adven27.concordion.extensions.exam.mq.commands.MqParser.TypedMessage
+import io.github.adven27.concordion.extensions.exam.mq.commands.MqCheckParser.ExpectedMessage
 import mu.KLogging
 import org.concordion.api.Evaluator
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.hasItems
 import org.junit.Assert.assertEquals
 
 @Suppress("TooManyFunctions")
@@ -27,80 +28,64 @@ open class MqVerifier : Verifier<Expected, Actual> {
         )
 
     protected fun verify(expected: Expected, actual: Actual, eval: Evaluator) =
-        // TODO идти по порядку как указаны экспектед брать верхнее и искать в актуал и тд (вверху лучше указывать конкретные внизу абстрактные экспектедв)
-        expected.messages.sortedTyped(expected.exact)
-            .zip(actual.messages.sorted(expected.exact)) { e, a -> VerifyPair(a, e) }
-            .map {
-                logger.debug("Verifying message:\n{}", it)
-                val typeConfig = ExamExtension.contentTypeConfig(it.expected.content.type)
-                MessageVerifyResult(
-                    checkHeaders(it.actual.headers, it.expected.headers, eval),
-                    typeConfig.let { (_, verifier, _) -> verifier.verify(it.expected.body, it.actual.body) }
-                )
+        if (expected.exact) exactOrder(expected, actual, eval) else anyOrder(expected, actual, eval)
+
+    protected fun anyOrder(expected: Expected, actual: Actual, eval: Evaluator): List<MessageVerifyResult> {
+        val am = actual.messages.withIndex().asSequence()
+        val found = mutableListOf<Int>()
+        return expected.messages
+            .map { it to am.not(found).find(it, eval)?.let { (i, r) -> r.also { found.add(i) } } }
+            .partition { (_, r) -> r == null }
+            .let { (notF, f) ->
+                f.map { (_, r) -> r!! } +
+                    notF.map { (e, _) -> e }
+                        .zip(am.not(found).map { it.value }.toList())
+                        .map { (e, a) -> VerifyPair(a, e) }
+                        .map { verifyResult(it.actual, it.expected, eval) }
             }
+    }
+
+    private fun Sequence<IndexedValue<Message>>.not(found: List<Int>) = filter { it.index !in found }
+
+    private fun Sequence<IndexedValue<Message>>.find(e: ExpectedMessage, eval: Evaluator) =
+        map { (i, a) -> i to verifyResult(a, e, eval) }
+            .firstOrNull { (_, r) -> r.headers.isSuccess && r.content.isSuccess }
+
+    protected fun exactOrder(expected: Expected, actual: Actual, eval: Evaluator) =
+        expected.messages.zip(actual.messages) { e, a -> VerifyPair(a, e) }.map {
+            logger.debug("Verifying message:\n{}", it)
+            verifyResult(it.actual, it.expected, eval)
+        }
+
+    private fun verifyResult(a: Message, e: ExpectedMessage, eval: Evaluator) = MessageVerifyResult(
+        checkHeaders(actual = a.headers, expected = e.headers, eval = eval),
+        checkParams(actual = a.params, expected = e.params, eval = eval),
+        contentVerifier(e.verifier).verify(expected = e.body, actual = a.body, eval)
+    )
 
     private fun toCheck(results: List<MessageVerifyResult>, expected: Expected, actual: Actual) = Check(
         expected = expected,
         actual = actual,
         fail = MessageVerifyingError(expected.queue, results)
-            .takeIf { results.any { it.headers.isFailure || it.content.isFailure } }
+            .takeIf { results.any { it.params.isFailure || it.headers.isFailure || it.content.isFailure } }
     )
 
-    @Suppress("SpreadOperator", "NestedBlockDepth")
+    @Suppress("SpreadOperator")
+    protected open fun verifyParams(actual: Map<String, String?>, expected: Map<String, String?>) =
+        assertThat("Params mismatch", actual, MapContentMatchers.hasAllEntries(expected))
+
+    @Suppress("SpreadOperator")
+    protected open fun verifyHeaders(actual: Map<String, String?>, expected: Map<String, String?>) =
+        assertThat("Headers mismatch", actual.toList(), hasItems(*expected.toList().toTypedArray()))
+
     protected fun checkHeaders(actual: Map<String, String?>, expected: Map<String, String?>, eval: Evaluator) =
-        if (expected.isEmpty()) {
-            Result.success(emptyMap())
-        } else {
-            try {
-                assertEquals("Different headers size", expected.size, actual.size)
-                expected.toList().partition { actual[it.first] != null }.let { (matched, absentInActual) ->
-                    (
-                        matched.toMap().map { (it.key to it.value) to (it.key to actual[it.key]) } +
-                            absentInActual.zip(absentInExpected(actual, matched.toMap()))
-                        ).map { (expected, actual) -> headerCheckResult(expected, actual, eval) }
-                        .let { results ->
-                            if (results.any { it.actualValue != null || it.actualKey != null }) {
-                                Result.failure(HeadersVerifyingError(results))
-                            } else {
-                                Result.success(results.associate { it.header })
-                            }
-                        }
-                }
-            } catch (e: AssertionError) {
-                Result.failure(HeadersSizeVerifyingError(expected, actual, e.message!!, e))
-            }
-        }
+        runCatching { verifyHeaders(actual, expected.mapValues { (_, v) -> v?.let { eval.resolve(it) } }) }
+            .map { expected }
 
-    private fun headerCheckResult(expected: Pair<String, String?>, actual: Pair<String, String?>, eval: Evaluator) =
-        if (expected.first == actual.first) {
-            if (checkAndSet(eval, evalActual(eval, actual), evalExpected(expected, eval))) {
-                HeaderCheckResult(expected)
-            } else {
-                HeaderCheckResult(expected, actualValue = actual.second)
-            }
-        } else {
-            HeaderCheckResult(expected, actualKey = actual.first)
-        }
+    protected fun checkParams(actual: Map<String, String?>, expected: Map<String, String?>, eval: Evaluator) =
+        runCatching { verifyParams(actual, expected.mapValues { (_, v) -> v?.let { eval.resolve(it) } }) }
+            .map { expected }
 
-    private fun evalExpected(expected: Pair<String, String?>, eval: Evaluator) =
-        expected.second?.let { eval.resolveNoType(it) }
-
-    private fun evalActual(eval: Evaluator, actual: Pair<String, String?>) = eval.resolveToObj(actual.second)
-
-    data class HeaderCheckResult(
-        val header: Pair<String, String?>,
-        val actualKey: String? = null,
-        val actualValue: String? = null
-    )
-
-    private fun absentInExpected(actual: Map<String, String?>, matched: Map<String, String?>) =
-        actual.filterNot { matched.containsKey(it.key) }.toList()
-
-    private fun List<Message>.sorted(exactMatch: Boolean) = if (!exactMatch) sortedBy { it.body } else this
-    private fun List<TypedMessage>.sortedTyped(exactMatch: Boolean) =
-        if (!exactMatch) sortedBy { it.body } else this
-
-    @Suppress("TooGenericExceptionCaught")
     protected fun awaitSize(expected: Expected, receive: (Expected) -> Actual): Result<Actual> {
         var prevActual = receive(expected).copy(partial = false)
         return runCatching {
@@ -135,27 +120,23 @@ open class MqVerifier : Verifier<Expected, Actual> {
         }
     }
 
-    data class MessageVerifyResult(val headers: Result<Map<String, String?>>, val content: Result<ExpectedContent>)
+    data class MessageVerifyResult(
+        val headers: Result<Map<String, String?>>,
+        val params: Result<Map<String, String?>>,
+        val content: Result<Content>
+    )
+
     class MessageVerifyingError(val queue: String, val expected: List<MessageVerifyResult>) : java.lang.AssertionError()
 
     class SizeVerifyingError(
         val queue: String,
-        val expected: List<TypedMessage>,
+        val expected: List<ExpectedMessage>,
         val actual: List<Message>,
         message: String,
         exception: Throwable
     ) : java.lang.AssertionError(message, exception)
 
-    class HeadersSizeVerifyingError(
-        val expected: Map<String, String?>,
-        val actual: Map<String, String?>,
-        message: String,
-        exception: Throwable
-    ) : java.lang.AssertionError(message, exception)
-
-    class HeadersVerifyingError(val result: List<HeaderCheckResult>) : java.lang.AssertionError()
-
-    data class VerifyPair(val actual: Message, val expected: TypedMessage) {
+    data class VerifyPair(val actual: Message, val expected: ExpectedMessage) {
         override fun toString() = "ACTUAL:\n\n$actual\n\nEXPECTED:\n\n$expected"
     }
 }

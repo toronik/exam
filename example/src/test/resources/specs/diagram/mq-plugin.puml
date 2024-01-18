@@ -1,0 +1,36 @@
+@startuml
+allowmixing
+left to right direction
+skinparam linetype ortho
+
+component MqPlugin #AFF {
+    interface MqTester {
+          fun start()
+          fun stop()
+          fun send(message: Message, params: Map<String, String>)
+          fun receive(): List<Message>
+          fun purge()
+          fun accumulateOnRetries(): Boolean = true
+    }
+}
+
+together {
+    class KafkaTesterImpl
+    class RabbitTesterImpl
+    class AnyCustomImpl
+    queue RabbitMQ #d1e7dd
+    queue Kafka #d1e7dd
+    queue "Any other MQ" #d1e7dd
+
+    RabbitTesterImpl ----> RabbitMQ :interacts with
+    KafkaTesterImpl ----> Kafka :interacts with
+    AnyCustomImpl ----> "Any other MQ" :interacts with
+}
+
+MqTester <.... KafkaTesterImpl :implements
+MqTester <.. RabbitTesterImpl :implements
+MqTester <.. AnyCustomImpl :implements
+
+KafkaTesterImpl -[hidden] RabbitTesterImpl
+RabbitTesterImpl -[hidden] AnyCustomImpl
+@enduml

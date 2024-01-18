@@ -1,0 +1,3 @@
+`operation`:: _Optional. Default: `clean_insert`._
++
+https://dbunit.sourceforge.net/dbunit/components.html#databaseoperation[DbUnit operation]

@@ -1,0 +1,4 @@
+200 OK
+Content-Type: application/json
+
+{"DELETE":"/mirror/request"}

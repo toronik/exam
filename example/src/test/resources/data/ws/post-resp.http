@@ -1,0 +1,4 @@
+200 OK
+Content-Type: application/json
+
+{"POST":"/mirror/request?p=1","body":{"a": "ok", "b": 1 }}

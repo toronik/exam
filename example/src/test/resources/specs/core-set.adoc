@@ -1,0 +1,96 @@
+=== e-set [[e-set]]
+
+Sets a specification variable which could be used in other commands expressions.
+
+.Usage
+[source,asciidoc]
+--
+include::core-set.adoc[tags=set]
+--
+
+====
+//tag::set[]
+The greeting for user [e-set=firstName]_Bob_ will be: [e-eq=greetingFor(#firstName)]_Hello Bob!_
+//end::set[]
+====
+
+Variable can be initialized with text, object and file content.
+
+.Initialization with string from template:
+[source,asciidoc]
+--
+include::core-set.adoc[tags=tmp]
+--
+
+====
+//tag::tmp[]
+[.when]
+Set `someText` =  [e-set=someText]`some text`
+and set `template` = [e-set=template]`someText: {{someText}}, current timestamp: {{iso (at)}}`
+[.then]
+`template` equals [e-eq=#template]`someText: {{someText}}, current timestamp: {{iso (at)}}`
+//end::tmp[]
+====
+
+.Initialization with object:
+[source,asciidoc]
+--
+include::core-set.adoc[tags=obj]
+--
+
+====
+//tag::obj[]
+[.when]
+Set `mapObject` = [e-set=mapObject]`{{map a='1' b='2'}}`
+[.then]
+`mapObject.a` equals [e-eq=#mapObject.a]`1` +
+`mapObject.b` equals [e-eq=#mapObject.b]`2`
+//end::obj[]
+====
+
+.Initialization with string from file template:
+[source,asciidoc]
+--
+include::core-set.adoc[tags=fl]
+--
+
+====
+//tag::fl[]
+[.when]
+Set `fileTemplate` = [e-set=fileTemplate]`{{file '/data/core/file.txt' v='123'}}`
+[.then]
+`fileTemplate` equals [e-eq=#fileTemplate]`File template: v = 123, someText = some text`
+//end::fl[]
+====
+
+.Initialization with listing:
+[source,asciidoc]
+--
+include::core-set.adoc[tags=set-code]
+--
+
+====
+//tag::set-code[]
+.Given `someJson`:
+[source,json,e-set=someJson]
+----
+{ "a" : 1 }
+----
+Then `someJson` equals [e-eq-json=#someJson]`{ "a" : 1 }`
+//end::set-code[]
+====
+
+.Hidden set
+[source,asciidoc]
+--
+include::core-set.adoc[tags=hidden]
+--
+
+====
+//tag::hidden[]
+[.when]
+Set `hidden` = [e-set=hidden hide]#1#
+[.then]
+`hidden` equals [e-eq=#hidden]`1`
+//end::hidden[]
+====

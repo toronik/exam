@@ -17,6 +17,7 @@ import io.github.adven27.concordion.extensions.exam.core.utils.XMLDateWithin
 import net.javacrumbs.jsonunit.JsonAssert.`when`
 import net.javacrumbs.jsonunit.core.Configuration
 import net.javacrumbs.jsonunit.core.Option.IGNORING_ARRAY_ORDER
+import net.javacrumbs.jsonunit.core.Option.IGNORING_EXTRA_FIELDS
 import net.javacrumbs.jsonunit.providers.Jackson2ObjectMapperProvider
 import org.concordion.api.extension.ConcordionExtender
 import org.concordion.api.extension.ConcordionExtension
@@ -65,8 +66,8 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
     }
 
     @Suppress("unused")
-    fun withContentTypeConfigs(addContentTypeConfigs: Map<String, ContentTypeConfig>): ExamExtension {
-        CONTENT_TYPE_CONFIGS += addContentTypeConfigs
+    fun withVerifiers(overrideVerifiers: Map<String, ContentVerifier>): ExamExtension {
+        CONTENT_VERIFIERS += overrideVerifiers
         return this
     }
 
@@ -118,32 +119,22 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
     }
 
     override fun addTo(ex: ConcordionExtender) {
-        val registry = CommandRegistry(JsonVerifier(), XmlVerifier())
+        val registry = CommandRegistry()
         plugins.forEach { registry.register(it.commands()) }
 
-        registry.commands()
-            .filter { "example" != it.key }
-            .forEach { ex.withCommand(NS, it.key, it.value) }
+        registry.commands().filter { "example" != it.key }.forEach { ex.withCommand(NS, it.key, it.value) }
 
-        CommandPrinterExtension().addTo(ex)
-        IncludesExtension().addTo(ex)
         TopButtonExtension().addTo(ex)
         CodeMirrorExtension().addTo(ex)
-        HighlightExtension().addTo(ex)
-        TocbotExtension().addTo(ex)
+//        TocbotExtension().addTo(ex)
         FontAwesomeExtension().addTo(ex)
-        BootstrapExtension().addTo(ex)
-        DetailsExtension().addTo(ex)
-        ResponsiveTableExtension().addTo(ex)
-        NomNomlExtension().addTo(ex)
         LoggingFormatterExtension().addTo(ex)
-
-        ex.withDocumentParsingListener(ExamDocumentParsingListener(registry))
-        ex.withThrowableListener(ErrorListener())
+//        ex.withThrowableListener(ErrorListener())
         if (focusOnError) {
             ex.withSpecificationProcessingListener(FocusOnErrorsListener())
         }
         ex.withExampleListener(ExamExampleListener(skipDecider))
+        ex.withDocumentParsingListener(ExamDocumentParsingListener(registry))
     }
 
     fun setUp() {
@@ -183,24 +174,18 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
                 }.first
         }
 
-        val CONTENT_TYPE_CONFIGS: MutableMap<String, ContentTypeConfig> = mutableMapOf(
-            "json" to JsonContentTypeConfig(),
-            "xml" to XmlContentTypeConfig(),
-            "text" to TextContentTypeConfig()
+        val CONTENT_VERIFIERS: MutableMap<String, ContentVerifier> = mutableMapOf(
+            "json" to JsonVerifier(),
+            "jsonIgnoreExtraFields" to JsonVerifier { it.withOptions(IGNORING_EXTRA_FIELDS) },
+            "jsonArrayOrdered" to JsonVerifier { it.withOptions(it.options.apply { remove(IGNORING_ARRAY_ORDER) }) },
+            "xml" to XmlVerifier(),
+            "text" to ContentVerifier.Default("text")
         )
 
         @JvmStatic
-        fun contentTypeConfig(type: String): ContentTypeConfig = CONTENT_TYPE_CONFIGS[type]
-            ?: throw IllegalStateException(
-                "Content type config for type '$type' not found. " +
-                    "Provide it via ExamExtension(...).withContentTypeConfigs(...) method."
-            )
-
-        @JvmStatic
-        fun prettyXml(text: String) = text.prettyXml()
-
-        @JvmStatic
-        fun prettyJson(text: String) = text.prettyJson()
+        fun contentVerifier(verifier: String): ContentVerifier = checkNotNull(CONTENT_VERIFIERS[verifier]) {
+            "Content verifier '$verifier' not found. Provide it via ExamExtension(...).withVerifiers(...)"
+        }
 
         var LOGGING_FILTER: TurboFilter = LoggerLevelFilter()
     }

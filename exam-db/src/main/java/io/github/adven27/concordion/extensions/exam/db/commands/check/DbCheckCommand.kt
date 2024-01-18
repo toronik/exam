@@ -1,7 +1,6 @@
 package io.github.adven27.concordion.extensions.exam.db.commands.check
 
 import io.github.adven27.concordion.extensions.exam.core.commands.Verifier.Check
-import io.github.adven27.concordion.extensions.exam.core.html.Html
 import io.github.adven27.concordion.extensions.exam.db.DbPlugin
 import io.github.adven27.concordion.extensions.exam.db.DbTester
 import io.github.adven27.concordion.extensions.exam.db.DbTester.TableExpectation
@@ -15,13 +14,13 @@ import org.concordion.api.Result.SUCCESS
 import org.concordion.api.ResultRecorder
 import org.dbunit.dataset.ITable
 
-@Suppress("LongParameterList")
 open class DbCheckCommand(
     dbTester: DbTester,
     valuePrinter: DbPlugin.ValuePrinter,
-    val parser: Parser = Parser.Suitable(),
-    val renderer: Renderer = Renderer.Suitable(valuePrinter)
+    private val parser: Parser = DbCheckParser(),
+    private val renderer: Renderer = BaseResultRenderer(valuePrinter)
 ) : DbCommand<Model, Result>(dbTester) {
+
     override fun model(context: Context) = parser.parse(context)
     override fun render(commandCall: CommandCall, result: Result) =
         renderer.render(commandCall, result)
@@ -36,30 +35,9 @@ open class DbCheckCommand(
 
     interface Parser {
         fun parse(context: Context): Model
-
-        open class Suitable : Parser {
-            override fun parse(context: Context) =
-                (if (context.el.localName() == "div") XhtmlCheckParser() else MdCheckParser()).parse(context)
-        }
     }
 
     interface Renderer {
         fun render(commandCall: CommandCall, result: Result)
-
-        class Md(printer: DbPlugin.ValuePrinter) : BaseResultRenderer(printer) {
-            override fun root(html: Html) = html.parent().parent()
-        }
-
-        class Xhtml(printer: DbPlugin.ValuePrinter) : BaseResultRenderer(printer) {
-            override fun root(html: Html) = html
-        }
-
-        open class Suitable(private val valuePrinter: DbPlugin.ValuePrinter) : Renderer {
-            override fun render(commandCall: CommandCall, result: Result) =
-                suitableRenderer(commandCall).render(commandCall, result)
-
-            private fun suitableRenderer(commandCall: CommandCall) =
-                if (commandCall.element.localName == "div") Xhtml(valuePrinter) else Md(valuePrinter)
-        }
     }
 }

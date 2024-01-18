@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.jknack.handlebars.Options
 import io.github.adven27.concordion.extensions.exam.core.ExamPlugin
-import io.github.adven27.concordion.extensions.exam.core.commands.AwaitConfig
 import io.github.adven27.concordion.extensions.exam.core.html.span
-import io.github.adven27.concordion.extensions.exam.db.builder.CompareOperation
-import io.github.adven27.concordion.extensions.exam.db.builder.ContainsFilterTable
 import io.github.adven27.concordion.extensions.exam.db.commands.DbCleanCommand
 import io.github.adven27.concordion.extensions.exam.db.commands.DbExecuteCommand
 import io.github.adven27.concordion.extensions.exam.db.commands.DbSetCommand
@@ -17,8 +14,6 @@ import io.github.adven27.concordion.extensions.exam.db.commands.DbShowCommand
 import io.github.adven27.concordion.extensions.exam.db.commands.DbVerifyCommand
 import io.github.adven27.concordion.extensions.exam.db.commands.ExamMatchersAwareValueComparer
 import io.github.adven27.concordion.extensions.exam.db.commands.check.DbCheckCommand
-import io.github.adven27.concordion.extensions.exam.db.commands.columnNamesArray
-import io.github.adven27.concordion.extensions.exam.db.commands.sortedTable
 import mu.KLogging
 import org.concordion.api.Command
 import org.concordion.api.Element
@@ -33,13 +28,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 import java.util.Date
-import org.concordion.api.Evaluator
-import org.dbunit.Assertion
-import org.dbunit.assertion.DbComparisonFailure
-import org.dbunit.assertion.Difference
-import org.dbunit.dataset.CompositeTable
-import org.dbunit.dataset.IDataSet
-import org.dbunit.dataset.filter.DefaultColumnFilter
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
@@ -166,17 +154,23 @@ class DbPlugin @JvmOverloads constructor(
 
 data class DbUnitConfig @JvmOverloads constructor(
     val databaseConfigProperties: Map<String, Any?> = mapOf(),
-    val columnValueComparers: Map<String, ExamMatchersAwareValueComparer> = emptyMap(),
+    val tableColumnValueComparer: List<TableColumnValueComparer> = listOf(),
     val valueComparer: ExamMatchersAwareValueComparer = ExamMatchersAwareValueComparer(),
     val overrideRowSortingComparer: RowComparator = RowComparator(),
     val diffFailureHandler: DiffCollectingFailureHandler = DiffCollectingFailureHandler(),
     val isColumnSensing: Boolean = false
 ) {
+
+    data class TableColumnValueComparer(
+        val table: String,
+        val columnValueComparer: Map<String, ExamMatchersAwareValueComparer>
+    )
+
     @Suppress("unused")
     class Builder {
         var databaseConfigProperties: Map<String, Any?> = mapOf()
         var valueComparer: ExamMatchersAwareValueComparer = ExamMatchersAwareValueComparer()
-        var columnValueComparers: Map<String, ExamMatchersAwareValueComparer> = emptyMap()
+        var tableColumnValueComparers: List<TableColumnValueComparer> = listOf()
         var overrideRowSortingComparer: RowComparator = RowComparator()
         var diffFailureHandler: DiffCollectingFailureHandler = DiffCollectingFailureHandler()
         var columnSensing: Boolean = false
@@ -187,8 +181,8 @@ data class DbUnitConfig @JvmOverloads constructor(
         fun valueComparer(valueComparer: ExamMatchersAwareValueComparer) =
             apply { this.valueComparer = valueComparer }
 
-        fun columnValueComparers(columnValueComparers: Map<String, ExamMatchersAwareValueComparer>) =
-            apply { this.columnValueComparers = columnValueComparers }
+        fun columnValueComparer(columnValueComparer: List<TableColumnValueComparer>) =
+            apply { this.tableColumnValueComparers = columnValueComparer }
 
         fun overrideRowSortingComparer(overrideRowSortingComparer: RowComparator = RowComparator()) =
             apply { this.overrideRowSortingComparer = overrideRowSortingComparer }
@@ -199,7 +193,7 @@ data class DbUnitConfig @JvmOverloads constructor(
         fun columnSensing(columnSensing: Boolean) = apply { this.columnSensing = columnSensing }
         fun build() = DbUnitConfig(
             databaseConfigProperties,
-            columnValueComparers,
+            tableColumnValueComparers,
             valueComparer,
             overrideRowSortingComparer,
             diffFailureHandler,

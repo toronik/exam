@@ -1,5 +1,6 @@
 package io.github.adven27.concordion.extensions.exam.db.commands
 
+import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.contentVerifier
 import io.github.adven27.concordion.extensions.exam.core.commands.checkAndSet
 import io.github.adven27.concordion.extensions.exam.core.commands.expression
 import io.github.adven27.concordion.extensions.exam.core.commands.matchesAnyNumber
@@ -144,3 +145,18 @@ fun sortedTable(table: ITable, columns: Array<String>, rowComparator: RowCompara
         setUseComparable(true)
         setRowComparator(rowComparator.init(table, columns))
     }
+
+open class TypedColumnComparer(val type: String) : ExamMatchersAwareValueComparer() {
+    override fun isExpected(
+        expectedTable: ITable?,
+        actualTable: ITable?,
+        rowNum: Int,
+        columnName: String?,
+        dataType: DataType,
+        expected: Any?,
+        actual: Any?
+    ) = contentVerifier(type).verify(expected.toString(), actual.toString(), evaluator).isSuccess
+}
+
+@Suppress("unused")
+class JsonColumnComparer : TypedColumnComparer("json")

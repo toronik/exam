@@ -1,0 +1,95 @@
+=== Handlebar support [[handlebars]]
+
+https://github.com/jknack/handlebars.java[The Handlebars templates] may be used for templating values in Exam commands.
+
+Exam provides following built-in https://github.com/jknack/handlebars.java#helpers[helpers] groups:
+
+Date helpers:: [pre language-handlebars c-echo=dateHelpers]`{empty}`
+Data matcher helpers:: [pre language-handlebars c-echo=matcherHelpers]`{empty}`
+Misc helpers:: [pre language-handlebars c-echo=miscHelpers]`{empty}`
+
+.Data types matchers:
+[source,asciidoc]
+--
+include::core-handlebar.adoc[tags=hb-t]
+--
+
+====
+//tag::hb-t[]
+[.given]
+.`dataJson`:
+[source,json,e-set=dataJson]
+{
+  "string": "some string",
+  "number": 123,
+  "bool": true,
+  "ignore": "anything 123",
+  "regex": "123"
+}
+
+[.then]
+.`dataJson` matches:
+[source,json,e-eq-json=#dataJson]
+{
+  "string": "{{string}}",
+  "number": "{{number}}",
+  "bool": "{{bool}}",
+  "ignore": "{{ignore}}",
+  "regex": "{{regex '\\d+'}}"
+}
+
+//end::hb-t[]
+====
+
+.Date/time matchers:
+[source,asciidoc]
+----
+include::core-handlebar.adoc[tags=hb-dt]
+----
+
+====
+//tag::hb-dt[]
+[.given]
+.`dtJson`:
+[source,json,e-set=dtJson]
+--
+{
+  "customFormat": "{{dateFormat (at) "yyyy/MM/dd'T'HH:mm.ss"}}",
+  "isoDate": "{{isoDate (at)}}",
+  "iso": "{{iso (at)}}",
+
+  "customFormatAndWithinNow": "{{dateFormat (at) "yyyy/MM/dd'T'HH:mm.ss"}}",
+  "isoDateAndWithinNow": "{{isoDate (at)}}",
+  "isoAndWithinNow": "{{iso (at)}}",
+
+  "customFormatAndWithinSpecifiedDate": "{{dateFormat (at) "yyyy/MM/dd'T'HH:mm.ss"}}",
+  "isoDateAndWithinSpecifiedDate": "{{isoDate (at)}}",
+  "isoAndWithinSpecifiedDate": "{{iso (at)}}",
+
+  "afterSpecifiedDate": "{{iso (at)}}",
+  "beforeSpecifiedDate": "{{iso (at)}}"
+}
+--
+[.then]
+.`dtJson` matches:
+[source,json,e-eq=#dtJson,e-verifier=json]
+--
+{
+"customFormat": "{{formattedAs 'yyyy/MM/dd\'T\'HH:mm.ss'}}",
+"isoDate": "{{isoDate}}",
+"iso": "{{iso}}",
+
+"customFormatAndWithinNow": "{{formattedAndWithin 'yyyy/MM/dd\'T\'HH:mm.ss' '25s'}}",
+"isoDateAndWithinNow": "{{isoDate '1d'}}",
+"isoAndWithinNow": "{{iso '25s'}}",
+
+"customFormatAndWithinSpecifiedDate": "{{formattedAndWithin 'yyyy/MM/dd\'T\'HH:mm.ss' '25s' (now)}}",
+"isoDateAndWithinSpecifiedDate": "{{isoDate '1d' (now)}}",
+"isoAndWithinSpecifiedDate": "{{iso '25s' (now)}}",
+
+"afterSpecifiedDate": "{{after (at '-1h')}}",
+"beforeSpecifiedDate": "{{before (at '+1h')}}"
+}
+--
+//end::hb-dt[]
+====

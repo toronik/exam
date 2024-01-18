@@ -8,13 +8,7 @@ import org.concordion.api.ImplementationStatus.implementationStatusFor
 import org.concordion.internal.ConcordionBuilder.NAMESPACE_CONCORDION_2007
 
 class ExamExampleCommand : SimpleCommand() {
-
-    override fun beforeParse(elem: Element) {
-        transformToConcordionExample(elem)
-        super.beforeParse(elem)
-    }
-
-    private fun transformToConcordionExample(elem: Element) {
+    fun transformToConcordionExample(elem: Element) {
         elem.addCcAttr("example", elem.getAttributeValue("name"))
         elem.addCcAttr(
             "status",

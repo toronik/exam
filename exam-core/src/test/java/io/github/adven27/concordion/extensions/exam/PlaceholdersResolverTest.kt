@@ -1,6 +1,6 @@
 package io.github.adven27.concordion.extensions.exam
 
-import io.github.adven27.concordion.extensions.exam.core.resolveJson
+import io.github.adven27.concordion.extensions.exam.core.resolve
 import io.github.adven27.concordion.extensions.exam.core.resolveToObj
 import io.github.adven27.concordion.extensions.exam.core.utils.DateWithin.Companion.PARAMS_SEPARATOR
 import io.github.adven27.concordion.extensions.exam.core.utils.toDate
@@ -20,14 +20,14 @@ class PlaceholdersResolverTest {
     private val eval = OgnlEvaluator(FixtureInstance(Object()))
 
     private companion object {
-        const val MATCHES = "\${json-unit.matches"
+        const val MATCHES = "\${test-unit.matches"
     }
 
     @Test
     fun canUseConcordionVars() {
         eval.setVariable("#value", 3)
 
-        assertThat(eval.resolveJson("{{value}}"), `is`("3"))
+        assertThat(eval.resolve("{{value}}"), `is`("3"))
         assertEquals(eval.resolveToObj("{{value}}"), 3)
     }
 
@@ -43,15 +43,15 @@ class PlaceholdersResolverTest {
     @Test
     fun canUseJsonUnitMatcherAliases() {
         assertThat(
-            eval.resolveJson("{{formattedAs 'dd.MM.yyyy'}}"),
+            eval.resolve("{{formattedAs 'dd.MM.yyyy'}}"),
             `is`("$MATCHES:formattedAs}dd.MM.yyyy")
         )
         assertThat(
-            eval.resolveJson("{{formattedAs 'dd.MM.yyyy HH:mm'}}"),
+            eval.resolve("{{formattedAs 'dd.MM.yyyy HH:mm'}}"),
             `is`("$MATCHES:formattedAs}dd.MM.yyyy HH:mm")
         )
         assertThat(
-            eval.resolveJson("{{formattedAndWithin 'yyyy-MM-dd' '1d' (date '1951-05-13')}}"),
+            eval.resolve("{{formattedAndWithin 'yyyy-MM-dd' '1d' (date '1951-05-13')}}"),
             `is`("$MATCHES:formattedAndWithin}yyyy-MM-dd${PARAMS_SEPARATOR}1d${PARAMS_SEPARATOR}1951-05-13T00:00")
         )
     }
@@ -60,11 +60,11 @@ class PlaceholdersResolverTest {
     fun canUseJsonUnitMatcherAliasWithRegexp() {
         val time = "HH:mm:ss[.SSSSSSSSS][.SSSSSS][.SSS]"
         assertThat(
-            eval.resolveJson("{{formattedAs 'yyyy-MM-dd\\'T\\'$time'}}"),
+            eval.resolve("{{formattedAs 'yyyy-MM-dd\\'T\\'$time'}}"),
             `is`("$MATCHES:formattedAs}yyyy-MM-dd'T'$time")
         )
         assertThat(
-            eval.resolveJson("{{formattedAndWithin 'yyyy-MM-dd\\'T\\'$time' '1d'}}"),
+            eval.resolve("{{formattedAndWithin 'yyyy-MM-dd\\'T\\'$time' '1d'}}"),
             startsWith("$MATCHES:formattedAndWithin}yyyy-MM-dd'T'$time${PARAMS_SEPARATOR}1d")
         )
     }
@@ -72,7 +72,7 @@ class PlaceholdersResolverTest {
     @Test
     fun examDateVariables() {
         val p = "dd.MM.yyyy'T'hh:mm:ss"
-        assertThat(eval.resolveJson("{{now \"$p\"}}"), `is`(Date().toString(p)))
+        assertThat(eval.resolve("{{now \"$p\"}}"), `is`(Date().toString(p)))
         Assertions.assertThat(eval.resolveToObj("{{now}}") as Date)
             .isCloseTo(Date(), 1000)
         Assertions.assertThat(eval.resolveToObj("{{now minus='1 d'}}") as Date)

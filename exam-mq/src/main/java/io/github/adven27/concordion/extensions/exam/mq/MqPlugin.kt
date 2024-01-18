@@ -6,14 +6,13 @@ import io.github.adven27.concordion.extensions.exam.mq.commands.MqCleanCommand
 import io.github.adven27.concordion.extensions.exam.mq.commands.MqSetCommand
 import org.concordion.api.Command
 
-class MqPlugin constructor(
+class MqPlugin(
     private val testers: Map<String, MqTester>,
     private val override: Map<String, Command> = mapOf()
 ) : ExamPlugin {
     override fun commands(): Map<String, Command> = mapOf(
-        "mq-check" to MqCheckCommand(testers),
         "mq-set" to MqSetCommand(testers),
-        "mq-send" to MqSetCommand(testers),
+        "mq-check" to MqCheckCommand(testers),
         "mq-clean" to MqCleanCommand(testers)
     ) + override
 

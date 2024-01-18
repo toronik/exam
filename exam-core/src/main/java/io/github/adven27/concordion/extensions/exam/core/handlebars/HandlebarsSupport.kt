@@ -73,7 +73,8 @@ interface ExamHelper : Helper<Any?> {
         "$example will produce: ${expectedStr()} " +
             if (context.isEmpty()) "" else "(given context has variables: $context)"
 
-    fun placeholderType(context: Context) = (context.model() as Evaluator).getVariable("#$PLACEHOLDER_TYPE")
+    fun placeholderType(context: Context): String =
+        (context.model() as Evaluator).getVariable("#$PLACEHOLDER_TYPE")?.toString() ?: "test"
 
     fun validate(options: Options) {
         val unexpected = options.hash.keys - this.options.keys

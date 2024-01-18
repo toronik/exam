@@ -3,17 +3,20 @@ package io.github.adven27.concordion.extensions.exam.core
 import com.github.jknack.handlebars.Helper
 import io.github.adven27.concordion.extensions.exam.core.ExamDocumentParsingListener.Companion.CONTENT_ID
 import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.PARSED_COMMANDS
-import io.github.adven27.concordion.extensions.exam.core.commands.BeforeParseExamCommand
+import io.github.adven27.concordion.extensions.exam.core.commands.ExamExampleCommand
 import io.github.adven27.concordion.extensions.exam.core.handlebars.HelperMissing.Companion.helpersDesc
 import io.github.adven27.concordion.extensions.exam.core.handlebars.MissingHelperException
 import io.github.adven27.concordion.extensions.exam.core.html.Html
 import io.github.adven27.concordion.extensions.exam.core.html.badge
 import io.github.adven27.concordion.extensions.exam.core.html.codeHighlight
 import io.github.adven27.concordion.extensions.exam.core.html.div
-import io.github.adven27.concordion.extensions.exam.core.html.italic
+import io.github.adven27.concordion.extensions.exam.core.html.errorMessage
+import io.github.adven27.concordion.extensions.exam.core.html.rootCause
+import io.github.adven27.concordion.extensions.exam.core.html.rootCauseMessage
 import io.github.adven27.concordion.extensions.exam.core.html.span
 import io.github.adven27.concordion.extensions.exam.core.html.tag
 import io.github.adven27.concordion.extensions.exam.core.html.trWithTDs
+import mu.KLogging
 import nu.xom.Attribute
 import nu.xom.Document
 import nu.xom.Element
@@ -28,11 +31,9 @@ import org.concordion.api.listener.SpecificationProcessingListener
 import org.concordion.api.listener.ThrowableCaughtEvent
 import org.concordion.api.listener.ThrowableCaughtListener
 import org.concordion.internal.FailFastException
-import java.io.ByteArrayInputStream
 import java.io.File
-import java.util.*
+import java.util.UUID
 import java.util.function.Predicate
-import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.collections.set
 import org.concordion.api.Element as ConcordionElement
 
@@ -52,7 +53,8 @@ internal class ExamExampleListener(private val skipDecider: SkipDecider) : Examp
         val name = event.resultSummary.specificationDescription.substringAfterLast(File.separator)
         val elem = event.element
         Html(elem).panel(
-            elem.getAttributeValue("name") ?: elem.childElements[0].also { elem.removeChild(it) }.text,
+            event.exampleName ?: elem.getAttributeValue("name")
+                ?: elem.childElements[0].also { elem.removeChild(it) }.text,
             levelOfOwnerHeader(elem) + 1
         )
         if (skipDecider.test(event)) {
@@ -70,17 +72,13 @@ internal class ExamExampleListener(private val skipDecider: SkipDecider) : Examp
     }
 
     private fun levelOfOwnerHeader(elem: ConcordionElement) =
-        ownerOf(elem, elem.rootElement)?.localName?.substring(1)?.toInt() ?: 0
+        ownerOf(elem)?.localName?.substring(1)?.toInt() ?: 0
 
-    private fun ownerOf(example: ConcordionElement?, content: ConcordionElement): ConcordionElement? {
-        var result: ConcordionElement? = null
-        for (it in content.getElementById(CONTENT_ID).childElements) {
-            when {
-                it.localName.matches("h\\d".toRegex()) -> result = it
-                it == example -> break
-            }
-        }
-        return result
+    private tailrec fun ownerOf(example: ConcordionElement, deep: Int = 3): ConcordionElement? = if (deep == 0) {
+        null
+    } else {
+        example.parentElement.getFirstDescendantNamed("h9|h8|h7|h6|h5|h4|h3|h2|h1")
+            ?: ownerOf(example.parentElement, deep - 1)
     }
 
     override fun afterExample(event: ExampleEvent) {
@@ -95,15 +93,17 @@ internal class ExamExampleListener(private val skipDecider: SkipDecider) : Examp
         )
         card.first("div")?.let { title ->
             title.childs().first().let {
+                val txt = it.text()
+                it.removeChildren()
+                if (summary.passed()) {
+                    it.prependChild(span(txt).css("success"))
+                } else {
+                    card.el.rootElement.getElementById("toctitle")
+                    it.prependChild(span(txt).css("failure"))
+                }
                 if (summary.implementationStatus != EXPECTED_TO_PASS) {
                     title(badge(event.resultSummary.implementationStatus.tag, "warning"))
-                    it.prependChild(badge(event.resultSummary.implementationStatus.tag, "warning"))
-                }
-                if (summary.passed()) {
-                    it.prependChild(italic("").css("example-badge fa fa-check m-1 text-success"))
-                } else {
-                    card.el.rootElement.getElementById("example-summary-badge").addStyleClass("text-danger")
-                    it.prependChild(italic("").css("example-badge fa fa-bug m-1 text-danger"))
+                    it.prependChild(badge("!", "warning"))
                 }
             }
         }
@@ -180,39 +180,14 @@ private fun Html.collapse() {
 
 fun List<Html>.firstByClass(cssClass: String) = firstOrNull { it.attr("class")?.contains(cssClass) ?: false }
 
-internal class ExamDocumentParsingListener(private val registry: CommandRegistry) : DocumentParsingListener {
-    companion object {
+internal class ExamDocumentParsingListener(private val registry: CommandRegistry) :
+    DocumentParsingListener {
+    companion object : KLogging() {
         const val CONTENT_ID = "content"
-        const val MENU_ID = "table-of-contents"
     }
 
     override fun beforeParsing(document: Document) {
-        layout(document)
         visit(document.rootElement)
-    }
-
-    private fun layout(document: Document) {
-        val content = div("class" to "bd-content ps-lg-4", "id" to CONTENT_ID)
-        val toc = div("class" to "bd-toc mt-4 mb-5 my-md-0 ps-xl-3 mb-lg-5 text-muted")(
-            div("class" to "row my-2 pb-2 border-bottom")(
-                div("class" to "col-9")(
-                    tag("strong").css("h6").text("On this page")
-                ),
-                div("class" to "col-2")(
-                    italic("", "id" to "example-summary-badge").css("fa fa-list-check")
-                )
-            ),
-            tag("nav").attrs("id" to MENU_ID, "class" to "js-toc toc toc-right")
-        )
-        val container = div("class" to "container-fluid")(
-            div("class" to "container-xxl my-md-4 bd-layout")(
-                Html("main").css("bd-main order-1")(
-                    toc,
-                    content
-                )
-            )
-        )
-        document.rootElement.html().first("body")!!.moveChildrenTo(content)(container)
     }
 
     private fun visit(elem: Element) {
@@ -223,14 +198,10 @@ internal class ExamDocumentParsingListener(private val registry: CommandRegistry
                 it.lines().last().takeWhile { c -> c == ' ' } + it
             }.trimIndent()
             elem.addAttribute(Attribute("cmdId", cmdId))
-            registry[elem.localName]?.let { if (it is BeforeParseExamCommand) it.beforeParse(elem) }
+            elem.addAttribute(Attribute("ml", ""))
+            registry[elem.localName]?.let { if (it is ExamExampleCommand) it.transformToConcordionExample(elem) }
         }
     }
-}
-
-fun loadXMLFromString(xml: String): org.w3c.dom.Document? = DocumentBuilderFactory.newInstance().let {
-    it.isNamespaceAware = true
-    it.newDocumentBuilder().parse(ByteArrayInputStream(xml.toByteArray()))
 }
 
 class ErrorListener : ThrowableCaughtListener {

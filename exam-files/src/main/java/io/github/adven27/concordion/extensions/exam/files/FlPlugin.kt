@@ -6,7 +6,7 @@ import io.github.adven27.concordion.extensions.exam.files.commands.FilesSetComma
 import io.github.adven27.concordion.extensions.exam.files.commands.FilesShowCommand
 import org.concordion.api.Command
 
-class FlPlugin @JvmOverloads constructor(
+/*class FlPlugin @JvmOverloads constructor(
     private var fileTester: FileTester = DefaultFileTester(),
     private val override: Map<String, Command> = mapOf()
 ) : ExamPlugin.NoSetUp() {
@@ -16,4 +16,4 @@ class FlPlugin @JvmOverloads constructor(
         "fl-set" to FilesSetCommand(fileTester),
         "fl-check" to FilesCheckCommand(fileTester)
     ) + override
-}
+}*/

@@ -33,7 +33,7 @@ open class IbmMQBrowseAndSendTester @JvmOverloads constructor(
 
     protected lateinit var producer: MessageProducer
 
-    override fun send(message: MqTester.Message, params: Map<String, String>) {
+    override fun send(message: MqTester.Message) {
         logger.info("Sending to {}...", config.queue)
         producer.send(
             sendConverter.apply(message to session).apply {
@@ -63,7 +63,7 @@ open class IbmMQConsumeAndSendTester @JvmOverloads constructor(
 
     protected lateinit var producer: MessageProducer
 
-    override fun send(message: MqTester.Message, params: Map<String, String>) {
+    override fun send(message: MqTester.Message) {
         logger.info("Sending to {}...", config.queue)
         producer.send(
             sendConverter.apply(message to session).apply {

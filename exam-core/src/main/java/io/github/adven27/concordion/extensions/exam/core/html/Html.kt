@@ -3,11 +3,20 @@
 
 package io.github.adven27.concordion.extensions.exam.core.html
 
+import io.github.adven27.concordion.extensions.exam.core.ExamExtension
+import io.github.adven27.concordion.extensions.exam.core.commands.swapText
 import io.github.adven27.concordion.extensions.exam.core.resolveToObj
+import nu.xom.Attribute
+import nu.xom.Builder
 import org.concordion.api.CommandCall
 import org.concordion.api.Element
 import org.concordion.api.Evaluator
-import java.util.*
+import org.concordion.internal.ConcordionBuilder
+import java.io.ByteArrayInputStream
+import java.io.StringReader
+import java.util.Optional
+import java.util.UUID
+import javax.xml.parsers.DocumentBuilderFactory
 
 const val ID = "id"
 const val ONCLICK = "onclick"
@@ -55,6 +64,13 @@ class Html(val el: Element) {
         return result
     }
 
+    fun child(name: String) = childs(name).single()
+    fun childOrNull(name: String) = childs(name).singleOrNull()
+    fun child(predicate: (Html) -> Boolean) = childs().single(predicate)
+    fun childOrNull(predicate: (Html) -> Boolean) = childs().singleOrNull(predicate)
+
+    fun child(name: String, vararg names: String) = names.fold(child(name)) { acc, s -> acc.child(s) }
+
     fun attrs(vararg attrs: Pair<String, String>): Html {
         attrs.forEach {
             el.addAttribute(it.first, it.second)
@@ -64,15 +80,16 @@ class Html(val el: Element) {
 
     fun attr(name: String): String? = el.getAttributeValue(name)
 
-    operator fun get(name: String): String? = attr(name)
+    fun hasClass(name: String) = attr("class")?.let { name in it.split(" ") } ?: false
 
-    fun attrOrFail(name: String): String =
-        el.getAttributeValue(name) ?: throw IllegalArgumentException("Attribute $name not found")
+    operator fun get(name: String): String? = attr(name)
 
     fun attr(attr: String, value: String): Html {
         el.addAttribute(attr, value)
         return this
     }
+
+    fun swapText(text: String) = el.swapText(text)
 
     infix fun collapse(target: String) =
         attrs("data-bs-toggle" to "collapse", "data-bs-target" to "#$target", "aria-expanded" to "true")
@@ -108,18 +125,20 @@ class Html(val el: Element) {
         return this
     }
 
+    fun remove() {
+        parent().remove(this)
+    }
+
     @JvmOverloads
     fun getAttr(name: String, eval: Evaluator? = null): String? {
         var attr = attr(name)
         if (attr != null) {
             attr = eval?.resolveToObj(attr)?.toString() ?: attr
-//            el.removeAttribute(name)
         }
         return attr
     }
 
     fun getAttr(name: String, def: String): String = getAttr(name) ?: def
-    fun getAttr(attrName: String, def: String, eval: Evaluator? = null) = getAttr(attrName, eval) ?: def
 
     fun el() = el
 
@@ -294,34 +313,6 @@ fun link(txt: String, src: String) = link(txt).attrs("href" to src)
 @JvmOverloads
 fun thumbnail(src: String, size: Int = 360) = link("", src)(image(src, size, size))
 
-fun imageOverlay(src: String, size: Int, title: String, desc: Html, fail: Boolean): Html {
-    return div().css("col")(
-        div().css("card ${if (fail) "border border-danger" else ""}")(
-            link("", src)(
-                image(src, size, size).css("card-img-top")
-            ),
-            div().css("card-body ${if (fail) "rest-failure" else "rest-success"}")(
-                Html("dl")(
-                    Html("dt", title),
-                    Html("dd").style("overflow: auto;")(desc)
-                )
-            )
-        )
-    )
-}
-
-@Suppress("MagicNumber")
-fun noImageOverlay(title: String, desc: Html, fail: Boolean): Html {
-    return div().css("col")(
-        div().css("card ${if (fail) "border border-danger" else ""}")(
-            div().css("card-body ${if (fail) "rest-failure" else "rest-success"}")(
-                h(4, title),
-                desc
-            )
-        )
-    )
-}
-
 fun descendantTextContainer(element: Element): Element {
     val child = element.childElements.firstOrNull()
     return if (child == null) element else descendantTextContainer(child)
@@ -342,8 +333,6 @@ fun pre(txt: String? = null, vararg attrs: Pair<String, String>) = Html("pre", t
 
 fun paragraph(txt: String) = Html("p", txt)
 
-fun codeXml(text: String?) = pre(text ?: "") css "xml card"
-
 fun codeHighlight(text: String?, lang: String? = null) =
     pre().attrs("class" to "doc-code ${if (lang != null) "language-$lang" else ""}")(code(text ?: ""))
 
@@ -357,28 +346,100 @@ fun ul(vararg attrs: Pair<String, String>) = Html("ul", *attrs)
 
 fun list() = ul() css "list-group"
 
+fun nu.xom.Element.moveAttributesTo(element: nu.xom.Node) {
+    val count = attributeCount
+    for (i in 0 until count) {
+        val attribute: Attribute = getAttribute(0)
+        removeAttribute(attribute)
+        (element as nu.xom.Element).addAttribute(attribute)
+    }
+}
+
 @JvmOverloads
 fun li(text: String? = null) = Html("li", text)
-
-fun menuItemA(txt: String) =
-    link(txt) css "list-group-item list-group-item-action" style "border-left: none; border-right: none;"
-
-fun menuItemA(txt: String, vararg children: Html) =
-    link(txt, *children) css "list-group-item list-group-item-action" style "border-left: none; border-right: none;"
 
 fun button(txt: String = "", vararg attrs: Pair<String, String>) =
     Html("button", txt, *attrs).attrs("type" to "button") css "btn btn-light btn-sm text-muted me-1"
 
-fun buttonCollapse(txt: String, target: String) = button(txt) collapse target
-
-fun divCollapse(txt: String, target: String) = div(txt).css("far fa-caret-square-down") collapse target
-
-fun footerOf(card: Html) = Html(card.el.getChildElements("div")[2])
-
-fun stat() = Html("small")
-
 fun CommandCall?.html() = Html(this!!.element)
-fun CommandCall?.takeAttr(name: String) = html().getAttr(name)
 fun CommandCall?.attr(name: String, def: String) = html().attr(name) ?: def
 
 fun generateId(): String = "e${UUID.randomUUID()}"
+
+fun nu.xom.Element.html() = Html(Element(this))
+
+fun String.toHtml() = parseTemplate(this)
+fun parseTemplate(tmpl: String) = Html(Element(Builder().build(StringReader(tmpl)).rootElement).deepClone())
+
+fun loadXMLFromString(xml: String): org.w3c.dom.Document? = DocumentBuilderFactory.newInstance().let {
+    it.isNamespaceAware = true
+    it.newDocumentBuilder().parse(ByteArrayInputStream(xml.toByteArray()))
+}
+
+fun String.fileExt() = substring(lastIndexOf('.') + 1).lowercase()
+
+fun String.toMap(): Map<String, String> = unboxIfNeeded(this).split(",").associate {
+    val (n, v) = it.split("=")
+    Pair(n.trim(), v.trim())
+}
+
+private fun unboxIfNeeded(it: String) = if (it.trim().startsWith("{")) it.substring(1, it.lastIndex) else it
+
+private fun failTemplate(header: String = "", help: String = "", cntId: String) = //language=xml
+    """
+    <div class="alert-warning">
+      ${if (header.isNotEmpty()) "<div class='card-header bg-danger text-white'>$header</div>" else ""}
+      <div>
+        <div id='$cntId'> </div>
+        ${help(help, cntId)}
+      </div>
+    </div>
+    """
+
+//language=xml
+private fun help(help: String, cntId: String) = if (help.isNotEmpty()) {
+    """
+<p data-bs-toggle="collapse" data-bs-target="#help-$cntId" aria-expanded="false">
+    <i class="far fa-caret-square-down"> </i><span> Help</span>
+</p>
+<div id='help-$cntId' class='collapse'>$help</div>
+"""
+} else {
+    ""
+}
+
+fun errorMessage(
+    header: String = "",
+    message: String,
+    help: String = "",
+    html: Html = span(),
+    type: String? = null
+): Pair<String, Html> =
+    "error-${System.currentTimeMillis()}".let { id ->
+        id to failTemplate(header, help, id).toHtml().apply {
+            findBy(id)!!(
+                codeHighlight(message, type).css("failure"),
+                html
+            )
+        }
+    }
+
+fun Throwable.rootCause(): Throwable {
+    var rootCause = this
+    while (rootCause.cause != null && rootCause.cause !== rootCause) {
+        rootCause = rootCause.cause!!
+    }
+    return rootCause
+}
+
+fun Throwable.rootCauseMessage() = this.rootCause().let { it.message ?: it.toString() }
+
+fun nu.xom.Element.addCcAttr(name: String, value: String) {
+    if (value.isNotEmpty()) {
+        addAttribute(Attribute(name, value).apply { setNamespace("c", ConcordionBuilder.NAMESPACE_CONCORDION_2007) })
+    }
+}
+
+fun nu.xom.Element.addExamAttr(name: String, value: String) {
+    if (value.isNotEmpty()) addAttribute(Attribute(name, value).apply { setNamespace("e", ExamExtension.NS) })
+}

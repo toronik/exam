@@ -1,0 +1,23 @@
+=== e-run [[e-run]]
+
+.Usage
+[source,asciidoc]
+include::core-run-and-echo.adoc[tags=r]
+
+====
+//tag::r[]
+link:Nested.adoc[Some nested spec, role=e-run]
+//end::r[]
+====
+
+=== e-echo [[e-echo]]
+
+.Usage
+[source,asciidoc]
+include::core-run-and-echo.adoc[tags=ec]
+
+====
+//tag::ec[]
+Echo _firstName_: [e-echo=#firstName]_{empty}_
+//end::ec[]
+====

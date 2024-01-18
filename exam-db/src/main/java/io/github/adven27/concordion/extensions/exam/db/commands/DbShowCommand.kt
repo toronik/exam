@@ -1,13 +1,12 @@
 package io.github.adven27.concordion.extensions.exam.db.commands
 
-import io.github.adven27.concordion.extensions.exam.core.fileExt
 import io.github.adven27.concordion.extensions.exam.core.html.Html
 import io.github.adven27.concordion.extensions.exam.core.html.code
+import io.github.adven27.concordion.extensions.exam.core.html.fileExt
 import io.github.adven27.concordion.extensions.exam.core.html.html
 import io.github.adven27.concordion.extensions.exam.core.html.pre
 import io.github.adven27.concordion.extensions.exam.db.DbPlugin
 import io.github.adven27.concordion.extensions.exam.db.DbTester
-import io.github.adven27.concordion.extensions.exam.db.MarkedHasNoDefaultValue
 import io.github.adven27.concordion.extensions.exam.db.builder.JSONWriter
 import io.github.adven27.concordion.extensions.exam.db.commands.DbShowCommand.Model
 import io.github.adven27.concordion.extensions.exam.db.commands.DbShowCommand.Result
@@ -60,10 +59,11 @@ open class DbShowCommand(
         }
 
     override fun render(commandCall: CommandCall, result: Result) {
-        commandCall.html()(
-            renderTable(result.table, valuePrinter, result.caption),
-            result.generated?.let { pre().attrs("class" to "doc-code language-xml")(code(it)) }
-        )
+        with(commandCall.html()) {
+            attr("hidden", "true")
+            result.generated?.let { below(pre()(code(it).attrs("class" to "language-xml"))) }
+            below(renderTable(result.table, valuePrinter, result.caption))
+        }
     }
 
     data class Model(
@@ -108,28 +108,20 @@ open class DbShowCommand(
     interface Parser {
         fun parse(context: Context): Model
 
-        open class Default(private val colParser: ColParser = ColParser()) : Parser {
+        open class Default : Parser {
             override fun parse(context: Context) = Model(
                 ds = context[DS],
-                table = context.expression.ifBlank { null } ?: context[TABLE]!!,
-                caption = context[CAPTION],
+                table = context.expression,
+                caption = context.el.first("caption")!!.text(),
                 where = context[WHERE],
                 createDataSet = context[CREATE_DATASET].toBoolean(),
                 saveToResources = context[SAVE_TO_RESOURCES],
-                cols = parseCols(context.el).keys
+                cols = parseCols(context.el).toSet()
             )
 
-            protected fun parseCols(el: Html): Map<String, Any?> {
-                val attr = el.getAttr("cols")
-                return if (attr == null) {
-                    emptyMap()
-                } else {
-                    val remarkAndVal = colParser.parse(attr)
-                    remarkAndVal.mapValues {
-                        if (it.value.second == null) MarkedHasNoDefaultValue() else it.value.second
-                    }
-                }
-            }
+            private fun parseCols(html: Html) =
+                html.el.getFirstChildElement("thead")?.getFirstChildElement("tr")?.childElements?.map { it.text.trim() }
+                    ?: listOf()
         }
     }
 }

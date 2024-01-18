@@ -18,13 +18,11 @@ open class DbExecuteCommand(
     private var valuePrinter: DbPlugin.ValuePrinter
 ) : DbCommand<FilesSeed, IDataSet>(dbTester) {
 
-    override fun model(context: Context) = DatasetCommandAttrs.from(context.el, context.eval).let {
-        FilesSeed(
-            ds = it.ds,
-            datasets = it.datasets.dataSets(),
-            strategy = context[OPERATION]?.let { SeedStrategy.valueOf(it.uppercase()) } ?: CLEAN_INSERT
-        )
-    }
+    override fun model(context: Context) = FilesSeed(
+        ds = context.el.getAttr(DS),
+        datasets = context.expression.split(",").map { context.el.getAttr("dir") + it.trim() },
+        strategy = context[OPERATION]?.let { SeedStrategy.valueOf(it.uppercase()) } ?: CLEAN_INSERT
+    )
 
     override fun process(model: FilesSeed, eval: Evaluator, recorder: ResultRecorder) = dbTester.seed(model, eval)
     override fun render(commandCall: CommandCall, result: IDataSet) {

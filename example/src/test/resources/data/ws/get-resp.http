@@ -1,0 +1,4 @@
+200 OK
+Content-Type: application/json
+
+{"GET":"/mirror/request"}

@@ -1,0 +1,3 @@
+`where`:: _Optional. Default: not set._
++
+_WHERE_ clause in database-specific SQL format to filter actual dataset

@@ -3,7 +3,6 @@
 package io.github.adven27.concordion.extensions.exam.db.commands
 
 import io.github.adven27.concordion.extensions.exam.core.commands.ExamCommand
-import io.github.adven27.concordion.extensions.exam.core.commands.VarsAttrs
 import io.github.adven27.concordion.extensions.exam.core.html.CLASS
 import io.github.adven27.concordion.extensions.exam.core.html.Html
 import io.github.adven27.concordion.extensions.exam.core.html.caption
@@ -16,21 +15,16 @@ import io.github.adven27.concordion.extensions.exam.core.html.thead
 import io.github.adven27.concordion.extensions.exam.core.html.tr
 import io.github.adven27.concordion.extensions.exam.db.DbPlugin
 import io.github.adven27.concordion.extensions.exam.db.DbTester
-import io.github.adven27.concordion.extensions.exam.db.commands.DbCommand.Companion.DS
-import org.concordion.api.Evaluator
 import org.dbunit.dataset.Column
 import org.dbunit.dataset.ITable
 import org.dbunit.dataset.filter.DefaultColumnFilter
 
 abstract class DbCommand<M, R>(protected val dbTester: DbTester, attrs: Set<String> = setOf()) :
-    ExamCommand<M, R>(setOf(DS, TABLE, CAPTION, WHERE, COLS, OPERATION) + attrs) {
+    ExamCommand<M, R>(setOf(DS, WHERE, OPERATION) + attrs) {
 
     companion object {
         const val DS = "ds"
-        const val TABLE = "table"
-        const val CAPTION = "caption"
         const val WHERE = "where"
-        const val COLS = "cols"
         const val OPERATION = "operation"
     }
 }
@@ -91,24 +85,3 @@ private fun ITable.empty() = this.rowCount == 0
 fun tableCaption(title: String?, def: String?): Html = caption()
     .style("width:max-content")(italic(" ", CLASS to "fa fa-database me-1"))
     .text("  ${if (!title.isNullOrBlank()) title else def}")
-
-data class DatasetCommandAttrs(
-    val datasets: DatasetsAttrs,
-    val vars: VarsAttrs,
-    val ds: String?
-) {
-    data class DatasetsAttrs(val datasets: String, val dir: String) {
-        fun dataSets() = datasets.split(",").map { dir.trim() + it.trim() }
-    }
-
-    companion object {
-        private const val DIR = "dir"
-        private const val DATASETS = "datasets"
-
-        fun from(root: Html, evaluator: Evaluator) = DatasetCommandAttrs(
-            DatasetsAttrs(root.attrOrFail(DATASETS), root.getAttr(DIR, "")),
-            VarsAttrs(root, evaluator),
-            root.getAttr(DS)
-        )
-    }
-}

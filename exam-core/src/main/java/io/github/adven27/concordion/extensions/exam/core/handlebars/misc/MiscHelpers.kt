@@ -1,6 +1,8 @@
 package io.github.adven27.concordion.extensions.exam.core.handlebars.misc
 
 import com.github.jknack.handlebars.Options
+import com.jayway.jsonpath.JsonPath
+import com.jayway.jsonpath.PathNotFoundException
 import io.github.adven27.concordion.extensions.exam.core.ExamExtension
 import io.github.adven27.concordion.extensions.exam.core.handlebars.ExamHelper
 import io.github.adven27.concordion.extensions.exam.core.handlebars.evaluator
@@ -18,13 +20,22 @@ enum class MiscHelpers(
     override val expected: Any? = "",
     override val options: Map<String, String> = emptyMap()
 ) : ExamHelper {
+    vars("""{{vars v1='a' v2=2}}""", mapOf(), "") {
+        override fun invoke(context: Any?, options: Options): Any {
+            val eval = options.evaluator()
+            options.hash.map { (k, v) ->
+                eval.setVariable("#$k", if (v is String) eval.resolveToObj(v) else v)
+            }
+            return ""
+        }
+    },
     set("""{{set 1 "someVar"}}""", mapOf(), 1) {
         override fun invoke(context: Any?, options: Options): Any? = options.params.map {
             options.evaluator().setVariable("#$it", context)
         }.let { context }
     },
-    getOr("""{{getOr var "default value"}}""", mapOf(), "default value") {
-        override fun invoke(context: Any?, options: Options): Any? = context ?: options.param<String>(0)
+    coalesce("""{{coalesce var1 var2 "default value"}}""", mapOf(), "default value") {
+        override fun invoke(context: Any?, options: Options) = context ?: options.params.firstNotNullOfOrNull { it }
     },
     map("""{{map key='value'}}""", mapOf(), mapOf("key" to "value")) {
         override fun invoke(context: Any?, options: Options): Map<*, *> =
@@ -34,11 +45,14 @@ enum class MiscHelpers(
         override fun invoke(context: Any?, options: Options): List<*> =
             if (context is List<*>) context + options.params.toList() else listOf(context) + options.params.toList()
     },
-    json("""{{json (map f1='1' f2=(ls '1' '2'))}}""", mapOf(), "1") {
+    json("""{{json (map f1='1' f2=(ls '1' '2'))}}""", mapOf(), """{"f1":"1","f2":["1","2"]}""") {
         override fun invoke(context: Any?, options: Options): String =
             ExamExtension.JACKSON_2_OBJECT_MAPPER_PROVIDER.getObjectMapper(false).writeValueAsString(
                 if (options.params.isEmpty()) context else listOf(context) + options.params
-            ).prettyJson()
+            )
+    },
+    prettyJson("""{{prettyJson '{"a": 1}'}}""", mapOf(), "{\n  \"a\": 1\n}") {
+        override fun invoke(context: Any?, options: Options): String = (context as String).prettyJson()
     },
     NULL("{{NULL}}", emptyMap(), null) {
         override fun invoke(context: Any?, options: Options): Any = Result.success(null)
@@ -51,21 +65,25 @@ enum class MiscHelpers(
     },
     resolve("{{resolve 'today is {{today}}' var='val'}}", mapOf(), "today is ${LocalDate.now().toDate()}") {
         override fun invoke(context: Any?, options: Options): Any? {
-            val evaluator = options.evaluator()
-            options.hash.forEach { (key, value) ->
-                evaluator.setVariable("#$key", evaluator.resolveToObj(value as String?))
-            }
-            return evaluator.resolveToObj("$context")
+            val eval = options.evaluator()
+            options.hash.forEach { (k, v) -> eval.setVariable("#$k", if (v is String) eval.resolveToObj(v) else v) }
+            return eval.resolveToObj("$context")
         }
     },
-    file("{{file '/hb/some-file.txt' var='val'}}", mapOf(), "today is ${LocalDate.now().toDate()}") {
+    file("{{file '/hb/some-file.txt' var1='val1' var2='val2'}}", mapOf(), "today is ${LocalDate.now().toDate()}") {
         override fun invoke(context: Any?, options: Options): Any? {
-            val evaluator = options.evaluator()
-            options.hash.forEach { (key, value) ->
-                evaluator.setVariable("#$key", evaluator.resolveToObj(value as String?))
+            val eval = options.evaluator()
+            options.hash.forEach { (k, v) -> eval.setVariable("#$k", if (v is String) eval.resolveToObj(v) else v) }
+            return eval.resolveToObj(context.toString().readFile()).also {
+                options.hash.forEach { (key, _) -> eval.setVariable("#$key", null) }
             }
-            return evaluator.resolveToObj(context.toString().readFile())
         }
+    },
+    jsonPath("""{{jsonPath '{"root": {"nested": 1}}' '$.root.nested'}}""", mapOf(), 1) {
+        override fun invoke(context: Any?, options: Options): Any? =
+            runCatching { JsonPath.read<Any>(context.toString(), options.param(0)) }
+                .recover { if (it is PathNotFoundException) null else throw it }
+                .getOrThrow()
     },
     prop("{{prop 'system.property' 'optional default'}}", mapOf(), "optional default") {
         override fun invoke(context: Any?, options: Options) = System.getProperty(context.toString(), options.param(0))
@@ -75,7 +93,7 @@ enum class MiscHelpers(
     };
 
     override fun apply(context: Any?, options: Options): Any? {
-        if (name !in setOf("file", "resolve", "map")) validate(options)
+        if (name !in setOf("vars", "file", "resolve", "map")) validate(options)
         val result = try {
             this(context, options)
         } catch (expected: Exception) {

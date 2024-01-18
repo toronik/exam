@@ -58,9 +58,9 @@ open class KafkaConsumeAndSendTester @JvmOverloads constructor(
         super.stop()
     }
 
-    override fun send(message: Message, params: Map<String, String>) =
+    override fun send(message: Message) =
         logger.debug("Sending to {}...", topic).also {
-            producer.send(record(message, partitionFrom(params), keyFrom(params))).get().apply {
+            producer.send(record(message, partitionFrom(message.params), keyFrom(message.params))).get().apply {
                 logger.debug("Message sent to {}-{} {}: {}", topic(), partition(), offset(), message)
             }
         }
@@ -82,8 +82,8 @@ open class KafkaConsumeAndSendTester @JvmOverloads constructor(
             ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to "true"
         )
 
-        private fun partitionFrom(headers: Map<String, String>) = headers[PARAM_PARTITION]?.toInt()
-        private fun keyFrom(headers: Map<String, String>) = headers[PARAM_KEY]
+        private fun partitionFrom(params: Map<String, String>) = params[PARAM_PARTITION]?.toInt()
+        private fun keyFrom(params: Map<String, String>) = params[PARAM_KEY]
     }
 }
 
@@ -139,16 +139,19 @@ open class KafkaConsumeOnlyTester @JvmOverloads constructor(
 
     override fun receive(): List<Message> = consumer.apply { seekTo(sutOffsets()) }.consume()
 
-    override fun send(message: Message, params: Map<String, String>) {
+    override fun send(message: Message) {
         throw UnsupportedOperationException("$javaClass doesn't support sending messages")
     }
 
     protected fun sutOffsets(): Map<TopicPartition, OffsetAndMetadata> =
-        if (sutConsumerGroup == null) emptyMap()
-        else adminClient.listConsumerGroupOffsets(sutConsumerGroup)
-            .partitionsToOffsetAndMetadata()[KAFKA_FETCHING_TIMEOUT, TimeUnit.SECONDS]
-            .filterKeys { it.topic() == topic }
-            .apply { logger.debug("SUT [consumer group: {}] offsets: {}", sutConsumerGroup, this) }
+        if (sutConsumerGroup == null) {
+            emptyMap()
+        } else {
+            adminClient.listConsumerGroupOffsets(sutConsumerGroup)
+                .partitionsToOffsetAndMetadata()[KAFKA_FETCHING_TIMEOUT, TimeUnit.SECONDS]
+                .filterKeys { it.topic() == topic }
+                .apply { logger.debug("SUT [consumer group: {}] offsets: {}", sutConsumerGroup, this) }
+        }
 
     protected fun KafkaConsumer<String, String>.seekTo(offsets: Map<TopicPartition, OffsetAndMetadata>) {
         if (offsets.isEmpty()) {

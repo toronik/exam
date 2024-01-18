@@ -1,8 +1,7 @@
 package io.github.adven27.concordion.extensions.exam.db.builder
 
+import io.github.adven27.concordion.extensions.exam.core.html.rootCauseMessage
 import io.github.adven27.concordion.extensions.exam.core.resolveToObj
-import io.github.adven27.concordion.extensions.exam.core.rootCauseMessage
-import io.github.adven27.concordion.extensions.exam.db.builder.SeedStrategy.CLEAN_INSERT
 import io.github.adven27.concordion.extensions.exam.db.commands.ExamMatchersAwareValueComparer.Companion.ERROR_MARKER
 import mu.KLogging
 import org.concordion.api.Evaluator
@@ -51,8 +50,8 @@ class ScriptableDataSetIterator(private val delegate: ITableIterator) : ITableIt
 }
 
 class ScriptableTable(private val delegate: ITable) : ITable {
-    private var manager: ScriptEngineManager
-    private val engines: MutableMap<String, ScriptEngine>
+    private var manager: ScriptEngineManager = ScriptEngineManager()
+    private val engines: MutableMap<String, ScriptEngine> = mutableMapOf()
     override fun getTableMetaData(): ITableMetaData = delegate.tableMetaData
 
     override fun getRowCount(): Int = delegate.rowCount
@@ -115,11 +114,6 @@ class ScriptableTable(private val delegate: ITable) : ITable {
         // any non digit char (except 'regex') followed by ':' followed by 1 or more chars
         // e.g: js: new Date().toString()
         private val scriptEnginePattern = Pattern.compile("^(?!regex)[a-zA-Z]+:.+")
-    }
-
-    init {
-        engines = HashMap()
-        manager = ScriptEngineManager()
     }
 }
 
@@ -342,6 +336,4 @@ enum class SeedStrategy(val operation: DatabaseOperation) {
 }
 
 enum class CompareOperation { EQUALS, CONTAINS }
-
 class DataBaseSeedingException(message: String?, cause: Throwable?) : RuntimeException(message, cause)
-

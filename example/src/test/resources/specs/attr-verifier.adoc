@@ -1,0 +1,3 @@
+`verifier`:: _Optional. Default: `text`._
++
+Content type verifier. Built-in values: `text`, `json`, `xml`.

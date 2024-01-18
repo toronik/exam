@@ -5,6 +5,7 @@ import io.github.adven27.concordion.extensions.exam.core.handlebars.ExamHelper
 import io.github.adven27.concordion.extensions.exam.core.handlebars.date.DateHelpers
 import io.github.adven27.concordion.extensions.exam.core.handlebars.date.DateHelpers.Companion.DEFAULT_FORMAT
 import io.github.adven27.concordion.extensions.exam.core.handlebars.matchers.MatcherHelpers
+import io.github.adven27.concordion.extensions.exam.core.handlebars.misc.MiscHelpers
 import io.github.adven27.concordion.extensions.exam.core.html.Html
 import io.github.adven27.concordion.extensions.exam.core.resolveToObj
 import io.github.adven27.concordion.extensions.exam.core.utils.parseDate
@@ -103,11 +104,13 @@ class HandlebarsResolverTest {
     }
 
     @Test
+    fun `misc helpers`() {
+        MiscHelpers.entries.forEach { assertEquals(it.expected, helper(it), "Failed helper: $it") }
+    }
+
+    @Test
     fun `defaults matcher`() {
-        MatcherHelpers.values().forEach {
-            val expected = it.expected
-            assertEquals(expected, helper(it), "Failed helper: $it")
-        }
+        MatcherHelpers.entries.forEach { assertEquals(it.expected, helper(it), "Failed helper: $it") }
     }
 
     private fun helper(h: ExamHelper): Any? {

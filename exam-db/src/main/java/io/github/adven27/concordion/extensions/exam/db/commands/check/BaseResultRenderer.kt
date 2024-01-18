@@ -1,11 +1,11 @@
 package io.github.adven27.concordion.extensions.exam.db.commands.check
 
-import io.github.adven27.concordion.extensions.exam.core.errorMessage
 import io.github.adven27.concordion.extensions.exam.core.html.Html
 import io.github.adven27.concordion.extensions.exam.core.html.div
+import io.github.adven27.concordion.extensions.exam.core.html.errorMessage
 import io.github.adven27.concordion.extensions.exam.core.html.html
+import io.github.adven27.concordion.extensions.exam.core.html.rootCauseMessage
 import io.github.adven27.concordion.extensions.exam.core.html.span
-import io.github.adven27.concordion.extensions.exam.core.rootCauseMessage
 import io.github.adven27.concordion.extensions.exam.db.DbPlugin.ValuePrinter
 import io.github.adven27.concordion.extensions.exam.db.DbTester.TableExpectation
 import io.github.adven27.concordion.extensions.exam.db.DbTester.TableVerifier.ContentMismatch
@@ -18,31 +18,19 @@ import org.dbunit.assertion.Difference
 import org.dbunit.dataset.ITable
 
 @Suppress("TooManyFunctions")
-abstract class BaseResultRenderer(private val printer: ValuePrinter) : DbCheckCommand.Renderer {
-    abstract fun root(html: Html): Html
+open class BaseResultRenderer(private val printer: ValuePrinter) : DbCheckCommand.Renderer {
 
     override fun render(commandCall: CommandCall, result: DbCheckCommand.Result) {
-        with(result) {
-            when (check.fail) {
-                null -> with(root(commandCall.html())) {
-                    below(
-                        renderTable(
-                            check.expected.table,
-                            { td, row, col -> td.success(check.expected.table[row, col], check.actual!![row, col]) },
-                            caption = result.caption,
-                            ifEmpty = { css("table-success") }
-                        )
-                    )
-                    parent().remove(this)
-                }
-
-                else -> with(root(commandCall.html())) {
-                    below(renderFail(result))
-                    parent().remove(this)
-                }
-            }
-        }
+        commandCall.html().below(if (result.check.fail == null) renderSuccess(result) else renderFail(result)).remove()
     }
+
+    private fun renderSuccess(result: DbCheckCommand.Result) =
+        renderTable(
+            result.check.expected.table,
+            { td, row, col -> td.success(result.check.expected.table[row, col], result.check.actual!![row, col]) },
+            caption = result.caption,
+            ifEmpty = { css("table-success") }
+        )
 
     private fun Html.success(expected: Any?, actual: Any?): Html = this(
         Html(printer.wrap(actual)).tooltip(printer.print(expected), expected.isDbMatcher())
@@ -93,7 +81,7 @@ abstract class BaseResultRenderer(private val printer: ValuePrinter) : DbCheckCo
         html = div()(
             span("Expected:"),
             expectedTable,
-            if (butWas != null) span("but was:") else null,
+            span("but was:").takeIf { butWas != null },
             butWas
         )
     ).second

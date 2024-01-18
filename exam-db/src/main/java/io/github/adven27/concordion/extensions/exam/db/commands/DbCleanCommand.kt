@@ -11,14 +11,11 @@ import org.concordion.api.CommandCall
 import org.concordion.api.Evaluator
 import org.concordion.api.ResultRecorder
 
-open class DbCleanCommand(private val dbTester: DbTester) : ExamCommand<Model, Model>(setOf(TABLES)) {
-    companion object {
-        const val TABLES = "tables"
-    }
+open class DbCleanCommand(private val dbTester: DbTester) : ExamCommand<Model, Model>() {
 
     override fun model(context: Context) = Model(
         ds = context[DbCommand.DS],
-        tables = (context[TABLES] ?: context.eval.evaluate(context.expression).toString()).split(",").map { it.trim() }
+        tables = context.eval.evaluate(context.expression).toString().split(",").map { it.trim() }
     )
 
     override fun process(model: Model, eval: Evaluator, recorder: ResultRecorder) = model.apply {
@@ -32,7 +29,7 @@ open class DbCleanCommand(private val dbTester: DbTester) : ExamCommand<Model, M
     }
 
     override fun render(commandCall: CommandCall, result: Model) =
-        commandCall.element.swapText(result.tables.joinToString(","))
+        commandCall.element.swapText(result.tables.joinToString())
 
     data class Model(val ds: String?, val tables: List<String>)
 }

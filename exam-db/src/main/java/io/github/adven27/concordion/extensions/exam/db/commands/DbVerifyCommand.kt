@@ -1,7 +1,6 @@
 package io.github.adven27.concordion.extensions.exam.db.commands
 
 import io.github.adven27.concordion.extensions.exam.core.commands.Verifier
-import io.github.adven27.concordion.extensions.exam.core.commands.awaitConfig
 import io.github.adven27.concordion.extensions.exam.core.html.Html
 import io.github.adven27.concordion.extensions.exam.core.html.div
 import io.github.adven27.concordion.extensions.exam.core.html.html
@@ -32,14 +31,12 @@ open class DbVerifyCommand(
         private const val ORDER_BY = "orderBy"
     }
 
-    override fun model(context: Context) = DatasetCommandAttrs.from(context.el, context.eval).let { attrs ->
-        DataSetFilesExpectation(
-            ds = attrs.ds,
-            datasets = attrs.datasets.dataSets(),
-            await = context.el.awaitConfig(),
-            orderBy = (context[ORDER_BY] ?: "").split(",").map { it.trim() }.filter { it.isNotEmpty() }.toSet()
-        )
-    }
+    override fun model(context: Context) = DataSetFilesExpectation(
+        ds = context.el.getAttr(DS),
+        datasets = context.expression.split(",").map { context.el.getAttr("dir") + it.trim() },
+        await = context.awaitConfig,
+        orderBy = (context[ORDER_BY] ?: "").split(",").map { it.trim() }.filter { it.isNotEmpty() }.toSet()
+    )
 
     override fun process(model: DataSetFilesExpectation, eval: Evaluator, recorder: ResultRecorder) =
         dbTester.test(model, eval).apply {
@@ -83,7 +80,7 @@ open class DbVerifyCommand(
 
         private fun Html.renderFail(fail: SizeMismatch) {
             this(
-                div().css("rest-failure bd-callout bd-callout-danger")(div(fail.rowsMismatch.message))(
+                div().css("failure bd-callout bd-callout-danger")(div(fail.rowsMismatch.message))(
                     span("Expected: "),
                     render(fail.expected),
                     span("but was: "),

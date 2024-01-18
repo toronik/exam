@@ -1,0 +1,92 @@
+=== e-execute [[e-execute]]
+
+Wrapper of https://concordion.org/instrumenting/java/html/#execute-command[concordion execute command]
+
+.Usage
+[source,asciidoc]
+include::core-execute.adoc[tags=exec1]
+
+====
+//tag::exec1[]
+The full name [e-execute=#result = split(#TEXT)]_Jane Smith_
+will be broken into first name [e-eq=#result.first]_Jane_
+and last name [e-eq=#result.second]_Smith_
+//end::exec1[]
+====
+
+[NOTE]
+=====
+In case, when an input parameter occurs after an output we want to check,
+we can solve this problem by putting an execute command on the paragraph.
+
+.Unusual sentence structures
+[source,asciidoc]
+--
+include::core-execute.adoc[tags=exec2]
+--
+
+====
+//tag::exec2[]
+[role=e-execute=#greeting = greetingFor(#firstName)]
+The greeting "[e-eq=#greeting]#Hello Bob!#"
+should be given to user [e-set=#firstName]#Bob# when he logs in.
+//end::exec2[]
+====
+=====
+
+.Execute on table
+[source,asciidoc]
+--
+include::core-execute.adoc[tags=eq-lower]
+--
+
+====
+//tag::eq-lower[]
+[.given]
+Variable `someVar` = [e-set=someVar]`123`
+
+[.then]
+.Lowercase test
+[%header, cols="1,1,2,2,3,3", e-execute="#r = lowercase(#param)"]
+|===
+|[e-set=param]#Param#
+|[e-eq=#r.text]#Text#
+|[e-eq-json=#r.json]#JSON#
+|[e-eq-xml=#r.xml]#XML#
+|[e-echo=#r.json]#Echo JSON#
+|[e-echo=#r.xml]#Echo XML#
+
+|[.json]`ABC {{someVar}}`
+|abc {{someVar}}
+|[.json]`{"result": "abc {{someVar}}"}`
+|[.xml]`<result>abc {{someVar}}</result>`
+|[pre language-json details]`{empty}`
+|[pre language-xml]`{empty}`
+
+|aBc {{someVar}}
+|abc {{someVar}}
+|[.json]`{"result": "abc {{someVar}}"}`
+|[.xml]`<result>abc {{someVar}}</result>`
+|[pre language-json]`{empty}`
+|[pre language-xml details]`{empty}`
+|===
+//end::eq-lower[]
+====
+
+.Checking emptiness:
+[source,asciidoc]
+--
+include::core-execute.adoc[tags=core-empty]
+--
+
+====
+//tag::core-empty[]
+.Empty string test
+[e-execute="#result = getEmptyString()"]
+,===
+[e-eq=#result]#Text#, [e-eq-json=#result]#JSON#, [e-eq-xml=#result]#XML#
+
+,,
+,===
+//end::core-empty[]
+====

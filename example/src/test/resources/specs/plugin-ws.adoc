@@ -1,0 +1,219 @@
+== Web Service plugin
+
+`WsPlugin` enables to document _REST/SOAP API_.
+
+[plantuml,ws]
+----
+left to right direction
+component WsPlugin #AFF
+component WebService #d1e7dd
+WsPlugin --> WebService :interacts with
+----
+
+.Dependency
+[source,groovy,subs="attributes+"]
+testImplementation "io.github.adven27:exam-ws:{version}"
+
+.Configuration
+[source,kotlin]
+--
+class Specs : AbstractSpecs() {
+    override fun init() = ExamExtension(
+        WsPlugin(
+            host = "localhost",
+            port = 8080
+        )
+    )
+--
+
+=== e-http
+
+Check HTTP interaction
+
+.Attributes
+[horizontal]
+include::attr-await.adoc[]
+
+.Usage
+[source,asciidoc]
+-----
+include::plugin-ws.adoc[tags=ws-http]
+-----
+
+====
+//tag::ws-http[]
+.HTTP API check
+[e-http=]
+--
+.Given request:
+[source,httprequest]
+----
+GET /mirror/headers
+Content-Type: application/json
+Authorization: token
+Accept-Language: ru
+Cookie: cookie1=c1; cookie2=c2
+----
+
+.Expected response:
+[source,httprequest]
+----
+200 OK
+Content-Type: application/json
+
+{
+  "GET": "/mirror/headers",
+  "Authorization": "token",
+  "Accept-Language": "ru",
+  "cookies": {
+    "cookie1": "c1",
+    "cookie2": "c2"
+  }
+}
+----
+--
+//end::ws-http[]
+====
+
+.SOAP
+[source,asciidoc]
+-----
+include::plugin-ws.adoc[tags=ws-soap]
+-----
+
+====
+//tag::ws-soap[]
+.SOAP in collapsible blocks
+[e-http=]
+--
+.SOAP request
+[%collapsible]
+=====
+[source,httprequest]
+----
+POST /mirror/soap
+Content-Type: application/soap+xml
+
+include::../data/ws/soap.xml[]
+----
+=====
+
+.SOAP response
+[%collapsible]
+=====
+[source,httprequest]
+----
+200
+
+include::../data/ws/soap.xml[]
+----
+=====
+--
+//end::ws-soap[]
+====
+
+.Data-driven check
+[source,asciidoc]
+-----
+include::plugin-ws.adoc[tags=ws-where]
+-----
+
+====
+//tag::ws-where[]
+.Data-driven check
+[e-http=, awaitAtMostSec=4]
+--
+.Request
+[source,httprequest]
+----
+{{file req}}
+----
+.Response
+[source,httprequest]
+----
+{{file resp}}
+----
+
+[.where]
+,===
+,req, resp
+
+GET, /data/ws/get.http, /data/ws/get-resp.http
+POST, /data/ws/post.http, /data/ws/post-resp.http
+PUT, /data/ws/put.http, /data/ws/put-resp.http
+DELETE, /data/ws/delete.http, /data/ws/delete-resp.http
+,===
+--
+//end::ws-where[]
+====
+
+.Put interactions to variable
+[source,asciidoc]
+-----
+include::plugin-ws.adoc[tags=ws-http-v]
+-----
+
+====
+//tag::ws-http-v[]
+.Put interactions to variable
+[source,httprequest,e-http=interactions]
+----
+GET /mirror/request
+Content-Type: application/json
+----
+
+.Check interactions
+[%header,cols="4,4,1,1",c-verify-rows="#i : #interactions"]
+|===
+|[e-eq=#i.req.raw]#Request#
+|[e-verifier=jsonIgnoreExtraFields e-eq=#i.resp.body]#Response#
+|[e-eq=#i.resp.statusCode]#Status#
+|[e-eq=#i.resp.statusPhrase]#Phrase#
+
+|[pre language-http]`GET /mirror/request HTTP/1.1
+Host: localhost:8888
+Content-Type: application/json
+{blank}
+{blank}`
+|[pre language-json]`{}`
+|200
+|OK
+|===
+//end::ws-http-v[]
+====
+
+.Custom content type verifier
+[source,kotlin]
+-----
+include::../specs/code/VerifierConfig.kt[]
+-----
+
+.Use custom content verifier
+[source,asciidoc]
+-----
+include::plugin-ws.adoc[tags=ws-custom]
+-----
+====
+//tag::ws-custom[]
+.Custom content type verifier
+[e-http=]
+--
+[source,httprequest]
+----
+POST /mirror/request
+Content-Type: application/json
+
+{}
+----
+
+.Check with registered `jsonIgnoreExtraFields` verifier
+[source,httprequest,e-verifier=jsonIgnoreExtraFields]
+----
+200 OK
+Content-Type: application/json
+
+{ "POST": "/mirror/request" }
+----
+--
+//end::ws-custom[]
+====

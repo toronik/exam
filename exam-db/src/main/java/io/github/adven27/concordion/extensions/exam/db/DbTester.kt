@@ -2,7 +2,7 @@ package io.github.adven27.concordion.extensions.exam.db
 
 import io.github.adven27.concordion.extensions.exam.core.commands.AwaitConfig
 import io.github.adven27.concordion.extensions.exam.core.commands.Verifier
-import io.github.adven27.concordion.extensions.exam.core.fileExt
+import io.github.adven27.concordion.extensions.exam.core.html.fileExt
 import io.github.adven27.concordion.extensions.exam.db.builder.CompareOperation
 import io.github.adven27.concordion.extensions.exam.db.builder.CompareOperation.EQUALS
 import io.github.adven27.concordion.extensions.exam.db.builder.ContainsFilterTable
@@ -26,6 +26,7 @@ import org.dbunit.database.DatabaseConfig
 import org.dbunit.database.DatabaseConfig.FEATURE_ALLOW_EMPTY_FIELDS
 import org.dbunit.database.DatabaseConfig.PROPERTY_DATATYPE_FACTORY
 import org.dbunit.database.DatabaseConfig.PROPERTY_METADATA_HANDLER
+import org.dbunit.database.DatabaseConfig.PROPERTY_TABLE_TYPE
 import org.dbunit.database.IDatabaseConnection
 import org.dbunit.database.search.TablesDependencyHelper.getAllDependentTables
 import org.dbunit.dataset.AbstractDataSet
@@ -70,7 +71,7 @@ open class DbTester @JvmOverloads constructor(
     schema: String? = null,
     dbUnitConfig: DbUnitConfig = DbUnitConfig(),
     dataTypeConfig: Map<String, (DatabaseConfig) -> DatabaseConfig> = DATA_TYPES,
-    private val allowedSeedStrategies: List<SeedStrategy> = SeedStrategy.values().toList()
+    private val allowedSeedStrategies: List<SeedStrategy> = SeedStrategy.entries
 ) : DbTesterBase(driver, url, user, password, schema, dbUnitConfig, dataTypeConfig), AutoCloseable {
 
     private val dataSetVerifier: DataSetVerifier = DataSetVerifier(dbUnitConfig)
@@ -199,7 +200,9 @@ open class DbTester @JvmOverloads constructor(
         ): Verifier.Check<DataSetExpectation, IDataSet> {
             dbUnitConfig.apply {
                 valueComparer.setEvaluator(eval)
-                columnValueComparers.forEach { it.value.setEvaluator(eval) }
+                tableColumnValueComparer.onEach {
+                    it.columnValueComparer.forEach { (_, comparer) -> comparer.setEvaluator(eval) }
+                }
             }
             return checkWith(expected.await) {
                 check(
@@ -264,7 +267,8 @@ open class DbTester @JvmOverloads constructor(
                 actualTable,
                 config.diffFailureHandler.apply { diffList.clear() },
                 config.valueComparer,
-                config.columnValueComparers
+                config.tableColumnValueComparer.filter { it.table == expectedTable.tableName() }
+                    .flatMap { it.columnValueComparer.toList() }.toMap()
             )
             config.diffFailureHandler.diffList.map { it as Difference }.takeIf { it.isNotEmpty() }?.let {
                 ContentMismatch(expectedTable, actualTable, it)
@@ -316,7 +320,9 @@ open class DbTester @JvmOverloads constructor(
         ): Verifier.Check<TableExpectation, ITable> {
             dbUnitConfig.apply {
                 valueComparer.setEvaluator(eval)
-                columnValueComparers.forEach { it.value.setEvaluator(eval) }
+                tableColumnValueComparer.forEach {
+                    it.columnValueComparer.forEach { (_, comparer) -> comparer.setEvaluator(eval) }
+                }
             }
             return with(expected) {
                 val sortCols =
@@ -362,7 +368,6 @@ open class DbTester @JvmOverloads constructor(
                 require(diff.isNotEmpty())
             }
 
-            fun diff(row: Int, col: String) = diff[row, col]
             private operator fun List<Difference>.get(row: Int, col: String) =
                 singleOrNull { it.rowIndex == row && it.columnName.equals(col, ignoreCase = true) }
         }
@@ -395,13 +400,15 @@ open class DbTester @JvmOverloads constructor(
                 actual,
                 config.diffFailureHandler.apply { diffList.clear() },
                 config.valueComparer,
-                config.columnValueComparers
+                config.tableColumnValueComparer.filter { it.table == expected.tableName() }
+                    .flatMap { it.columnValueComparer.toList() }.toMap()
+
             )
         }
     }
 }
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 open class DbTesterBase @JvmOverloads constructor(
     driver: String,
     url: String,
@@ -436,7 +443,12 @@ open class DbTesterBase @JvmOverloads constructor(
             "HSQL Database Engine" to { it.apply { setProperty(PROPERTY_DATATYPE_FACTORY, HsqldbDataTypeFactory()) } },
             "H2" to { it.apply { setProperty(PROPERTY_DATATYPE_FACTORY, H2DataTypeFactory()) } },
             "Oracle" to { it.apply { setProperty(PROPERTY_DATATYPE_FACTORY, OracleDataTypeFactory()) } },
-            "PostgreSQL" to { it.apply { setProperty(PROPERTY_DATATYPE_FACTORY, JsonbPostgresqlDataTypeFactory()) } },
+            "PostgreSQL" to {
+                it.apply {
+                    setProperty(PROPERTY_DATATYPE_FACTORY, JsonbPostgresqlDataTypeFactory())
+                    setProperty(PROPERTY_TABLE_TYPE, arrayOf("VIEW", "TABLE", "PARTITIONED TABLE"))
+                }
+            },
             "Microsoft SQL Server" to { it.apply { setProperty(PROPERTY_DATATYPE_FACTORY, MsSqlDataTypeFactory()) } }
         )
     }
@@ -474,10 +486,9 @@ open class DbTesterBase @JvmOverloads constructor(
     fun <R> useStatement(fn: (Statement) -> R): R = connection.connection.createStatement().use { fn(it) }
 
     fun select(ds: String?, table: String, cols: Set<String>, where: String? = null): ITable = connection(ds).let { c ->
-        includedColumnsTable(
-            if (where.isNullOrEmpty()) c.createTable(table) else c.select(table, where),
-            cols.toTypedArray()
-        )
+        (if (where.isNullOrEmpty()) c.createTable(table) else c.select(table, where)).let {
+            if (cols.isEmpty()) it else includedColumnsTable(it, cols.toTypedArray())
+        }
     }
 
     private fun IDatabaseConnection.select(tableName: String, filter: String): ITable =

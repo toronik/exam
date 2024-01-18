@@ -109,7 +109,7 @@ enum class DurationStyle(pattern: String) {
                 if (chronoUnit == null) {
                     return MILLIS
                 }
-                for (candidate in values()) {
+                for (candidate in entries) {
                     if (candidate.chronoUnit == chronoUnit) {
                         return candidate
                     }
@@ -118,7 +118,7 @@ enum class DurationStyle(pattern: String) {
             }
 
             fun fromSuffix(suffix: String): TimeUnit {
-                for (candidate in values()) {
+                for (candidate in entries) {
                     if (candidate.suffix.equals(suffix, ignoreCase = true)) {
                         return candidate
                     }
@@ -148,7 +148,7 @@ enum class DurationStyle(pattern: String) {
          * @throws IllegalArgumentException if the value is not a known style
          */
         fun detect(value: String): DurationStyle {
-            for (candidate in values()) {
+            for (candidate in entries) {
                 if (candidate.matches(value)) {
                     return candidate
                 }

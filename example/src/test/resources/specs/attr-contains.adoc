@@ -1,0 +1,3 @@
+`contains`:: _Optional. Default: `EXACT`._
++
+Messages list verifying  mode. Supported values: `EXACT`, `EXACT_IN_ANY_ORDER`.

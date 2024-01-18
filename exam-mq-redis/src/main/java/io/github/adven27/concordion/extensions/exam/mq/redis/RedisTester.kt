@@ -9,7 +9,7 @@ open class RedisTester(private val host: String, private val port: Int) : MqTest
         jedis = Jedis(host, port)
     }
 
-    override fun send(message: MqTester.Message, params: Map<String, String>) {
+    override fun send(message: MqTester.Message) {
         val kv = message.body.split("=").toTypedArray()
         jedis[kv[0].trim { it <= ' ' }] = kv[1].trim { it <= ' ' }
     }
