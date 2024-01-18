@@ -93,12 +93,12 @@ class HandlebarsResolverTest {
 
     @Test
     fun `defaults date`() {
-        DateHelpers.values().forEach {
+        DateHelpers.entries.forEach {
             val expected = it.expected
-            if (expected is Date) {
-                assertThat(helper(it) as Date).describedAs("Failed helper: %s", it).isCloseTo(expected, 2000)
-            } else {
-                assertEquals(expected, helper(it), "Failed helper: $it")
+            val result = helper(it)
+            when (expected) {
+                is Date -> assertThat( if(result is String) result.parseDate() else result as Date).describedAs("Failed helper: %s", it).isCloseTo(expected, 2000)
+                else -> assertEquals(expected, result, "Failed helper: $it")
             }
         }
     }

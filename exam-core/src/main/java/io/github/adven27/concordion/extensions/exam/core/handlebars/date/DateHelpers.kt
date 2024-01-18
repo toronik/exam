@@ -47,11 +47,11 @@ enum class DateHelpers(
             (if (context is String) AT.plus(detectAndParse(context)) else AT).toDate()
     },
     now(
-        example = """{{now "yyyy-MM-dd'T'HH:mm Z" tz="GMT+3" minus="1 y, 2 months, d 3" plus="4 h, 5 min, 6 s"}}""",
+        example = """{{now "yyyy-MM-dd'T'HH:mm:ss" tz="GMT+3" minus="1 y, 2 months, d 3" plus="4 h, 5 min, 6 s"}}""",
         expected = ZonedDateTime.now("GMT+3".timeZoneId())
             .minusYears(1).minusMonths(2).minusDays(3)
             .plusHours(4).plusMinutes(5).plusSeconds(6)
-            .toString("yyyy-MM-dd'T'HH:mm Z"),
+            .toDate(),
         options = mapOf(TZ to "\"GMT+3\"", PLUS to "\"1 day\"", MINUS to "\"5 hours\"")
     ) {
         override fun invoke(context: Any?, options: Options): Any? = if (context is String && context.isNotBlank()) {
