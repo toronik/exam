@@ -4,9 +4,9 @@ https://github.com/jknack/handlebars.java[The Handlebars templates] may be used 
 
 Exam provides following built-in https://github.com/jknack/handlebars.java#helpers[helpers] groups:
 
-Date helpers:: [pre language-handlebars c-echo=dateHelpers]`{empty}`
-Data matcher helpers:: [pre language-handlebars c-echo=matcherHelpers]`{empty}`
-Misc helpers:: [pre language-handlebars c-echo=miscHelpers]`{empty}`
+Date helpers:: [pre language-handlebars e-echo=dateHelpers]`{empty}`
+Data matcher helpers:: [pre language-handlebars e-echo=matcherHelpers]`{empty}`
+Misc helpers:: [pre language-handlebars e-echo=miscHelpers]`{empty}`
 
 .Data types matchers:
 [source,asciidoc]

@@ -16,13 +16,13 @@ include::core-example.adoc[tags=e]
 .Before each example
 ****
 [.given]
-Split the full name [c-execute=#result = split(#TEXT)]_Jane Smith_
+Split the full name [e-execute=#result = split(#TEXT)]_Jane Smith_
 ****
 
 .Dummy
 ====
-Result contains first name [c-assert-equals=#result.first]_Jane_
-and last name [c-assert-equals=#result.second]_Smith_
+Result contains first name [e-eq=#result.first]_Jane_
+and last name [e-eq=#result.second]_Smith_
 ====
 
 [.ExpectedToFail]
@@ -33,8 +33,8 @@ and last name [c-assert-equals=#result.second]_Smith_
 Wrong expectations
 
 [.then]
-Result contains first name [c-assert-equals=#result.first]_Wrong_
-and last name [c-assert-equals=#result.second]_Wrong_
+Result contains first name [e-eq=#result.first]_Wrong_
+and last name [e-eq=#result.second]_Wrong_
 
 ====
 //end::e[]
