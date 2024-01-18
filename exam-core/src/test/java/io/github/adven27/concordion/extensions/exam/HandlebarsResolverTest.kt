@@ -16,7 +16,7 @@ import org.concordion.internal.FixtureInstance
 import org.concordion.internal.OgnlEvaluator
 import org.junit.Test
 import java.time.LocalDate
-import java.util.*
+import java.util.Date
 import kotlin.test.assertEquals
 
 class HandlebarsResolverTest {
@@ -97,7 +97,9 @@ class HandlebarsResolverTest {
             val expected = it.expected
             val result = helper(it)
             when (expected) {
-                is Date -> assertThat( if(result is String) result.parseDate() else result as Date).describedAs("Failed helper: %s", it).isCloseTo(expected, 2000)
+                is Date -> assertThat(if (result is String) result.parseDate() else result as Date)
+                    .describedAs("Failed helper: %s", it).isCloseTo(expected, 2000)
+
                 else -> assertEquals(expected, result, "Failed helper: $it")
             }
         }
