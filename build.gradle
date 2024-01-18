@@ -94,12 +94,12 @@ task publishMaven {
     dependsOn ":exam-mq-kafka:publishToSonatype"
     dependsOn ":exam-mq-ibmmq:publishToSonatype"
     dependsOn ":exam-mq-redis:publishToSonatype"
-    dependsOn ":exam-files:publishToSonatype"
-    dependsOn ":exam-ui:publishToSonatype"
+//    dependsOn ":exam-files:publishToSonatype"
+//    dependsOn ":exam-ui:publishToSonatype"
     dependsOn ":exam-ms:publishToSonatype"
-    dependsOn ":exam-nosql:publishToSonatype"
-    dependsOn ":exam-nosql-mongo:publishToSonatype"
-    dependsOn ":exam-nosql-elastic:publishToSonatype"
+//    dependsOn ":exam-nosql:publishToSonatype"
+//    dependsOn ":exam-nosql-mongo:publishToSonatype"
+//    dependsOn ":exam-nosql-elastic:publishToSonatype"
 }
 
 nexusPublishing {
