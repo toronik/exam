@@ -60,6 +60,7 @@ open class ConcordionPostprocessor : Postprocessor() {
             "eq-json",
             "eq-xml",
             "verifier",
+            "ds",
             AWAIT_AT_MOST_SEC_SPINAL,
             AWAIT_AT_MOST_SEC_CAMEL,
             AWAIT_POLL_DELAY_MILLIS_SPINAL,

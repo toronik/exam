@@ -40,11 +40,14 @@ enum class DateHelpers(
     override val options: Map<String, String> = emptyMap()
 ) : ExamHelper {
     at(
-        example = "{{at '-2d'}}",
-        expected = LocalDateTime.now().minusDays(2).toDate()
+        example = "{{at '-2d' '-1m'}}",
+        expected = LocalDateTime.now().minusDays(2).minusMinutes(1).toDate()
     ) {
-        override fun invoke(context: Any?, options: Options) =
-            (if (context is String) AT.plus(detectAndParse(context)) else AT).toDate()
+        override fun invoke(context: Any?, options: Options) = (
+            context.takeIf { it is String }?.let {
+                (setOf(context) + options.params).map { detectAndParse(it as String) }.fold(AT) { r, d -> r.plus(d) }
+            } ?: AT
+            ).toDate()
     },
     now(
         example = """{{now "yyyy-MM-dd'T'HH:mm:ss" tz="GMT+3" minus="1 y, 2 months, d 3" plus="4 h, 5 min, 6 s"}}""",

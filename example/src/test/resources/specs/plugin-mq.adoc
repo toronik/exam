@@ -11,10 +11,10 @@ include::diagram/mq-plugin.puml[]
 
 There are several out-of-the-box implementations that can be used directly or as an example for custom ones:
 
-- https://github.com/Adven27/Exam/tree/master/exam-mq-kafka[exam-mq-kafka]
-- https://github.com/Adven27/Exam/tree/master/exam-mq-rabbit[exam-mq-rabbit]
-- https://github.com/Adven27/Exam/tree/master/exam-mq-ibmmq[exam-mq-ibmmq]
-- https://github.com/Adven27/Exam/tree/master/exam-mq-redis[exam-mq-redis]
+- https://github.com/toronik/exam/tree/master/exam-mq-kafka[exam-mq-kafka]
+- https://github.com/toronik/exam/tree/master/exam-mq-rabbit[exam-mq-rabbit]
+- https://github.com/toronik/exam/tree/master/exam-mq-ibmmq[exam-mq-ibmmq]
+- https://github.com/toronik/exam/tree/master/exam-mq-redis[exam-mq-redis]
 
 .Dependency
 [source,groovy,subs="attributes+"]
@@ -26,30 +26,28 @@ testImplementation "io.github.adven27:exam-mq:{version}"
 open class Specs : AbstractSpecs() {
     override fun init() = ExamExtension(
         MqPlugin(
-            mapOf(
-                "someRabbitQueue" to RabbitTester(
-                    port = 5432,
-                    sendConfig = SendConfig("someRoutingKey"),
-                    receiveConfig = ReceiveConfig("someQueueName")
-                ),
-                "dummyQueue" to object : MqTester {
-                    private val queue = ArrayDeque<Message>()
+            "someRabbitQueue" to RabbitTester(
+                port = 5432,
+                sendConfig = SendConfig("someRoutingKey"),
+                receiveConfig = ReceiveConfig("someQueueName")
+            ),
+            "dummyQueue" to object : MqTester {
+                private val queue = ArrayDeque<Message>()
 
-                    /* open connection*/
-                    override fun start() = Unit
+                /* open connection*/
+                override fun start() = Unit
 
-                    /* close connection*/
-                    override fun stop() = Unit
+                /* close connection*/
+                override fun stop() = Unit
 
-                    override fun send(message: Message) {
-                        queue += message
-                    }
-
-                    override fun receive(): List<Message> = queue.map { queue.poll() }
-                    override fun purge() = queue.clear()
-                    override fun accumulateOnRetries(): Boolean = true
+                override fun send(message: Message) {
+                    queue += message
                 }
-            )
+
+                override fun receive(): List<Message> = queue.map { queue.poll() }
+                override fun purge() = queue.clear()
+                override fun accumulateOnRetries(): Boolean = true
+            }
         )
     )
 --
@@ -63,7 +61,6 @@ _Queue alias_ is a queue logical name: `<e e:mq-set="out"/>`
 - `<<e-mq-check>>`
 - `<<e-mq-clean>>`
 
-:queue2: myAnotherQueue
 
 === e-mq-set [[e-mq-set]]
 
@@ -77,6 +74,8 @@ include::plugin-mq.adoc[tags=mq-set-1]
 
 ====
 //tag::mq-set-1[]
+:queue2: myAnotherQueue
+
 .Sending message to {queue2}
 [source,json,e-mq-set={queue2}]
 ----
@@ -225,7 +224,6 @@ include::plugin-mq.adoc[tags=mq-check-empty]
 .Check myQueue is empty
 [caption=, e-mq-check=myQueue]
 |===
-|{empty}
 |===
 //end::mq-check-empty[]
 ====

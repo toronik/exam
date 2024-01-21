@@ -44,10 +44,11 @@ class DbCheckParser : DbCheckCommand.Parser {
 
     private fun toColumns(cols: List<String>) = cols.map { Column(it, DataType.UNKNOWN) }.toTypedArray()
 
-    private fun cols(it: Html) =
-        it.el.getFirstChildElement("thead").getFirstChildElement("tr").childElements.map { it.text.trim() }
+    private fun cols(html: Html) =
+        html.el.getFirstChildElement("thead")?.getFirstChildElement("tr")?.childElements?.map { it.text.trim() }
+            ?: listOf()
 
-    private fun values(it: Html) = it.el().getFirstChildElement("tbody").childElements.map { tr ->
-        tr.childElements.map { it.text.trim() }
-    }
+    private fun values(html: Html) =
+        html.el.getFirstChildElement("tbody")?.childElements?.map { tr -> tr.childElements.map { it.text.trim() } }
+            ?: listOf()
 }

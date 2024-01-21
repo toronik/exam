@@ -7,7 +7,7 @@ component MqPlugin #AFF {
     interface MqTester {
           fun start()
           fun stop()
-          fun send(message: Message, params: Map<String, String>)
+          fun send(message: Message)
           fun receive(): List<Message>
           fun purge()
           fun accumulateOnRetries(): Boolean = true

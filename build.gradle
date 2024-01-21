@@ -4,7 +4,7 @@ buildscript {
     ext.exposed_version = '0.41.1'
     ext.klogging_version = '3.0.4'
     ext.jacksonKt_version = '2.14.1'
-    ext.libVersion = '2024.0.0'
+    ext.libVersion = '2024.0.1'
     repositories {
         mavenCentral()
         maven {

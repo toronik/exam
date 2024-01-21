@@ -4,7 +4,6 @@ import mu.KLogging
 import org.asciidoctor.Asciidoctor
 import org.asciidoctor.Attributes
 import org.asciidoctor.Attributes.FONT_ICONS
-import org.asciidoctor.AttributesBuilder
 import org.asciidoctor.Options
 import org.asciidoctor.Placement.LEFT
 import org.asciidoctor.SafeMode.UNSAFE
@@ -19,17 +18,17 @@ import org.concordion.internal.ConcordionBuilder.getBaseOutputDir
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStreamReader
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import kotlin.time.measureTimedValue
 
 open class AdocExtension : ConcordionExtension {
     companion object : KLogging() {
         const val BASE = "ext/ascii"
         const val BASE_BS = "ext/bootstrap"
+        private const val SPECS_ADOC_RESOURCES_DIR = "SPECS_ADOC_RESOURCES_DIR"
         private const val SPECS_ADOC_BASE_DIR = "SPECS_ADOC_BASE_DIR"
         private const val SPECS_ADOC_VERSION = "SPECS_ADOC_VERSION"
-        val ADOC_BASE_DIR = File(System.getProperty(SPECS_ADOC_BASE_DIR, "./src/test/resources/specs"))
+        val RESOURCES_DIR: String = System.getProperty(SPECS_ADOC_RESOURCES_DIR, "./src/test/resources")
+        val BASE_DIR: String = System.getProperty(SPECS_ADOC_BASE_DIR, "/specs")
         val ADOC_VERSION: String = System.getProperty(SPECS_ADOC_VERSION, "<Set system property $SPECS_ADOC_VERSION>")
         val ADOC: Asciidoctor = Asciidoctor.Factory.create().apply {
             System.setProperty("jruby.compat.version", "RUBY1_9")
@@ -41,33 +40,39 @@ open class AdocExtension : ConcordionExtension {
                 .postprocessor(ConcordionPostprocessor::class.java)
                 .treeprocessor(ExamTreeProcessor())
         }
-        val CACHE: MutableMap<String, ByteArrayInputStream> = mutableMapOf()
-
-        fun copyGeneratedDiagramImagesToReports(baseDir: File) {
-            File(baseDir.path + File.separator + "img").takeIf { it.exists() }?.let { img ->
-                val output = File(getBaseOutputDir().path + File.separator + "specs/img")
-                output.takeUnless { it.exists() }?.let { Files.createDirectories(it.toPath()) }
-                img.listFiles()?.forEach {
-                    Files.move(
-                        it.toPath(),
-                        File(output.path + File.separator + it.name).toPath(),
-                        REPLACE_EXISTING
+        val ADOC_OPTS: Options = Options.builder()
+            .standalone(true)
+            .baseDir(File("$RESOURCES_DIR$BASE_DIR"))
+            .safe(UNSAFE)
+            .backend("xhtml5")
+            .attributes(
+                Attributes.builder()
+                    .noFooter(true)
+                    .sourceHighlighter("highlight.js")
+                    .showTitle(true)
+                    .tableOfContents(true)
+                    .tableOfContents(LEFT)
+                    .icons(FONT_ICONS)
+                    .attributes(
+                        mapOf(
+                            "toclevels" to "4",
+                            "diagram-cachedir" to getBaseOutputDir().path,
+                            "imagesoutdir" to getBaseOutputDir().path + BASE_DIR,
+                            "version" to ADOC_VERSION
+                        )
                     )
-                }
-                Files.deleteIfExists(img.toPath())
-            }
-        }
+                    .build()
+            )
+            .build()
+        val CACHE: MutableMap<String, ByteArrayInputStream> = mutableMapOf()
     }
-
-    protected open fun configureAttributesBuilder(b: AttributesBuilder): AttributesBuilder = b
 
     override fun addTo(ex: ConcordionExtender) {
         addStyles(ex)
         ex.withSpecificationType("adoc") { i, n ->
             measureTimedValue {
                 CACHE.getOrPut(n) {
-                    ByteArrayInputStream(ADOC.convert(InputStreamReader(i).readText(), options()).toByteArray())
-                        .also { copyGeneratedDiagramImagesToReports(ADOC_BASE_DIR) }
+                    ByteArrayInputStream(ADOC.convert(InputStreamReader(i).readText(), ADOC_OPTS).toByteArray())
                 }
             }.let {
                 logger.info { "$n converted in " + it.duration }
@@ -116,32 +121,6 @@ open class AdocExtension : ConcordionExtension {
             "fonts/fontawesome-webfont.woff2"
         )
     }
-
-    private fun options(): Options? = Options.builder()
-        .standalone(true)
-        .baseDir(ADOC_BASE_DIR)
-        .safe(UNSAFE)
-        .backend("xhtml5")
-        .attributes(
-            Attributes.builder()
-                .noFooter(true)
-                .imagesDir("img")
-                .sourceHighlighter("highlight.js")
-                .showTitle(true)
-                .tableOfContents(true)
-                .tableOfContents(LEFT)
-                .icons(FONT_ICONS)
-                .attributes(
-                    mapOf(
-                        "toclevels" to "4",
-                        "diagram-cachedir" to getBaseOutputDir().path,
-                        "version" to ADOC_VERSION
-                    )
-                )
-                .apply { configureAttributesBuilder(this) }
-                .build()
-        )
-        .build()
 
     protected open fun attrs(): Map<String, String> = mapOf()
 

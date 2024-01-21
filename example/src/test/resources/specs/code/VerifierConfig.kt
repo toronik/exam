@@ -8,6 +8,6 @@ class Specs : AbstractSpecs() {
     override fun init() = ExamExtension(
         //...
     ).withVerifiers(
-        mapOf("jsonIgnoreExtraFields" to JsonVerifier { it.withOptions(IGNORING_EXTRA_FIELDS) })
+        "jsonIgnoreExtraFields" to JsonVerifier { it.withOptions(IGNORING_EXTRA_FIELDS) }
     )
 }

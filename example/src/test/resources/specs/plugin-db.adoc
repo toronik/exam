@@ -26,21 +26,17 @@ DbUnit --> DB :interacts with
 testImplementation "io.github.adven27:exam-db:{version}"
 
 .Configuration
-[source,java]
+[source,kotlin]
 --
-public class Specs extends AbstractSpecs {
-    @Override
-    protected ExamExtension init() {
-        return new ExamExtension(
-            new DbPlugin(
-                "org.postgresql.Driver",                     // driver class
-                "jdbc:postgresql://localhost:5432/postgres", // jdbc url
-                "postgres",                                  // user
-                "postgres"                                   // password
-            )
-        );
-    }
-}
+class Specs : AbstractSpecs() {
+    override fun init() = ExamExtension(
+        DbPlugin(
+            driver = "org.postgresql.Driver",
+            url = "jdbc:postgresql://localhost:5432/postgres",
+            user = "postgres",
+            password = "postgres"
+        )
+    )
 --
 
 .Commands
@@ -108,6 +104,26 @@ id, name, height, manufactured
 2, Bob, 200, {{at '-1h'}}
 ,===
 //end::db-check[]
+====
+
+.Check emptiness
+[source,asciidoc]
+--
+include::plugin-db.adoc[tags=db-check-empty]
+--
+
+====
+.Set empty table
+[e-db-set=ANDROIDS_TABLE]
+|===
+|===
+
+//tag::db-check-empty[]
+.Check table
+[e-db-check=ANDROIDS_TABLE]
+|===
+|===
+//end::db-check-empty[]
 ====
 
 === e-db-clean [[e-db-clean]]

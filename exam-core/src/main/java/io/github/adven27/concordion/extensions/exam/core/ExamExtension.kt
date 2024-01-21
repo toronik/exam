@@ -66,8 +66,8 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
     }
 
     @Suppress("unused")
-    fun withVerifiers(overrideVerifiers: Map<String, ContentVerifier>): ExamExtension {
-        CONTENT_VERIFIERS += overrideVerifiers
+    fun withVerifiers(vararg overrideVerifiers: Pair<String, ContentVerifier>): ExamExtension {
+        CONTENT_VERIFIERS += overrideVerifiers.toMap()
         return this
     }
 

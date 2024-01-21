@@ -28,7 +28,7 @@ open class Specs : AbstractSpecs() {
 
     override fun init(): ExamExtension = ExamExtension(
         WsPlugin(PORT.also { System.setProperty("server.port", it.toString()) }),
-        MqPlugin(mapOf("myQueue" to DummyMq(), "myAnotherQueue" to DummyMq())),
+        MqPlugin("myQueue" to DummyMq(), "myAnotherQueue" to DummyMq()),
         DbPlugin(dbTester)
     ).withHandlebar { hb ->
         hb.registerHelper(
@@ -42,7 +42,7 @@ open class Specs : AbstractSpecs() {
             }
         )
     }.withVerifiers(
-        mapOf("jsonIgnoreExtraFields" to JsonVerifier { it.withOptions(IGNORING_EXTRA_FIELDS) })
+        "jsonIgnoreExtraFields" to JsonVerifier { it.withOptions(IGNORING_EXTRA_FIELDS) }
     )
 
     override fun startSut() {

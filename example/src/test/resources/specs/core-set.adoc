@@ -54,6 +54,10 @@ Set `mapObject` = [e-set=mapObject]`{{map a='1' b='2'}}`
 include::core-set.adoc[tags=fl]
 --
 
+.Given file `/data/core/file.txt`
+[source]
+include::../data/core/file.txt[]
+
 ====
 //tag::fl[]
 [.when]

@@ -1,5 +1,6 @@
 package io.github.adven27.concordion.extensions.exam.mq.commands
 
+import com.github.jknack.handlebars.internal.text.StringEscapeUtils.escapeJava
 import io.github.adven27.concordion.extensions.exam.core.Content
 import io.github.adven27.concordion.extensions.exam.core.ContentVerifier.Fail
 import io.github.adven27.concordion.extensions.exam.core.commands.Verifier
@@ -160,6 +161,6 @@ interface MqCheckRenderer {
 
     // language=html
     private fun toRows(headers: Map<String, String?>) = headers.entries.joinToString("\n") { (k, v) ->
-        """<tr><td class="success">$k</td><td class="success"><pre>$v</pre></td></tr>"""
+        """<tr><td class="success">$k</td><td class="success"><pre><![CDATA[${escapeJava(v)}]]></pre></td></tr>"""
     }
 }
