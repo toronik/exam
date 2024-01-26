@@ -11,9 +11,11 @@ import io.github.adven27.concordion.extensions.exam.core.logger.LoggingFormatter
 import io.github.adven27.concordion.extensions.exam.core.utils.After
 import io.github.adven27.concordion.extensions.exam.core.utils.Before
 import io.github.adven27.concordion.extensions.exam.core.utils.DateFormatMatcher
-import io.github.adven27.concordion.extensions.exam.core.utils.DateWithinNow
-import io.github.adven27.concordion.extensions.exam.core.utils.DateWithinParam
+import io.github.adven27.concordion.extensions.exam.core.utils.DateFormattedAndWithinDate
+import io.github.adven27.concordion.extensions.exam.core.utils.DateFormattedAndWithinNow
+import io.github.adven27.concordion.extensions.exam.core.utils.DateWithin
 import io.github.adven27.concordion.extensions.exam.core.utils.XMLDateWithin
+import io.github.adven27.concordion.extensions.exam.core.utils.uuid
 import net.javacrumbs.jsonunit.JsonAssert.`when`
 import net.javacrumbs.jsonunit.core.Configuration
 import net.javacrumbs.jsonunit.core.Option.IGNORING_ARRAY_ORDER
@@ -151,9 +153,11 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
 
         val MATCHERS: MutableMap<String, Matcher<*>> = mutableMapOf(
             "formattedAs" to DateFormatMatcher(),
-            "formattedAndWithin" to DateWithinParam(),
-            "formattedAndWithinNow" to DateWithinNow(),
+            "formattedAndWithin" to DateFormattedAndWithinDate(),
+            "formattedAndWithinNow" to DateFormattedAndWithinNow(),
             "xmlDateWithinNow" to XMLDateWithin(),
+            "within" to DateWithin(),
+            "uuid" to uuid(),
             "after" to After(),
             "before" to Before()
         )

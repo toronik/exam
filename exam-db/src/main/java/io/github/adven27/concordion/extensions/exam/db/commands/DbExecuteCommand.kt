@@ -30,6 +30,10 @@ open class DbExecuteCommand(
     }
 
     private fun ITableIterator.render(root: Html) {
-        root(table.let { renderTable(it, { td, row, col -> td()(Html(valuePrinter.wrap(it[row, col]))) }) })
+        root(
+            table.let {
+                renderTable(it, { td, row, col -> td()(Html(valuePrinter.wrap(it.tableName(), col, it[row, col]))) })
+            }
+        )
     }
 }

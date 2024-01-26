@@ -64,7 +64,7 @@ fun String.toDatePattern(): DateTimeFormatter = if (this == "ISO_LOCAL") {
     DateTimeFormatter.ofPattern(this)
 }
 
-fun date(item: Any, pattern: String? = null): Result<ZonedDateTime> = try {
+fun date(item: Any?, pattern: String? = null): Result<ZonedDateTime> = try {
     Result.success(
         when (item) {
             is ZonedDateTime -> item

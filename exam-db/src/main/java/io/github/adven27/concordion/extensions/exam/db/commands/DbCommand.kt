@@ -17,15 +17,16 @@ import io.github.adven27.concordion.extensions.exam.db.DbPlugin
 import io.github.adven27.concordion.extensions.exam.db.DbTester
 import org.dbunit.dataset.Column
 import org.dbunit.dataset.ITable
-import org.dbunit.dataset.filter.DefaultColumnFilter
+import org.dbunit.dataset.filter.DefaultColumnFilter.includedColumnsTable
 
 abstract class DbCommand<M, R>(protected val dbTester: DbTester, attrs: Set<String> = setOf()) :
-    ExamCommand<M, R>(setOf(DS, WHERE, OPERATION) + attrs) {
+    ExamCommand<M, R>(setOf(DS, WHERE, OPERATION, ORDER_BY) + attrs) {
 
     companion object {
         const val DS = "ds"
         const val WHERE = "where"
         const val OPERATION = "operation"
+        const val ORDER_BY = "orderBy"
     }
 }
 
@@ -35,8 +36,8 @@ fun ITable.columnNames() = this.tableMetaData.columns.map { it.columnName }
 fun ITable.columnNamesArray() = this.columnNames().toTypedArray()
 fun ITable.columnsSortedBy(sort: (o1: String, o2: String) -> Int) = columnNames().sortedWith(Comparator(sort))
 
-fun ITable.withColumnsAsIn(expected: ITable): ITable =
-    DefaultColumnFilter.includedColumnsTable(this, expected.columns())
+fun ITable.withColumnsAsIn(expected: ITable, sortCols: Array<String> = arrayOf()): ITable =
+    includedColumnsTable(this, (expected.columns().map { it.columnName }.toSet() + sortCols).toTypedArray())
 
 operator fun ITable.get(row: Int, col: String): Any? = this.getValue(row, col)
 operator fun ITable.get(row: Int, col: Column): Any? = this[row, col.columnName]
@@ -50,7 +51,7 @@ fun renderTable(
     remarks: Map<String, Int> = emptyMap()
 ): Html = renderTable(
     t,
-    { td, row, col -> td()(Html(valuePrinter.wrap(t[row, col]))) },
+    { td, row, col -> td()(Html(valuePrinter.wrap(t.tableName(), col, t[row, col]))) },
     caption,
     { col: String -> if (remarks.containsKey(col)) "table-info" else "" },
     { col1, col2 -> -compareValues(remarks[col1], remarks[col2]) }

@@ -1,5 +1,4 @@
 = Exam BDD Framework
-:toc:
 
 [.lead]
 Extension for https://github.com/concordion/concordion/[Concordion BDD framework]

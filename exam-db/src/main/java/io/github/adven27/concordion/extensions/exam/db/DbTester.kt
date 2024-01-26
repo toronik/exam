@@ -35,7 +35,6 @@ import org.dbunit.dataset.CompositeTable
 import org.dbunit.dataset.FilteredDataSet
 import org.dbunit.dataset.IDataSet
 import org.dbunit.dataset.ITable
-import org.dbunit.dataset.SortedTable
 import org.dbunit.dataset.csv.CsvDataSet
 import org.dbunit.dataset.datatype.AbstractDataType
 import org.dbunit.dataset.datatype.DataType
@@ -247,19 +246,18 @@ open class DbTester @JvmOverloads constructor(
                 val sortCols = orderBy.takeIf { it.isNotEmpty() }?.filterBy(table) ?: expectedTable.columnNamesArray()
                 var actualTable = includedColumnsTable(
                     sortedTable(actual.getTable(table), sortCols, dbUnitConfig.overrideRowSortingComparer),
-                    expectedTable.tableMetaData.columns
+                    columns(expectedTable, sortCols).toTypedArray()
                 )
-                expectedTable = sortedTable(
-                    expectedTable.applyTableMetaDataFrom(actualTable),
-                    sortCols,
-                    dbUnitConfig.overrideRowSortingComparer
-                )
+                expectedTable = CompositeTable(actualTable.tableMetaData, expectedTable)
                 if (compareOperation == CompareOperation.CONTAINS) {
                     actualTable = ContainsFilterTable(actualTable, expectedTable, excludeCols.toList())
                 }
                 assert(expectedTable, actualTable, dbUnitConfig)
             }.also { logger.info(it.toString()) }
         }
+
+        private fun columns(t: ITable, sortCols: Array<String>) =
+            t.tableMetaData.columns.map { it.columnName }.toSet() + sortCols
 
         private fun assert(expectedTable: ITable, actualTable: ITable, config: DbUnitConfig) = try {
             assertWithValueComparer(
@@ -276,8 +274,6 @@ open class DbTester @JvmOverloads constructor(
         } catch (f: DbComparisonFailure) {
             SizeMismatch(expectedTable, actualTable, f)
         }
-
-        private fun ITable.applyTableMetaDataFrom(source: ITable) = CompositeTable(source.tableMetaData, this)
 
         private fun Set<String>.filterBy(tableName: String) = map { it.uppercase() }
             .filter { it.startsWith("${tableName.uppercase()}.") }
@@ -327,31 +323,28 @@ open class DbTester @JvmOverloads constructor(
             return with(expected) {
                 val sortCols =
                     (if (orderBy.isEmpty() && table.rowCount > 0) table.columnNames() else orderBy).toTypedArray()
-                var actualTable = sortedTable(
-                    actual(this).withColumnsAsIn(table),
+                val actualTable = actual(this)
+                var sortedActual = sortedTable(
+                    actualTable.withColumnsAsIn(table, sortCols),
                     sortCols,
                     dbUnitConfig.overrideRowSortingComparer
                 )
                 try {
-                    val expectedTable = sortedTable(
-                        CompositeTable(actualTable.tableMetaData, table),
-                        sortCols,
-                        dbUnitConfig.overrideRowSortingComparer
-                    )
+                    val expectedTable = CompositeTable(actualTable.withColumnsAsIn(table).tableMetaData, table)
                     await?.let {
                         it.await("Await DB table ${expectedTable.tableName()}").untilAsserted {
-                            actualTable = sortedTable(
+                            sortedActual = sortedTable(
                                 actual(this).withColumnsAsIn(expectedTable),
                                 sortCols,
                                 dbUnitConfig.overrideRowSortingComparer
                             )
-                            dbUnitAssert(expectedTable, actualTable)
+                            dbUnitAssert(expectedTable, sortedActual, sortCols)
                         }
-                    } ?: dbUnitAssert(expectedTable, actualTable)
-                    Verifier.Check(expected = expected, actual = actualTable)
+                    } ?: dbUnitAssert(expectedTable, sortedActual, sortCols)
+                    Verifier.Check(expected = expected, actual = sortedActual)
                 } catch (ignore: Throwable) {
                     logger.warn("Check failed", ignore)
-                    Verifier.Check(expected = expected, actual = actualTable, fail = ignore)
+                    Verifier.Check(expected = expected, actual = sortedActual, fail = ignore)
                 }
             }
         }
@@ -379,9 +372,9 @@ open class DbTester @JvmOverloads constructor(
             failure: DbComparisonFailure? = null
         ) : AssertionError(message, failure)
 
-        private fun dbUnitAssert(expected: SortedTable, actual: ITable) {
+        private fun dbUnitAssert(expected: ITable, actual: ITable, sortCols: Array<String>) {
             try {
-                assert(expected, actual, dbUnitConfig)
+                assert(expected, actual, sortCols, dbUnitConfig)
             } catch (fail: DbComparisonFailure) {
                 throw SizeMismatch(expected, actual, fail)
             }
@@ -394,10 +387,10 @@ open class DbTester @JvmOverloads constructor(
             }
         }
 
-        protected fun assert(expected: SortedTable, actual: ITable, config: DbUnitConfig) {
+        protected fun assert(expected: ITable, actual: ITable, sortCols: Array<String>, config: DbUnitConfig) {
             assertWithValueComparer(
                 expected,
-                actual,
+                actual.withColumnsAsIn(expected),
                 config.diffFailureHandler.apply { diffList.clear() },
                 config.valueComparer,
                 config.tableColumnValueComparer.filter { it.table == expected.tableName() }

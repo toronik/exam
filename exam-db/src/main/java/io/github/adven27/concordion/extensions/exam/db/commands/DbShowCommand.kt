@@ -112,7 +112,7 @@ open class DbShowCommand(
             override fun parse(context: Context) = Model(
                 ds = context[DS],
                 table = context.expression,
-                caption = context.el.first("caption")!!.text(),
+                caption = context.el.firstOrNull("caption")?.text(),
                 where = context[WHERE],
                 createDataSet = context[CREATE_DATASET].toBoolean(),
                 saveToResources = context[SAVE_TO_RESOURCES],

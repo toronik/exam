@@ -6,6 +6,7 @@ in a way a manual tester would do it: send request, verify response/database/mes
 .Manual testing
 [plantuml, manual]
 --
+left to right direction
 skinparam actorStyle awesome
 
 actor "Manual Tester" as Tester #AFF
@@ -18,19 +19,16 @@ together {
     interface "MQ API" as MQ #d1e7dd
 }
 
-Team -> "Test cases" #line.dashed
-"Test cases" -> Tester #line.dashed
+Team --> "Test cases" #line.dashed
+"Test cases" --> Tester #line.dashed
 
-DB -[hidden]- WS
-WS -[hidden]- MQ
+Tester <..> DB
+Tester <..> WS
+Tester <..> MQ
 
-WS <.> Tester
-MQ <.> Tester
-Tester <.> DB
-
-WS - SUT
-MQ - SUT
-SUT <-> DB
+WS -- SUT
+MQ -- SUT
+SUT <--> DB
 --
 
 Hence, the Exam functionality falls apart in *different libraries (plugins)* that are tailored
@@ -40,37 +38,32 @@ http interactions, file system interactions etc._ and may be used separately.
 .Exam testing
 [plantuml, exam]
 --
+left to right direction
+
 skinparam actorStyle awesome
+skinparam nodesep 10
 
 usecase TC as "Specification with examples" #transparent;line.dashed
 component "System Under Test" as SUT #d1e7dd
 component Exam #AFF {
-    component WsPlugin #AFF
     component DbPlugin #AFF
+    component WsPlugin #AFF
     component MqPlugin #AFF
 }
-together {
-    database DB #d1e7dd
-    interface "REST API" as WS #d1e7dd
-    interface "MQ API" as MQ #d1e7dd
-}
+database DB #d1e7dd
+interface "REST API" as WS #d1e7dd
+interface "MQ API" as MQ #d1e7dd
 
-Team .> TC
-TC -> Exam
+Team ..> TC
+TC --> Exam
 
-DB -[hidden]- WS
-WS -[hidden]- MQ
+DbPlugin <..> DB
+WsPlugin <..> WS
+MqPlugin <..> MQ
 
-DbPlugin -[hidden]- WsPlugin
-WsPlugin -[hidden]- MqPlugin
-
-WS <.> WsPlugin
-MQ <.> MqPlugin
-DbPlugin <.> DB
-
-MQ - SUT
-SUT - WS
-SUT <-> DB
+DB <--> SUT
+WS -- SUT
+MQ -- SUT
 --
 
 Each library consist of a *plugin class* that should be configured and attached to `ExamExtension`

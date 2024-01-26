@@ -10,10 +10,13 @@ import io.github.adven27.concordion.extensions.exam.core.handlebars.date.DateHel
 import io.github.adven27.concordion.extensions.exam.core.handlebars.matchers.MatcherHelpers
 import io.github.adven27.concordion.extensions.exam.core.handlebars.misc.MiscHelpers
 import io.github.adven27.concordion.extensions.exam.db.DbPlugin
+import io.github.adven27.concordion.extensions.exam.db.DbPlugin.ValuePrinter
+import io.github.adven27.concordion.extensions.exam.db.DbPlugin.ValuePrinter.Default.TableColumn
 import io.github.adven27.concordion.extensions.exam.db.DbTester
 import io.github.adven27.concordion.extensions.exam.db.DbUnitConfig
 import io.github.adven27.concordion.extensions.exam.db.DbUnitConfig.TableColumnValueComparer
 import io.github.adven27.concordion.extensions.exam.db.commands.IgnoreMillisComparer
+import io.github.adven27.concordion.extensions.exam.db.commands.JsonColumnComparer
 import io.github.adven27.concordion.extensions.exam.mq.MqPlugin
 import io.github.adven27.concordion.extensions.exam.mq.MqTester
 import io.github.adven27.concordion.extensions.exam.mq.MqTester.Message
@@ -22,6 +25,9 @@ import net.javacrumbs.jsonunit.core.Option.IGNORING_EXTRA_FIELDS
 import java.util.ArrayDeque
 
 class Nested : Specs()
+class MqCheckFailures : Specs()
+class DbSetOperations : Specs()
+class DbCheckFailures : Specs()
 
 @Suppress("FunctionOnlyReturningConstant")
 open class Specs : AbstractSpecs() {
@@ -29,7 +35,12 @@ open class Specs : AbstractSpecs() {
     override fun init(): ExamExtension = ExamExtension(
         WsPlugin(PORT.also { System.setProperty("server.port", it.toString()) }),
         MqPlugin("myQueue" to DummyMq(), "myAnotherQueue" to DummyMq()),
-        DbPlugin(dbTester)
+        DbPlugin(
+            dbTester,
+            valuePrinter = ValuePrinter.Default(
+                tableColumnType = mapOf(TableColumn("product", "meta_json") to "json")
+            )
+        )
     ).withHandlebar { hb ->
         hb.registerHelper(
             "hi",
@@ -76,9 +87,7 @@ open class Specs : AbstractSpecs() {
         const val PORT = 8888
 
         @JvmStatic
-        val dbTester = dbTester()
-
-        private fun dbTester() = DbTester(
+        val dbTester = DbTester(
             driver = "org.h2.Driver",
             url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:sql/populate.sql'",
             user = "sa",
@@ -86,8 +95,12 @@ open class Specs : AbstractSpecs() {
             dbUnitConfig = DbUnitConfig(
                 tableColumnValueComparer = listOf(
                     TableColumnValueComparer(
-                        table = "TYPES",
+                        table = "types",
                         columnValueComparer = mapOf("DATETIME_TYPE" to IgnoreMillisComparer())
+                    ),
+                    TableColumnValueComparer(
+                        table = "product",
+                        columnValueComparer = mapOf("META_JSON" to JsonColumnComparer())
                     )
                 )
             )

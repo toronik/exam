@@ -1,9 +1,5 @@
 package io.github.adven27.concordion.extensions.exam.db
 
-import com.fasterxml.jackson.core.JacksonException
-import com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.jknack.handlebars.Options
 import io.github.adven27.concordion.extensions.exam.core.ExamPlugin
 import io.github.adven27.concordion.extensions.exam.core.html.span
@@ -27,13 +23,13 @@ import java.sql.Statement
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
-import java.util.Date
+import java.util.*
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
 
 class DbPlugin @JvmOverloads constructor(
-    val dbTester: DbTester,
+    private val dbTester: DbTester,
     private val connectOnDemand: Boolean = true,
     private val valuePrinter: ValuePrinter = ValuePrinter.Default(),
     private val override: Map<String, Command> = mapOf()
@@ -111,30 +107,26 @@ class DbPlugin @JvmOverloads constructor(
     interface ValuePrinter {
         open class Default @JvmOverloads constructor(
             formatter: DateTimeFormatter = ISO_LOCAL_DATE_TIME,
-            private val detectJson: Boolean = false
+            private val tableColumnType: Map<TableColumn, String> = mapOf()
         ) : AbstractDefault(formatter) {
-            private val mapper: ObjectMapper = jacksonObjectMapper().configure(FAIL_ON_TRAILING_TOKENS, true)
+            data class TableColumn(val table: String, val column: String)
 
             override fun orElse(value: Any): String = value.toString()
 
-            override fun wrap(value: Any?): Element = if (detectJson && isJson(value)) {
-                Element("pre").addStyleClass("json").appendText(print(value))
-            } else {
-                super.wrap(value)
-            }
+            override fun wrap(table: String, column: String, value: Any?): Element =
+                tableColumnType.entries
+                    .filter { (tc, _) -> tc.eq(table, column) }
+                    .map { it.value }
+                    .firstOrNull()
+                    ?.let { Element("pre").addStyleClass(it).appendText(print(table, column, value)) }
+                    ?: super.wrap(table, column, value)
 
-            protected fun isJson(value: Any?): Boolean = value is String && valid(value)
-
-            private fun valid(json: String) = try {
-                mapper.readTree(json)
-                true
-            } catch (ignore: JacksonException) {
-                false
-            }
+            private fun TableColumn.eq(t: String, c: String) =
+                table.equals(t, ignoreCase = true) && column.equals(c, ignoreCase = true)
         }
 
         abstract class AbstractDefault(private val formatter: DateTimeFormatter) : ValuePrinter {
-            override fun print(value: Any?): String = when (value) {
+            override fun print(table: String, column: String, value: Any?): String = when (value) {
                 null -> "(null)"
                 is Array<*> -> value.contentToString()
                 is java.sql.Date -> printDate(Date(value.time))
@@ -143,12 +135,14 @@ class DbPlugin @JvmOverloads constructor(
             }
 
             private fun printDate(value: Date) = formatter.withZone(ZoneId.systemDefault()).format(value.toInstant())
-            override fun wrap(value: Any?): Element = span(print(value)).el
+            override fun wrap(table: String, column: String, value: Any?): Element =
+                span(print(table, column, value)).el
+
             abstract fun orElse(value: Any): String
         }
 
-        fun print(value: Any?): String
-        fun wrap(value: Any?): Element
+        fun print(table: String, column: String, value: Any?): String
+        fun wrap(table: String, column: String, value: Any?): Element
     }
 }
 

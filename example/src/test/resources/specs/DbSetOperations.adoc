@@ -1,0 +1,100 @@
+= DbUnit operations
+
+https://dbunit.sourceforge.net/dbunit/components.html#databaseoperation[DbUnit operations] allows to append, update and delete rows.
+
+[#before]
+.Before each example
+****
+.Given table `PRODUCT`
+[e-db-set=product]
+,===
+id, name, price
+
+1, Adam, 10
+2,  Bob, 20
+,===
+****
+
+== Append rows
+[source,asciidoc]
+--
+include::DbSetOperations.adoc[tags=db-insert]
+--
+
+.Append rows
+====
+//tag::db-insert[]
+.Append row
+[e-db-set=product, e-operation=insert]
+,===
+id, name, price
+
+3, Carl, 30
+,===
+//end::db-insert[]
+
+.Row added
+[e-db-check=product]
+,===
+id, name, price
+
+1, Adam, 10
+2,  Bob, 20
+3, Carl, 30
+,===
+====
+
+== Update rows
+[source,asciidoc]
+--
+include::DbSetOperations.adoc[tags=db-update]
+--
+
+.Update rows
+====
+//tag::db-update[]
+.Update row
+[e-db-set=product, e-operation=update]
+,===
+id, name, price
+
+2, Bob2, 22
+,===
+//end::db-update[]
+
+.Second row updated
+[e-db-check=product]
+,===
+id, name, price
+
+1, Adam, 10
+2,  Bob2, 22
+,===
+====
+
+== Delete rows
+[source,asciidoc]
+--
+include::DbSetOperations.adoc[tags=db-delete]
+--
+
+.Delete rows
+====
+//tag::db-delete[]
+.Delete row
+[e-db-set=product, e-operation=delete]
+,===
+id
+
+2
+,===
+//end::db-delete[]
+
+.Second row deleted
+[e-db-check=product]
+,===
+id, name, price
+
+1, Adam, 10
+,===
+====

@@ -10,9 +10,10 @@ import io.github.adven27.concordion.extensions.exam.db.DbPlugin.ValuePrinter
 import io.github.adven27.concordion.extensions.exam.db.DbTester.TableExpectation
 import io.github.adven27.concordion.extensions.exam.db.DbTester.TableVerifier.ContentMismatch
 import io.github.adven27.concordion.extensions.exam.db.DbTester.TableVerifier.SizeMismatch
-import io.github.adven27.concordion.extensions.exam.db.commands.ExamMatchersAwareValueComparer.Companion.isDbMatcher
+import io.github.adven27.concordion.extensions.exam.db.commands.ExamMatchersAwareValueComparer.Companion.isMatcher
 import io.github.adven27.concordion.extensions.exam.db.commands.get
 import io.github.adven27.concordion.extensions.exam.db.commands.renderTable
+import io.github.adven27.concordion.extensions.exam.db.commands.tableName
 import org.concordion.api.CommandCall
 import org.dbunit.assertion.Difference
 import org.dbunit.dataset.ITable
@@ -27,13 +28,17 @@ open class BaseResultRenderer(private val printer: ValuePrinter) : DbCheckComman
     private fun renderSuccess(result: DbCheckCommand.Result) =
         renderTable(
             result.check.expected.table,
-            { td, row, col -> td.success(result.check.expected.table[row, col], result.check.actual!![row, col]) },
+            { td, row, col ->
+                result.check.expected.table.let {
+                    td.success(it.tableName(), col, it[row, col], result.check.actual!![row, col])
+                }
+            },
             caption = result.caption,
             ifEmpty = { css("table-success") }
         )
 
-    private fun Html.success(expected: Any?, actual: Any?): Html = this(
-        Html(printer.wrap(actual)).tooltip(printer.print(expected), expected.isDbMatcher())
+    private fun Html.success(table: String, col: String, expected: Any?, actual: Any?): Html = this(
+        Html(printer.wrap(table, col, actual)).tooltip(printer.print(table, col, expected), expected.isMatcher())
     ).css("table-success")
 
     private fun renderFail(result: DbCheckCommand.Result) = when (result.check.fail) {
@@ -87,12 +92,15 @@ open class BaseResultRenderer(private val printer: ValuePrinter) : DbCheckComman
     ).second
 
     private fun cellFailure(expected: ITable, actual: ITable, diff: List<Difference>): (Html, Int, String) -> Html =
-        { td, row, col -> diff[row, col]?.let { td.diff(it) } ?: td.success(expected[row, col], actual[row, col]) }
+        { td, row, col ->
+            diff[row, col]?.let { td.diff(it) }
+                ?: td.success(expected.tableName(), col, expected[row, col], actual[row, col])
+        }
 
-    private fun Html.diff(it: Difference) = this(
-        Html("del", printer.print(it.expectedValue), "class" to "me-1"),
-        Html("ins", printer.print(it.actualValue))
-    ).css("table-danger").tooltip(it.failMessage)
+    private fun Html.diff(d: Difference) = this(
+        Html("del", printer.print(d.expectedTable.tableName(), d.columnName, d.expectedValue), "class" to "me-1"),
+        Html("ins", printer.print(d.actualTable.tableName(), d.columnName, d.actualValue))
+    ).css("table-danger").tooltip(d.failMessage)
 
     private operator fun List<Difference>.get(row: Int, col: String) =
         singleOrNull { it.rowIndex == row && it.columnName.equals(col, ignoreCase = true) }

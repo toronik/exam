@@ -41,6 +41,26 @@ include::core-handlebar.adoc[tags=hb-t]
 //end::hb-t[]
 ====
 
+.Check with matcher and set actual to variable:
+[source,asciidoc]
+--
+include::core-handlebar.adoc[tags=hb-m-s]
+--
+
+====
+//tag::hb-m-s[]
+.Check and set
+[%header, e-execute="#r = lowercase(#param)"]
+|===
+|[e-set=param]#Param# |[e-eq=#r.text]#Text#
+
+|ABC |{{string}}>>str1
+|DEF |{{ignore}}>>str2
+|===
+Actual value is matched and set to variable: str1 = [e-eq=#str1]`abc`, str2 = [e-eq=#str2]`def`
+//end::hb-m-s[]
+====
+
 .Date/time matchers:
 [source,asciidoc]
 ----
@@ -54,15 +74,15 @@ include::core-handlebar.adoc[tags=hb-dt]
 [source,json,e-set=dtJson]
 --
 {
-  "customFormat": "{{dateFormat (at) "yyyy/MM/dd'T'HH:mm.ss"}}",
+  "customFormat": "{{format (at) "yyyy/MM/dd'T'HH:mm.ss"}}",
   "isoDate": "{{isoDate (at)}}",
   "iso": "{{iso (at)}}",
 
-  "customFormatAndWithinNow": "{{dateFormat (at) "yyyy/MM/dd'T'HH:mm.ss"}}",
+  "customFormatAndWithinNow": "{{format (at) "yyyy/MM/dd'T'HH:mm.ss"}}",
   "isoDateAndWithinNow": "{{isoDate (at)}}",
   "isoAndWithinNow": "{{iso (at)}}",
 
-  "customFormatAndWithinSpecifiedDate": "{{dateFormat (at) "yyyy/MM/dd'T'HH:mm.ss"}}",
+  "customFormatAndWithinSpecifiedDate": "{{format (at) "yyyy/MM/dd'T'HH:mm.ss"}}",
   "isoDateAndWithinSpecifiedDate": "{{isoDate (at)}}",
   "isoAndWithinSpecifiedDate": "{{iso (at)}}",
 

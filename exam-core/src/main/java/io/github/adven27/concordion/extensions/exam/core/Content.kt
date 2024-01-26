@@ -1,5 +1,6 @@
 package io.github.adven27.concordion.extensions.exam.core
 
+import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.DEFAULT_JSON_UNIT_CFG
 import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.DEFAULT_NODE_MATCHER
 import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.MATCHERS
 import io.github.adven27.concordion.extensions.exam.core.utils.ExamDiffEvaluator
@@ -9,8 +10,11 @@ import io.github.adven27.concordion.extensions.exam.core.utils.after
 import io.github.adven27.concordion.extensions.exam.core.utils.before
 import io.github.adven27.concordion.extensions.exam.core.utils.bool
 import io.github.adven27.concordion.extensions.exam.core.utils.ignore
+import io.github.adven27.concordion.extensions.exam.core.utils.notNull
 import io.github.adven27.concordion.extensions.exam.core.utils.number
 import io.github.adven27.concordion.extensions.exam.core.utils.string
+import io.github.adven27.concordion.extensions.exam.core.utils.uuid
+import io.github.adven27.concordion.extensions.exam.core.utils.within
 import mu.KLogging
 import net.javacrumbs.jsonunit.JsonAssert
 import net.javacrumbs.jsonunit.core.Configuration
@@ -93,7 +97,9 @@ interface ContentVerifier {
 
     open class Default(val type: String, val printer: ContentPrinter = ContentPrinter.AsIs()) : ContentVerifier {
         override fun verify(expected: String, actual: String, eval: Evaluator) =
-            eval.resolve(expected, type).replace("\${test-unit.", "\${$type-unit.").let { verifyResolved(it, actual) }
+            eval.resolve(expected, type).replace("\${test-unit.", "\${$type-unit.").let {
+                verifyResolved(setActualIfNeeded(it, actual, eval)!!, actual)
+            }
 
         override fun printer() = printer
 
@@ -117,7 +123,7 @@ interface ContentVerifier {
         }
 
         protected open fun assertThat(expected: String, actual: String) =
-            assertThat("Text mismatch", actual, matcher(expected))
+            assertThat("Text mismatch", actual, matcher(expected) as Matcher<String>)
     }
 
     data class Fail(val details: String, val expected: String, val actual: String, val type: String = "text") :
@@ -126,18 +132,33 @@ interface ContentVerifier {
     class Exception(actual: String, expected: String, throwable: Throwable) :
         RuntimeException("Failed to verify content:\n$actual\nExpected:\n$expected", throwable)
 
-    fun matcher(e: String): Matcher<String> = when {
-        e == "\${text-unit.any-string}" -> string()
-        e == "\${text-unit.any-number}" -> number()
-        e == "\${text-unit.any-boolean}" -> bool()
-        e == "\${text-unit.ignore}" -> ignore()
-        e.startsWith("\${text-unit.regex}") -> matchesRegex(e.substringAfter("}"))
-        e.startsWith("\${text-unit.matches:after}") -> after(e.substringAfter("}"))
-        e.startsWith("\${text-unit.matches:before}") -> before(e.substringAfter("}"))
-        else -> equalTo(e)
-    }
+    companion object : KLogging() {
+        fun matcher(e: Any?, prefix: String = "\${text-unit."): Matcher<out Any?> = when {
+            e is String -> when {
+                e == "${prefix}any-string}" -> string()
+                e == "${prefix}any-number}" -> number()
+                e == "${prefix}any-boolean}" -> bool()
+                e == "${prefix}uuid}" -> uuid()
+                e == "${prefix}ignore}" -> ignore()
+                e == "${prefix}not-null}" -> notNull()
+                e.startsWith("${prefix}regex}") -> matchesRegex(e.substringAfter("}"))
+                e.startsWith("${prefix}matches:after}") -> after(e.substringAfter("}"))
+                e.startsWith("${prefix}matches:before}") -> before(e.substringAfter("}"))
+                e.startsWith("${prefix}matches:within}") -> within(e.substringAfter("}"))
+                else -> equalTo(e)
+            }
 
-    companion object : KLogging()
+            else -> equalTo(e)
+        }
+
+        fun <T> setActualIfNeeded(expected: String?, actual: T, eval: Evaluator) = if (expected != null) {
+            val split = expected.split(">>")
+            if (split.size > 1) eval.setVariable("#${split[1]}", actual)
+            split[0]
+        } else {
+            null
+        }
+    }
 }
 
 open class XmlVerifier(
@@ -171,10 +192,8 @@ open class JsonVerifier(
 ) : ContentVerifier.Default("json", printer) {
 
     @JvmOverloads
-    constructor(printer: ContentPrinter = JsonPrinter(), configure: (Configuration) -> Configuration = { it }) : this(
-        configure(ExamExtension.DEFAULT_JSON_UNIT_CFG),
-        printer
-    )
+    constructor(printer: ContentPrinter = JsonPrinter(), configure: (Configuration) -> Configuration = { it }) :
+        this(configure(DEFAULT_JSON_UNIT_CFG), printer)
 
     override fun assertThat(expected: String, actual: String) {
         validate(actual)

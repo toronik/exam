@@ -6,7 +6,7 @@ import io.github.adven27.concordion.extensions.exam.core.commands.Verifier
 import io.github.adven27.concordion.extensions.exam.core.commands.Verifier.Check
 import io.github.adven27.concordion.extensions.exam.core.html.rootCauseMessage
 import io.github.adven27.concordion.extensions.exam.core.resolve
-import io.github.adven27.concordion.extensions.exam.core.utils.MapContentMatchers
+import io.github.adven27.concordion.extensions.exam.core.utils.MapContentMatchers.Companion.hasAllEntries
 import io.github.adven27.concordion.extensions.exam.mq.MqTester.Message
 import io.github.adven27.concordion.extensions.exam.mq.commands.MqCheckCommand.Actual
 import io.github.adven27.concordion.extensions.exam.mq.commands.MqCheckCommand.Expected
@@ -14,7 +14,6 @@ import io.github.adven27.concordion.extensions.exam.mq.commands.MqCheckParser.Ex
 import mu.KLogging
 import org.concordion.api.Evaluator
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.hasItems
 import org.junit.Assert.assertEquals
 
 @Suppress("TooManyFunctions")
@@ -58,8 +57,8 @@ open class MqVerifier : Verifier<Expected, Actual> {
         }
 
     private fun verifyResult(a: Message, e: ExpectedMessage, eval: Evaluator) = MessageVerifyResult(
-        checkHeaders(actual = a.headers, expected = e.headers, eval = eval),
-        checkParams(actual = a.params, expected = e.params, eval = eval),
+        checkHeaders(act = a.headers, exp = e.headers, eval = eval),
+        checkParams(act = a.params, exp = e.params, eval = eval),
         contentVerifier(e.verifier).verify(expected = e.body, actual = a.body, eval)
     )
 
@@ -70,21 +69,18 @@ open class MqVerifier : Verifier<Expected, Actual> {
             .takeIf { results.any { it.params.isFailure || it.headers.isFailure || it.content.isFailure } }
     )
 
-    @Suppress("SpreadOperator")
-    protected open fun verifyParams(actual: Map<String, String?>, expected: Map<String, String?>) =
-        assertThat("Params mismatch", actual, MapContentMatchers.hasAllEntries(expected))
+    protected fun checkHeaders(act: Map<String, String?>, exp: Map<String, String?>, eval: Evaluator) =
+        checkProps(act, exp, eval, "Headers mismatch")
 
-    @Suppress("SpreadOperator")
-    protected open fun verifyHeaders(actual: Map<String, String?>, expected: Map<String, String?>) =
-        assertThat("Headers mismatch", actual.toList(), hasItems(*expected.toList().toTypedArray()))
+    protected fun checkParams(act: Map<String, String?>, exp: Map<String, String?>, eval: Evaluator) =
+        checkProps(act, exp, eval, "Params mismatch")
 
-    protected fun checkHeaders(actual: Map<String, String?>, expected: Map<String, String?>, eval: Evaluator) =
-        runCatching { verifyHeaders(actual, expected.mapValues { (_, v) -> v?.let { eval.resolve(it) } }) }
-            .map { expected }
+    private fun checkProps(act: Map<String, String?>, exp: Map<String, String?>, eval: Evaluator, message: String) =
+        runCatching { verifyProps(message, act, exp.mapValues { (_, v) -> v?.let { eval.resolve(it) } }) }
+            .map { exp }
 
-    protected fun checkParams(actual: Map<String, String?>, expected: Map<String, String?>, eval: Evaluator) =
-        runCatching { verifyParams(actual, expected.mapValues { (_, v) -> v?.let { eval.resolve(it) } }) }
-            .map { expected }
+    protected open fun verifyProps(message: String, actual: Map<String, String?>, expected: Map<String, String?>) =
+        assertThat(message, actual, hasAllEntries(expected))
 
     protected fun awaitSize(expected: Expected, receive: (Expected) -> Actual): Result<Actual> {
         var prevActual = receive(expected).copy(partial = false)

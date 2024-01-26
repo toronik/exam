@@ -1,0 +1,53 @@
+= DB Check Failures
+
+[#before]
+.Before each example
+****
+.Given table `ANDROIDS_TABLE`
+[e-db-set=ANDROIDS_TABLE]
+,===
+id, name, height, manufactured
+
+1, Adam, 170, {{at}}
+2, Bob, 200, {{at '-1h'}}
+,===
+****
+
+[.ExpectedToFail]
+.Surplus rows
+====
+.Wrong expectation
+[e-db-check=ANDROIDS_TABLE]
+,===
+id, name, height, manufactured
+
+1, Adam, 170, {{at}}
+,===
+====
+
+[.ExpectedToFail]
+.Missing rows
+====
+.Wrong expectation
+[e-db-check=ANDROIDS_TABLE]
+,===
+id, name, height, manufactured
+
+1, Adam, 170, {{at}}
+2, Bob, 200, {{at '-1h'}}
+3, Carl, 300, {{at '1h'}}
+,===
+====
+
+[.ExpectedToFail]
+.Wrong content
+====
+.Wrong expectation
+[e-db-check=ANDROIDS_TABLE]
+,===
+id, name, height, manufactured
+
+1, {{number}}, 0, {{within '10s'}}
+2, Bob, {{string}}, {{within '10s'}}
+,===
+====

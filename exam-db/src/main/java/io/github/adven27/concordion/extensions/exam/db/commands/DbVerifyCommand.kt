@@ -12,7 +12,7 @@ import io.github.adven27.concordion.extensions.exam.db.DbTester.DataSetFilesExpe
 import io.github.adven27.concordion.extensions.exam.db.DbTester.DataSetVerifier.ContentMismatch
 import io.github.adven27.concordion.extensions.exam.db.DbTester.DataSetVerifier.Failed
 import io.github.adven27.concordion.extensions.exam.db.DbTester.DataSetVerifier.SizeMismatch
-import io.github.adven27.concordion.extensions.exam.db.commands.ExamMatchersAwareValueComparer.Companion.isDbMatcher
+import io.github.adven27.concordion.extensions.exam.db.commands.ExamMatchersAwareValueComparer.Companion.isMatcher
 import org.concordion.api.CommandCall
 import org.concordion.api.Evaluator
 import org.concordion.api.Result.FAILURE
@@ -90,12 +90,14 @@ open class DbVerifyCommand(
         }
 
         private fun render(table: ITable): Html =
-            renderTable(table, { td, row, col -> td()(Html(printer.wrap(table[row, col]))) })
+            renderTable(table, { td, row, col -> td()(Html(printer.wrap(table.tableName(), col, table[row, col]))) })
 
         private fun Html.renderSuccess(expected: ITable, actual: ITable) = this(
             renderTable(
                 t = expected,
-                cell = { td, row, col -> td.markAsSuccess(expected[row, col], actual[row, col]) },
+                cell = { td, row, col ->
+                    td.markAsSuccess(expected.tableName(), col, expected[row, col], actual[row, col])
+                },
                 ifEmpty = { el.addStyleClass("table-success").appendNonBreakingSpaceIfBlank() }
             )
         )
@@ -111,16 +113,16 @@ open class DbVerifyCommand(
         private fun markAsSuccessOrFail(fail: ContentMismatch): (Html, Int, String) -> Html = { td, row, col ->
             fail.diff(row, col)
                 ?.let { td.markAsFailure(it) }
-                ?: td.markAsSuccess(fail.expected[row, col], fail.actual[row, col])
+                ?: td.markAsSuccess(fail.expected.tableName(), col, fail.expected[row, col], fail.actual[row, col])
         }
 
-        private fun Html.markAsFailure(diff: Difference) = this(
-            Html("del", printer.print(diff.expectedValue), "class" to "me-1"),
-            Html("ins", printer.print(diff.actualValue))
-        ).css("table-danger").tooltip(diff.failMessage)
+        private fun Html.markAsFailure(d: Difference) = this(
+            Html("del", printer.print(d.expectedTable.tableName(), d.columnName, d.expectedValue), "class" to "me-1"),
+            Html("ins", printer.print(d.actualTable.tableName(), d.columnName, d.actualValue))
+        ).css("table-danger").tooltip(d.failMessage)
 
-        private fun Html.markAsSuccess(expected: Any?, actual: Any?): Html = this(
-            Html(printer.wrap(actual)).tooltip(printer.print(expected), expected.isDbMatcher())
+        private fun Html.markAsSuccess(table: String, col: String, expected: Any?, actual: Any?): Html = this(
+            Html(printer.wrap(table, col, actual)).tooltip(printer.print(table, col, expected), expected.isMatcher())
         ).css("table-success")
     }
 }

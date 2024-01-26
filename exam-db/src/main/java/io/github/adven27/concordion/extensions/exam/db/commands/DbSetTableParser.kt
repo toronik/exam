@@ -18,7 +18,7 @@ open class DbSetTableParser : DbSetCommand.Parser {
             strategy = context[DbCommand.OPERATION]?.let { SeedStrategy.valueOf(it.uppercase()) }
                 ?: SeedStrategy.CLEAN_INSERT
         ),
-        caption = context.el.first("caption")!!.text().ifBlank { null }
+        caption = context.el.firstOrNull("caption")?.text()
     )
 
     private fun table(context: Context): ITable {

@@ -33,11 +33,11 @@ class DbCheckParser : DbCheckCommand.Parser {
     }
 
     override fun parse(context: Context): DbCheckCommand.Model = DbCheckCommand.Model(
-        caption = context.el.first("caption")!!.text(),
+        caption = context.el.firstOrNull("caption")?.text(),
         expectation = TableExpectation(
             ds = context[DS],
             table = table(context.expression, context.el, context.eval),
-            orderBy = context.el.getAttr("orderBy", context.eval)?.split(",")?.map { it.trim() }?.toSet() ?: setOf(),
+            orderBy = context["orderBy"]?.split(",")?.map { it.trim() }?.toSet() ?: setOf(),
             await = context.awaitConfig
         )
     )

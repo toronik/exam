@@ -65,14 +65,11 @@ include::plugin-db.adoc[tags=db-set]
 
 ====
 //tag::db-set[]
-.Set up table `ANDROIDS_TABLE`
-[e-db-set=ANDROIDS_TABLE]
-,===
-id, name, height, manufactured
-
-1, Adam, 170, {{at}}
-2, Bob, 200, {{at '-1h'}}
-,===
+.Set up table `PRODUCT`
+[%header,format=csv, e-db-set=product]
+|===
+include::../data/db/product.csv[]
+|===
 //end::db-set[]
 ====
 
@@ -94,16 +91,70 @@ include::plugin-db.adoc[tags=db-check]
 --
 
 ====
-//tag::db-check[]
-.Check table
-[e-db-check=ANDROIDS_TABLE]
-,===
-id, name, height, manufactured
+tag::db-check[]
+.Check table `PRODUCT`
+[%header,format=csv, e-db-check=product]
+|===
+include::../data/db/product.csv[]
+|===
+end::db-check[]
+====
 
-1, Adam, 170, {{at}}
-2, Bob, 200, {{at '-1h'}}
-,===
-//end::db-check[]
+.Check with matchers
+[source,asciidoc]
+--
+include::plugin-db.adoc[tags=db-check-matcher]
+--
+
+====
+//tag::db-check-matcher[]
+.Check with matchers
+[e-db-check=product]
+|===
+|name |price |rating |disabled |created_at |meta_json
+
+|{{string}}
+|{{number}}>>priceA
+|{{notNull}}
+|{{bool}}>>disabledA
+|{{within '15s' (at '-1d')}}
+|{"id": "{{string}}", "code": "{{number}}"}
+
+|{{regex '.*'}}>>nameB
+|{{ignore}}
+|{{ignore}}>>ratingB
+|true
+|{{within '15s'}}>>createdB
+|{"id": "{{regex '\\w'}}", "code": "{{ignore}}"}
+|===
+
+nameB = [e-eq=#nameB]`Model B`
+priceA = [e-eq=#priceA]`100.50`
+ratingB = [e-eq=#ratingB]`(null)`
+disabledA = [e-eq=#disabledA]`false`
+createdB = [e-eq=#createdB]`{{format (at) 'yyyy-MM-dd HH:mm:ss.SSS'}}`
+//end::db-check-matcher[]
+====
+
+.Check ordered
+[source,asciidoc]
+--
+include::plugin-db.adoc[tags=db-check-ordered]
+--
+
+====
+//tag::db-check-ordered[]
+[e-db-check=product, e-orderBy='rating, id']
+|===
+|name |rating
+
+|{{string}}
+|{{ignore}}
+
+|{{string}}
+|10
+|===
+//end::db-check-ordered[]
 ====
 
 .Check emptiness
@@ -114,13 +165,13 @@ include::plugin-db.adoc[tags=db-check-empty]
 
 ====
 .Set empty table
-[e-db-set=ANDROIDS_TABLE]
+[e-db-set=product]
 |===
 |===
 
 //tag::db-check-empty[]
 .Check table
-[e-db-check=ANDROIDS_TABLE]
+[e-db-check=product]
 |===
 |===
 //end::db-check-empty[]
@@ -266,3 +317,8 @@ id, name
 ,===
 //end::db-show[]
 ====
+
+=== Details
+
+- link:DbSetOperations.adoc[What are set operation options?, role=e-run]
+- link:DbCheckFailures.adoc[How failures look like?, role=e-run]

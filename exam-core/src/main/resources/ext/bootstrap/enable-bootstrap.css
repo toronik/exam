@@ -1,13 +1,23 @@
-/*
-p {
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    font-size: 16px;
-    font-weight: 400;
-    max-width: none;
-    line-height: unset;
+.mh-500 {
+    max-height: 500px;
+    overflow: scroll!important;
 }
 
-*/
+.mh-400 {
+    max-height: 400px;
+    overflow: scroll!important;
+}
+
+.mh-300 {
+    max-height: 300px;
+    overflow: scroll!important;
+}
+
+.mh-200 {
+    max-height: 200px;
+    overflow: scroll!important;
+}
+
 .alert-warning pre {
     background: inherit;
 }
@@ -221,12 +231,6 @@ pre {
     margin-top: 0.25rem!important;
 }
 
-.filename {
-    font-family: monospace;
-    font-size: 14px;
-    font-style: italic;
-}
-
 .footer {
     text-align: right;
     margin-top: 40px;
@@ -260,7 +264,7 @@ p.success {
     background-color: #d1e7dd !important;
     border-color: #9c9 !important;
 }
-.success pre {
+pre.success {
     background-color: #d1e7dd !important;
 }
 .failure, .failure * {
@@ -272,6 +276,11 @@ p.success {
     text-decoration: line-through;
     color: #c99;
 }
+
+pre.failure {
+    margin-bottom: 10px;
+}
+
 .ignored, .ignored * {
     background-color: #f0f0f0 !important;
 }

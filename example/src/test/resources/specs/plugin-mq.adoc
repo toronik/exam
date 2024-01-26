@@ -53,7 +53,7 @@ open class Specs : AbstractSpecs() {
 --
 
 NOTE: `MqPlugin` accepts a map of a `<queue alias name>` to a `MqTester` implementation.
-_Queue alias_ is a queue logical name: `<e e:mq-set="out"/>`
+_Queue alias_ is a queue logical name: `e-mq-set=out`
 
 .Commands
 [unstyled]
@@ -278,3 +278,7 @@ include::plugin-mq.adoc[tags=mq-clean]
 Queues are empty: [e-mq-clean]_myQueue, myAnotherQueue_
 //end::mq-clean[]
 ====
+
+=== Details
+
+- link:MqCheckFailures.adoc[How failures look like?, role=e-run]

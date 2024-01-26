@@ -68,14 +68,15 @@ function enableCodeMirrorMerge(selector, mode) {
             expected = target.querySelector('.expected'),
             actual = target.querySelector('.actual');
 
-        expectedValue = unescape(expected.innerHTML);
-        actualValue = unescape(actual.innerHTML);
+        if (expected && actual) {
+          expectedValue = unescape(expected.innerHTML);
+          actualValue = unescape(actual.innerHTML);
 
-        actual.parentNode.removeChild(actual);
-        expected.parentNode.removeChild(expected);
-        target.innerHTML = '';
+          actual.parentNode.removeChild(actual);
+          expected.parentNode.removeChild(expected);
+          target.innerHTML = '';
 
-        view = CodeMirror.MergeView(target, {
+          view = CodeMirror.MergeView(target, {
             value: expectedValue,
             readOnly: true,
             origLeft: null,
@@ -88,6 +89,7 @@ function enableCodeMirrorMerge(selector, mode) {
             scrollbarStyle: "simple",
             viewportMargin: Infinity
             //theme: "idea"
-        });
+          });
+        }
     }
 }

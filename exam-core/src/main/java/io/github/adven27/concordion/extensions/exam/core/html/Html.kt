@@ -200,7 +200,7 @@ class Html(val el: Element) {
 
     infix fun insteadOf(original: Html) = insteadOf(original.el)
 
-    fun first(tag: String): Html? {
+    fun firstOrNull(tag: String): Html? {
         val first = el.childElements.firstOrNull { it.localName == tag }
         return if (first == null) null else Html(first)
     }
@@ -210,13 +210,13 @@ class Html(val el: Element) {
         return if (last == null) null else Html(last)
     }
 
-    fun firstOptional(tag: String): Optional<Html> = Optional.ofNullable(first(tag))
+    fun firstOptional(tag: String): Optional<Html> = Optional.ofNullable(firstOrNull(tag))
 
     fun all(tag: String): Collection<Html> {
         return el.childElements.asList().filter { it.localName == tag }.map { Html(it) }
     }
 
-    fun firstOrThrow(tag: String) = first(tag) ?: error("<$tag> tag is required")
+    fun firstOrThrow(tag: String) = firstOrNull(tag) ?: error("<$tag> tag is required")
 
     fun removeChildren(): Html {
         moveChildrenTo(Html("tmp"))

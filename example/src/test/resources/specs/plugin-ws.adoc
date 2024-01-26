@@ -159,7 +159,7 @@ include::plugin-ws.adoc[tags=ws-http-v]
 .Put interactions to variable
 [source,httprequest,e-http=interactions]
 ----
-GET /mirror/request
+GET /mirror/request?p=1
 Content-Type: application/json
 ----
 
@@ -171,7 +171,7 @@ Content-Type: application/json
 |[e-eq=#i.resp.statusCode]#Status#
 |[e-eq=#i.resp.statusPhrase]#Phrase#
 
-|[pre language-http]`GET /mirror/request HTTP/1.1
+|[pre language-http]`GET /mirror/request?p=1 HTTP/1.1
 Host: localhost:8888
 Content-Type: application/json
 {blank}

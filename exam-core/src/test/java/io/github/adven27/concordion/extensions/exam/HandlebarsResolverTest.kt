@@ -1,27 +1,25 @@
 package io.github.adven27.concordion.extensions.exam
 
-import com.github.jknack.handlebars.HandlebarsException
 import io.github.adven27.concordion.extensions.exam.core.handlebars.ExamHelper
 import io.github.adven27.concordion.extensions.exam.core.handlebars.date.DateHelpers
-import io.github.adven27.concordion.extensions.exam.core.handlebars.date.DateHelpers.Companion.DEFAULT_FORMAT
 import io.github.adven27.concordion.extensions.exam.core.handlebars.matchers.MatcherHelpers
 import io.github.adven27.concordion.extensions.exam.core.handlebars.misc.MiscHelpers
 import io.github.adven27.concordion.extensions.exam.core.html.Html
 import io.github.adven27.concordion.extensions.exam.core.resolveToObj
 import io.github.adven27.concordion.extensions.exam.core.utils.parseDate
+import io.github.adven27.concordion.extensions.exam.core.utils.parseLocalDate
+import io.github.adven27.concordion.extensions.exam.core.utils.parseLocalDateTime
 import io.github.adven27.concordion.extensions.exam.core.utils.toDate
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.concordion.internal.FixtureInstance
 import org.concordion.internal.OgnlEvaluator
 import org.junit.Test
 import java.time.LocalDate
-import java.util.Date
+import java.util.*
 import kotlin.test.assertEquals
 
 class HandlebarsResolverTest {
     private val eval = OgnlEvaluator(FixtureInstance(Html("div").el))
-    private val defaultFormat = DEFAULT_FORMAT.format()
 
     @Test
     fun resolve_with_vars() {
@@ -36,63 +34,37 @@ class HandlebarsResolverTest {
     }
 
     @Test
-    fun date_defaults() {
+    fun parse() {
         assertEquals(
             "2019-06-30T09:10:00".parseDate("yyyy-MM-dd'T'HH:mm:ss"),
-            sut("{{date \"2019-06-30T09:10:00\"}}")
+            sut("{{parse \"2019-06-30T09:10:00\"}}")
         )
         assertEquals(
             "2019-06-30T00:00:00".parseDate("yyyy-MM-dd'T'HH:mm:ss"),
-            sut("{{date \"2019-06-30\"}}")
+            sut("{{parse \"2019-06-30\"}}")
         )
     }
 
     @Test
-    fun dateFormat_defaults() {
-        val expected = "2019-06-30T09:10:00"
-        eval.setVariable("#someDate", expected.parseDate(defaultFormat))
+    fun format() {
+        val expDate = "2019-06-30"
+        val expDateTime = "${expDate}T09:10:00"
+        eval.setVariable("#d", expDateTime.parseDate())
+        eval.setVariable("#ldt", expDateTime.parseLocalDateTime())
+        eval.setVariable("#ld", expDate.parseLocalDate())
 
-        assertEquals(expected, sut("{{dateFormat someDate}}"))
+        assertEquals(expDateTime, sut("{{format d}}"))
+        assertEquals(expDateTime, sut("{{format ldt}}"))
+        assertEquals(expDate, sut("{{format ld}}"))
     }
 
     @Test
-    fun dateFormat_wrongContext() {
-        assertThatExceptionOfType(HandlebarsException::class.java)
-            .isThrownBy { sut("""{{dateFormat someDate "yyyy-MM-dd" tz="GMT+3"}}""") }
-    }
-
-    @Test
-    fun dateFormat_wrongOptions() {
-        eval.setVariable("#someDate", Date())
-        val placeholder = """{{dateFormat someDate wrong="yyyy-MM-dd" tz="GMT+3"}}"""
-
-        assertThatExceptionOfType(HandlebarsException::class.java).isThrownBy { sut(placeholder) }
-            .withMessageContaining(
-                "Wrong options for helper '$placeholder': found '[wrong]', " +
-                    "expected any of '${DateHelpers.dateFormat.options}"
-            )
-            .withRootCauseExactlyInstanceOf(IllegalArgumentException::class.java)
-    }
-
-    @Test
-    fun now_defaults() {
+    fun now() {
         assertThat(eval.resolveToObj("{{now}}") as Date).isCloseTo(Date(), 2000)
     }
 
     @Test
-    fun now_wrongOptions() {
-        val placeholder = """{{now wrong="yyyy-MM-dd" tz="GMT+3"}}"""
-
-        assertThatExceptionOfType(HandlebarsException::class.java).isThrownBy { sut(placeholder) }
-            .withMessageContaining(
-                "Wrong options for helper '$placeholder': " +
-                    "found '[wrong]', expected any of '${DateHelpers.now.options}"
-            )
-            .withRootCauseExactlyInstanceOf(IllegalArgumentException::class.java)
-    }
-
-    @Test
-    fun `defaults date`() {
+    fun `date helpers`() {
         DateHelpers.entries.forEach {
             val expected = it.expected
             val result = helper(it)
@@ -111,7 +83,7 @@ class HandlebarsResolverTest {
     }
 
     @Test
-    fun `defaults matcher`() {
+    fun `matcher helpers`() {
         MatcherHelpers.entries.forEach { assertEquals(it.expected, helper(it), "Failed helper: $it") }
     }
 
