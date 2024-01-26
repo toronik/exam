@@ -91,7 +91,7 @@ internal class ExamExampleListener(private val skipDecider: SkipDecider) : Examp
             "data-summary-exception" to summary.exceptionCount.toString(),
             "data-summary-status" to summary.implementationStatus.tag
         )
-        card.first("div")?.let { title ->
+        card.firstOrNull("div")?.let { title ->
             title.childs().first().let {
                 val txt = it.text()
                 it.removeChildren()
@@ -115,7 +115,7 @@ internal class ExamExampleListener(private val skipDecider: SkipDecider) : Examp
         failureCount == 0L && exceptionCount == 0L && implementationStatus == EXPECTED_TO_PASS
 
     private fun removeConcordionExpectedToFailWarning(card: Html) {
-        card.first("p")?.let { card.remove(it) }
+        card.firstOrNull("p")?.let { card.remove(it) }
     }
 }
 
@@ -131,7 +131,7 @@ class FocusOnErrorsListener : SpecificationProcessingListener {
 
                 failed.forEach { (id, summary) ->
                     val example = findExample(event.rootElement, id)
-                    example?.first("p")?.first("a")?.invoke(
+                    example?.firstOrNull("p")?.firstOrNull("a")?.invoke(
                         summary.successCount.toPill("success"),
                         summary.ignoredCount.toPill("secondary"),
                         summary.failureCount.toPill("warning"),

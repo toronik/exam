@@ -1,0 +1,125 @@
+= Message Queue Check Failures
+
+[#before]
+.Before each example
+****
+[e-mq-clean]#myQueue# is empty.
+****
+
+[.ExpectedToFail]
+.Surplus messages
+====
+.Got message
+[source,json,e-mq-set=myQueue]
+----
+{ "a": 1, "b": "some" }
+----
+
+.Expected no messages
+[caption=, e-mq-check=myQueue]
+|===
+|===
+====
+
+[.ExpectedToFail]
+.Missing messages
+====
+Got no messages.
+
+.Expected single message
+[cols="a", caption=, e-mq-check=myQueue]
+|===
+|[source,json,e-mq-set=myQueue]
+----
+{ "a": 1, "b": "some" }
+----
+|===
+====
+
+[.ExpectedToFail]
+.Wrong payload
+====
+.Got message
+[source,json,e-mq-set=myQueue]
+----
+{ "a": 1, "b": "some" }
+----
+
+[.ExpectedToFail]
+.Wrong message body expectations
+[cols="a", caption=, e-mq-check=myQueue]
+|===
+|[source,json]
+----
+{ "a": 1 }
+----
+|===
+====
+
+[.ExpectedToFail]
+.Wrong headers or params
+====
+.Got messages:
+[cols="a", grid=rows, frame=ends, caption=, e-mq-set=myQueue]
+|===
+|
+[.headers]
+.Headers
+[cols="h,1", caption=]
+,===
+h1, {{isoDate (at '-1d')}}
+h2, 2
+,===
+
+[source,json]
+----
+{ "a": 1, "b": "some" }
+----
+
+|
+[.params]
+.Params
+[cols="h,1", caption=]
+,===
+key, some-kafka-message-key
+partition, 1
+,===
+
+[source,json]
+----
+{ "a": 1, "b": "some" }
+----
+|===
+
+.Wrong expectations in headers and params
+[cols="a", grid=rows, frame=ends, caption=, e-mq-check=myQueue]
+|===
+|
+[.headers]
+.Headers
+[cols="h,1", caption=]
+,===
+h1, {{isoDate (at)}}
+h2, 3
+,===
+
+[source,json]
+----
+{ "a": 1, "b": "some" }
+----
+
+|
+[.params]
+.Params
+[cols="h,1", caption=]
+,===
+key, wrong
+partition, 2
+,===
+
+[source,json]
+----
+{ "a": 1, "b": "some" }
+----
+|===
+====

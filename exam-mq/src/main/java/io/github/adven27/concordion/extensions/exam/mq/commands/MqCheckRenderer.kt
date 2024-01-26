@@ -3,6 +3,7 @@ package io.github.adven27.concordion.extensions.exam.mq.commands
 import com.github.jknack.handlebars.internal.text.StringEscapeUtils.escapeJava
 import io.github.adven27.concordion.extensions.exam.core.Content
 import io.github.adven27.concordion.extensions.exam.core.ContentVerifier.Fail
+import io.github.adven27.concordion.extensions.exam.core.commands.EqCommand.Companion.objectToString
 import io.github.adven27.concordion.extensions.exam.core.commands.Verifier
 import io.github.adven27.concordion.extensions.exam.core.html.Html
 import io.github.adven27.concordion.extensions.exam.core.html.div
@@ -36,7 +37,8 @@ interface MqCheckRenderer {
                                     params = Result.success(it.params),
                                     content = Result.success(Content(body = it.body, type = it.content.type))
                                 )
-                            }
+                            },
+                            "success"
                         ).toHtml()
                     )
                     parent().remove(this)
@@ -61,7 +63,7 @@ interface MqCheckRenderer {
         }
 
         private fun renderMessageContentError(fail: MessageVerifyingError) =
-            template(fail.queue, fail.expected).toHtml()
+            template(fail.queue, fail.expected, "failure").toHtml()
 
         private fun renderSizeError(fail: SizeVerifyingError) =
             errorMessage(
@@ -77,7 +79,8 @@ interface MqCheckRenderer {
                                 params = Result.success(it.params),
                                 content = Result.success(Content(body = it.body, type = it.content.type))
                             )
-                        }
+                        },
+                        "success"
                     ).toHtml(),
                     span("but was:"),
                     template(
@@ -88,36 +91,37 @@ interface MqCheckRenderer {
                                 params = Result.success(it.params),
                                 content = Result.success(Content.Text(it.body))
                             )
-                        }
+                        },
+                        "failure"
                     ).toHtml()
                 )
             ).second
     }
 
-    fun template(name: String, messages: List<MessageVerifyResult>) = //language=html
+    fun template(name: String, messages: List<MessageVerifyResult>, style: String) = //language=html
         """
         <div class="mq-check">
             <table class="tableblock frame-ends grid-rows stretch">
                 <caption><i class="fa fa-envelope-open me-1"> </i><span>$name</span></caption>
-                <tbody> ${renderMessages(messages)} </tbody>
+                <tbody> ${renderMessages(messages, style)} </tbody>
             </table>
         </div>
         """.trimIndent()
 
     // language=html
-    private fun renderMessages(messages: List<MessageVerifyResult>) = messages.joinToString("\n") { r ->
+    private fun renderMessages(messages: List<MessageVerifyResult>, style: String) = messages.joinToString("\n") { r ->
         """
         <tr><td class='exp-body'>
-        ${r.params.fold(::renderParams, ::renderError)}
-        ${r.headers.fold(::renderHeaders, ::renderError)}
-        ${r.content.fold(::renderContent, ::renderContentError)}
+        ${r.params.fold({ renderProps("Params", it, style) }, ::renderError)}
+        ${r.headers.fold({ renderProps("Headers", it, style) }, ::renderError)}
+        ${r.content.fold({ renderContent(it, style) }, ::renderContentError)}
         </td></tr>
         """.trimIndent()
-    }.ifEmpty { """<tr><td class='exp-body success'>EMPTY</td></tr>""" }
+    }.ifEmpty { """<tr><td class='exp-body $style'>EMPTY</td></tr>""" }
 
     // language=html
-    private fun renderContent(content: Content) =
-        """<div class="${content.type} success"></div>""".toHtml().text(content.pretty()).el.toXML()
+    private fun renderContent(content: Content, style: String) =
+        """<div class="${content.type} $style"></div>""".toHtml().text(content.pretty()).el.toXML()
 
     // language=html
     private fun renderContentError(error: Throwable) = when (error) {
@@ -134,33 +138,24 @@ interface MqCheckRenderer {
     }
 
     // language=html
-    private fun renderHeaders(headers: Map<String, String?>) = if (headers.isNotEmpty()) {
-        """
-        <table class="table table-sm caption-top">
-            <caption class="small">Headers</caption>
-            <tbody> ${toRows(headers)} </tbody>
-        </table>
-        """.trimIndent()
-    } else {
-        ""
-    }
-
-    // language=html
-    private fun renderParams(params: Map<String, String?>) = if (params.isNotEmpty()) {
-        """
-        <table class="table table-sm caption-top">
-            <caption class="small">Params</caption>
-            <tbody> ${toRows(params)} </tbody>
-        </table>
-        """.trimIndent()
-    } else {
-        ""
-    }
+    private fun renderProps(caption: String, props: Map<String, String?>, style: String) =
+        props.takeIf { it.isNotEmpty() }?.let {
+            """
+            <table class="table table-sm caption-top">
+                <caption class="small">$caption</caption>
+                <tbody> ${toRows(props, style)} </tbody>
+            </table>
+            """.trimIndent()
+        } ?: ""
 
     private fun renderError(error: Throwable) = errorMessage(message = error.rootCauseMessage()).second.el.toXML()
 
     // language=html
-    private fun toRows(headers: Map<String, String?>) = headers.entries.joinToString("\n") { (k, v) ->
-        """<tr><td class="success">$k</td><td class="success"><pre><![CDATA[${escapeJava(v)}]]></pre></td></tr>"""
+    private fun toRows(headers: Map<String, String?>, style: String) = headers.entries.joinToString("\n") { (k, v) ->
+        "<tr><td class='$style'>$k</td><td class='$style'>${renderValue(v)}</td></tr>"
     }
+
+    fun renderValue(v: String?): String = runCatching { pre(objectToString(v)).el.toXML() }
+        .recoverCatching { pre(escapeJava(objectToString(v))).el.toXML() }
+        .getOrElse { pre(it.rootCauseMessage()).el.toXML() }
 }

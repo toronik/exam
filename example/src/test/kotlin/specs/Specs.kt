@@ -22,6 +22,7 @@ import net.javacrumbs.jsonunit.core.Option.IGNORING_EXTRA_FIELDS
 import java.util.ArrayDeque
 
 class Nested : Specs()
+class MqCheckFailures : Specs()
 
 @Suppress("FunctionOnlyReturningConstant")
 open class Specs : AbstractSpecs() {

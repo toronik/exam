@@ -33,7 +33,7 @@ class DbCheckParser : DbCheckCommand.Parser {
     }
 
     override fun parse(context: Context): DbCheckCommand.Model = DbCheckCommand.Model(
-        caption = context.el.first("caption")!!.text(),
+        caption = context.el.firstOrNull("caption")?.text(),
         expectation = TableExpectation(
             ds = context[DS],
             table = table(context.expression, context.el, context.eval),
