@@ -2,8 +2,6 @@
 
 [![Stability: Active](https://masterminds.github.io/stability/active.svg)](https://masterminds.github.io/stability/active.html)
 ![CI](https://github.com/toronik/exam/workflows/CI/badge.svg)
-[![](https://jitpack.io/v/toronik/exam.svg)](https://jitpack.io/#toronik/exam)
-
 
 **Exam** is oriented on **declarative end-to-end black\graybox** application testing in a way a manual tester would do it: send request, verify response\database\message queue etc.
 

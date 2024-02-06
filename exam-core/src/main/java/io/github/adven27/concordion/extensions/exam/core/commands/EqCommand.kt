@@ -21,7 +21,7 @@ import org.concordion.internal.util.Check
 
 open class EqCommand(val verifier: ContentVerifier) : AssertEqualsCommand() {
     companion object : KLogging() {
-         fun objectToString(any: Any?): String = any?.toString() ?: "(null)"
+        fun objectToString(any: Any?): String = any?.toString() ?: "(null)"
     }
 
     override fun verify(command: CommandCall, eval: Evaluator, resultRecorder: ResultRecorder, fixture: Fixture) {
