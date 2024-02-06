@@ -16,11 +16,25 @@ include::core-example.adoc[tags=e]
 .Before each example
 ****
 [.given]
+
+[e-db-set=ANDROIDS_TABLE]
+|===
+|===
+
 Split the full name [e-execute=#result = split(#TEXT)]_Jane Smith_
 ****
 
 .Dummy
 ====
+
+.Ta
+|===
+|Header 1
+
+|Column 1, row 1
+|===
+
+
 Result contains first name [e-eq=#result.first]_Jane_
 and last name [e-eq=#result.second]_Smith_
 ====
