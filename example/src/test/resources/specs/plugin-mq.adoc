@@ -263,8 +263,6 @@ include::../data/mq/msg.json[]
 //end::mq-check-custom[]
 ====
 
-link:MqCheckFailures.adoc[How failures look like?, role=e-run]
-
 === e-mq-clean [[e-mq-clean]]
 
 Cleans specified queues.

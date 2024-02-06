@@ -298,19 +298,19 @@ include::plugin-db.adoc[tags=db-show]
 ====
 //tag::db-show[]
 .Show all and generate dataset
-[e-db-show=ANDROIDS_TABLE, e-saveToResources=/data/db/ANDROIDS_TABLE.xml]
+[e-db-show=person, e-saveToResources=/data/db/person.xml]
 ,===
 ,===
 
 .Show specific columns
-[e-db-show=ANDROIDS_TABLE]
+[e-db-show=person]
 ,===
 id, name
 
 ,===
 
 .Show specific rows
-[e-db-show=ANDROIDS_TABLE, e-where="name='Bob'"]
+[e-db-show=person, e-where="name='Bob'"]
 ,===
 id, name
 

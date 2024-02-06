@@ -3,13 +3,13 @@
 [#before]
 .Before each example
 ****
-.Given table `ANDROIDS_TABLE`
-[e-db-set=ANDROIDS_TABLE]
+.Given table `PRODUCT`
+[e-db-set=product]
 ,===
-id, name, height, manufactured
+id, name, price, created_At
 
-1, Adam, 170, {{at}}
-2, Bob, 200, {{at '-1h'}}
+1, Model A, 1.70, {{at}}
+2, Model B, 2.00, {{at '-1h'}}
 ,===
 ****
 
@@ -17,11 +17,11 @@ id, name, height, manufactured
 .Surplus rows
 ====
 .Wrong expectation
-[e-db-check=ANDROIDS_TABLE]
+[e-db-check=product]
 ,===
-id, name, height, manufactured
+id, name, price, created_At
 
-1, Adam, 170, {{at}}
+1, Model A, 1.70, {{at}}
 ,===
 ====
 
@@ -29,13 +29,13 @@ id, name, height, manufactured
 .Missing rows
 ====
 .Wrong expectation
-[e-db-check=ANDROIDS_TABLE]
+[e-db-check=product]
 ,===
-id, name, height, manufactured
+id, name, price, created_At
 
-1, Adam, 170, {{at}}
-2, Bob, 200, {{at '-1h'}}
-3, Carl, 300, {{at '1h'}}
+1, Model A, 1.70, {{at}}
+2, Model B, 2.00, {{at '-1h'}}
+3, Model C, 3.00, {{at '1h'}}
 ,===
 ====
 
@@ -43,11 +43,11 @@ id, name, height, manufactured
 .Wrong content
 ====
 .Wrong expectation
-[e-db-check=ANDROIDS_TABLE]
+[e-db-check=product]
 ,===
-id, name, height, manufactured
+id, name, price, created_At
 
 1, {{number}}, 0, {{within '10s'}}
-2, Bob, {{string}}, {{within '10s'}}
+2, Model B, {{string}}, {{within '10s'}}
 ,===
 ====

@@ -488,7 +488,7 @@ open class DbTesterBase @JvmOverloads constructor(
         createQueryTable(tableName, "SELECT * FROM $tableName WHERE $filter")
 
     fun actualWithDependentTables(ds: String?, table: String): IDataSet = connection(ds).let {
-        it.createDataSet(getAllDependentTables(it, QualifiedTableName(table, it.schema).qualifiedName))
+        it.createDataSet(getAllDependentTables(it, QualifiedTableName(table.uppercase(), it.schema).qualifiedName))
     }
 
     protected fun actualDataSet(tables: Array<String>): IDataSet = connection.createDataSet(tables)
