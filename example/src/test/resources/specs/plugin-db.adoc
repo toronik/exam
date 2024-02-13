@@ -91,13 +91,13 @@ include::plugin-db.adoc[tags=db-check]
 --
 
 ====
-tag::db-check[]
+//tag::db-check[]
 .Check table `PRODUCT`
 [%header,format=csv, e-db-check=product]
 |===
 include::../data/db/product.csv[]
 |===
-end::db-check[]
+//end::db-check[]
 ====
 
 .Check with matchers

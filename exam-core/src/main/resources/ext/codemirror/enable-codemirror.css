@@ -11,6 +11,10 @@ pre.htmlmixed > .CodeMirror {
     height: auto;
 }
 
+.cm-mergeView {
+    font-size: small;
+}
+
 .json > .CodeMirror, .xml > .CodeMirror, .text > .CodeMirror  {
     font-size: small;
     height: fit-content;
@@ -76,9 +80,14 @@ td.json.success, td.xml.success, td.htmlmixed.success, td.text.success {
 }
 
 .CodeMirror-merge-gap {
+    width: 2% !important;
     background-color: transparent;
     border-left: 1px dashed #cc9999;
     border-right: 1px dashed #cc9999;
+}
+
+.CodeMirror-merge-pane {
+    width: 49% !important;
 }
 
 .CodeMirror-merge-l-connect,

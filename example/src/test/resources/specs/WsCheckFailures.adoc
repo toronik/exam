@@ -1,0 +1,34 @@
+= Web Service Check Failures
+
+[.ExpectedToFail]
+.Failed checks
+====
+[e-http=]
+--
+[source,httprequest]
+----
+POST /mirror/request?p=1
+Content-Type: application/json
+
+{ "a": "ok", "b": 1 }
+----
+[source,httprequest]
+----
+{{code}} {{phrase}}
+Content-Type: application/json
+{{header}}
+
+{"POST":"/mirror/request?p=1","body":{"a": "{{field}}", "b": 1 }}
+----
+
+[.where]
+,===
+,code, phrase, header, field
+
+Wrong status, 400, OK,    , ok
+Wrong phrase, 200, WRONG, , ok
+Wrong header, 200, OK,  surplus: wrong, ok
+Wrong body,   200, OK,    , wrong
+,===
+--
+====

@@ -10,37 +10,6 @@ import org.concordion.api.extension.ConcordionExtender
 import org.concordion.api.extension.ConcordionExtension
 import org.concordion.api.Element as ConcordionElement
 
-class CodeMirrorExtension : ConcordionExtension {
-    override fun addTo(e: ConcordionExtender) {
-        e.linkedCss(
-            BASE,
-            "codemirror.css",
-            "enable-codemirror.css",
-            "merge.css",
-            "foldgutter.css",
-            "simplescrollbar.css"
-        )
-
-        e.linkedJs(
-            BASE,
-            "codemirror.js",
-            "enable-codemirror.js",
-            "javascript.js",
-            "xml.js",
-            "addon/mode/simple.js",
-            "http.js",
-            "diff_match_patch.js",
-            "merge.js",
-            "xml-fold.js",
-            "simplescrollbar.js"
-        )
-    }
-
-    companion object {
-        const val BASE = "ext/codemirror"
-    }
-}
-
 class TocbotExtension : ConcordionExtension {
     override fun addTo(e: ConcordionExtender) {
         e.linkedCss(BASE, "tocbot.css")
@@ -97,35 +66,6 @@ class TocbotExtension : ConcordionExtension {
 
     companion object {
         const val BASE = "ext/tocbot"
-    }
-}
-
-class FontAwesomeExtension : ConcordionExtension {
-    override fun addTo(e: ConcordionExtender) {
-        e.linkedCss(
-            BASE,
-            "css/all.min.css",
-            "css/regular.min.css",
-            "css/solid.min.css",
-            "css/all.min.css"
-        )
-        e.resources(
-            BASE,
-            "webfonts/fa-regular-400.woff2",
-            "webfonts/fa-regular-400.eot",
-            "webfonts/fa-regular-400.svg",
-            "webfonts/fa-regular-400.ttf",
-            "webfonts/fa-regular-400.woff",
-            "webfonts/fa-solid-900.woff2",
-            "webfonts/fa-solid-900.eot",
-            "webfonts/fa-solid-900.svg",
-            "webfonts/fa-solid-900.ttf",
-            "webfonts/fa-solid-900.woff"
-        )
-    }
-
-    companion object {
-        const val BASE = "ext/fontawesome"
     }
 }
 

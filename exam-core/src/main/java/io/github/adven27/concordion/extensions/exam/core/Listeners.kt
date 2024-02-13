@@ -175,7 +175,7 @@ private fun Map.Entry<String, ResultSummary>.failed() =
 private fun findExample(el: ConcordionElement, id: String) = Html(el).findBy(id)
 private fun Html.collapse() {
     descendants("a").firstByClass("bd-example-title")?.css("collapsed")
-    childs("div").firstByClass("bd-example")?.removeClass("show")
+    childs("div").firstByClass("exampleblock")?.removeClass("show")
 }
 
 fun List<Html>.firstByClass(cssClass: String) = firstOrNull { it.attr("class")?.contains(cssClass) ?: false }

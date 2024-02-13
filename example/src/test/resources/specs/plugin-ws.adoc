@@ -218,3 +218,7 @@ Content-Type: application/json
 --
 //end::ws-custom[]
 ====
+
+=== Details
+
+- link:WsCheckFailures.adoc[How failures look like?, role=e-run]

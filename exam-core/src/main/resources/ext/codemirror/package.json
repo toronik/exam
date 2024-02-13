@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "@codemirror/commands": "latest",
+    "@codemirror/lang-json": "latest",
+    "@codemirror/lang-html": "latest",
+    "@codemirror/lang-xml": "latest",
+    "codemirror-lang-http-bak": "latest",
+    "@codemirror/search": "latest",
+    "@codemirror/view": "latest",
+    "@codemirror/language": "latest",
+    "@codemirror/merge": "latest",
+    "@rollup/plugin-node-resolve": "latest",
+    "codemirror": "latest",
+    "minify": "latest",
+    "rollup": "latest"
+  }
+}

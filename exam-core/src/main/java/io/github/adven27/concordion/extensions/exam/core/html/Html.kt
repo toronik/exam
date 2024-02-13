@@ -155,21 +155,19 @@ class Html(val el: Element) {
     }
 
     private fun body(root: Html, id: String) = div()
-        .css("bd-example collapse show rounded bg-light bg-gradient")
+        .css("exampleblock collapse show rounded bg-light bg-gradient")
         .attrs("id" to id).apply {
             root.moveChildrenTo(this)
         }
 
-    private fun title(header: String, id: String, lvl: Int) = div()(
+    private fun title(header: String, id: String, lvl: Int) = div("class" to "title")(
         tag("h$lvl").text(header).style("visibility: hidden; height:0;").css("test-class"),
-        italic("", "class" to "far fa-caret-square-down"),
+        italic("", "class" to "fa-regular fa-square-check"),
         tag("span").text(" "),
         tag("a").text(header).css("bd-example-title text-muted fw-lighter")
     ) collapse id
 
     fun localName() = el.localName!!
-
-    fun hasChildren() = el.hasChildren()
 
     fun moveChildrenTo(html: Html): Html {
         el.moveChildrenTo(html.el)

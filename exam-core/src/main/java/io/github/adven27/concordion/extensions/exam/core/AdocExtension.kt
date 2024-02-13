@@ -24,6 +24,8 @@ open class AdocExtension : ConcordionExtension {
     companion object : KLogging() {
         const val BASE = "ext/ascii"
         const val BASE_BS = "ext/bootstrap"
+        const val BASE_CM = "ext/codemirror"
+        const val BASE_FA = "ext/fontawesome"
         private const val SPECS_ADOC_RESOURCES_DIR = "SPECS_ADOC_RESOURCES_DIR"
         private const val SPECS_ADOC_BASE_DIR = "SPECS_ADOC_BASE_DIR"
         private const val SPECS_ADOC_VERSION = "SPECS_ADOC_VERSION"
@@ -64,16 +66,16 @@ open class AdocExtension : ConcordionExtension {
                     .build()
             )
             .build()
-        val CACHE: MutableMap<String, ByteArrayInputStream> = mutableMapOf()
+        val CACHE: MutableMap<String, ByteArray> = mutableMapOf()
     }
 
     override fun addTo(ex: ConcordionExtender) {
         addStyles(ex)
         ex.withSpecificationType("adoc") { i, n ->
             measureTimedValue {
-                CACHE.getOrPut(n) {
-                    ByteArrayInputStream(ADOC.convert(InputStreamReader(i).readText(), ADOC_OPTS).toByteArray())
-                }
+                ByteArrayInputStream(
+                    CACHE.getOrPut(n) { ADOC.convert(InputStreamReader(i).readText(), ADOC_OPTS).toByteArray() }
+                )
             }.let {
                 logger.info { "$n converted in " + it.duration }
                 it.value
@@ -82,15 +84,33 @@ open class AdocExtension : ConcordionExtension {
     }
 
     private fun addStyles(ex: ConcordionExtender) {
+        ex.linkedCss(BASE_CM, "enable-codemirror.css")
+        ex.linkedJs(BASE_CM, "cm6.bundle.min.js", "enable-codemirror.js")
+
         ex.linkedCss(BASE_BS, "bootstrap.min.css", "enable-bootstrap.css", "doc.min.css", "scrollToTop.css")
-        ex.linkedJs(
-            BASE_BS,
-            "bootstrap.bundle.min.js",
-            "jquery-3.2.1.slim.min.js",
-            "sidebar.js",
-            "doc.min.js",
-            "scrollToTop.js"
+        ex.linkedJs(BASE_BS, "bootstrap.bundle.min.js", "jquery-3.2.1.slim.min.js", "scrollToTop.js")
+
+        ex.linkedCss(
+            BASE_FA,
+            "css/all.min.css",
+            "css/regular.min.css",
+            "css/solid.min.css",
+            "css/all.min.css"
         )
+        ex.resources(
+            BASE_FA,
+            "webfonts/fa-regular-400.woff2",
+            "webfonts/fa-regular-400.eot",
+            "webfonts/fa-regular-400.svg",
+            "webfonts/fa-regular-400.ttf",
+            "webfonts/fa-regular-400.woff",
+            "webfonts/fa-solid-900.woff2",
+            "webfonts/fa-solid-900.eot",
+            "webfonts/fa-solid-900.svg",
+            "webfonts/fa-solid-900.ttf",
+            "webfonts/fa-solid-900.woff"
+        )
+
         ex.linkedCss(
             BASE,
             "css/site.css",

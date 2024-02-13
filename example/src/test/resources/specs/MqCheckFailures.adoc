@@ -154,11 +154,13 @@ h1, {{isoDate (at '-1d')}}
 [.ExpectedToFail]
 .Big message
 ====
+.Got message
 [source,json,e-mq-set=myQueue,role=mh-200]
 ----
 include::../data/mq/big.json[]
 ----
 
+.Wrong expectations
 [cols="a", caption=, e-mq-check=myQueue]
 |===
 |[source,json,role=mh-100]

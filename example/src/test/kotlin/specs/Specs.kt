@@ -25,6 +25,7 @@ import net.javacrumbs.jsonunit.core.Option.IGNORING_EXTRA_FIELDS
 import java.util.ArrayDeque
 
 class Nested : Specs()
+class WsCheckFailures : Specs()
 class MqCheckFailures : Specs()
 class DbSetOperations : Specs()
 class DbCheckFailures : Specs()

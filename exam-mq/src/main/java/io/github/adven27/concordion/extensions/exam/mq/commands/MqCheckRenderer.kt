@@ -123,7 +123,7 @@ interface MqCheckRenderer {
         is Fail -> errorMessage(
             message = error.details,
             type = "json",
-            html = div("class" to "${error.type} failure")(
+            html = div("class" to "${error.type} failure mh-500")(
                 Html("del", contentVerifier(error.type).printer().print(error.expected), "class" to "expected"),
                 Html("ins", contentVerifier(error.type).printer().print(error.actual), "class" to "actual")
             )

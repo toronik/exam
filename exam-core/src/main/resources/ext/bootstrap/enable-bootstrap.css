@@ -18,6 +18,11 @@
     overflow: scroll!important;
 }
 
+.mh-100 {
+    max-height: 100px;
+    overflow: scroll!important;
+}
+
 .alert-warning pre {
     background: inherit;
 }
@@ -267,7 +272,7 @@ p.success {
 pre.success {
     background-color: #d1e7dd !important;
 }
-.failure, .failure * {
+.failure {
     background-color: #fdd !important;
     border-color: #c99 !important;
     padding: 1px;

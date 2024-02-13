@@ -127,9 +127,7 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
         registry.commands().filter { "example" != it.key }.forEach { ex.withCommand(NS, it.key, it.value) }
 
         TopButtonExtension().addTo(ex)
-        CodeMirrorExtension().addTo(ex)
 //        TocbotExtension().addTo(ex)
-        FontAwesomeExtension().addTo(ex)
         LoggingFormatterExtension().addTo(ex)
 //        ex.withThrowableListener(ErrorListener())
         if (focusOnError) {

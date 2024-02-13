@@ -27,7 +27,7 @@ open class BaseParser {
         else -> throw UnsupportedOperationException("Unsupported markup $html")
     }
 
-    private fun parsedMessage(item: Html, msg: ParsedMessage, eval: Evaluator): ParsedMessage = when {
+    private fun parseMessage(item: Html, msg: ParsedMessage, eval: Evaluator): ParsedMessage = when {
         item.localName() == "table" && item.hasClass("headers") -> msg.copy(headers = parseHeaders(item, eval))
         item.localName() == "table" && item.hasClass("params") -> msg.copy(params = parseHeaders(item, eval))
         item.localName() == "pre" -> parseContent(msg, item, eval)
@@ -43,7 +43,7 @@ open class BaseParser {
     )
 
     protected fun parse(item: Html, eval: Evaluator) = item.childs()
-        .fold(ParsedMessage()) { acc, el -> parsedMessage(el, acc, eval) }
+        .fold(ParsedMessage()) { acc, el -> parseMessage(el, acc, eval) }
         .takeIf { it.content != null }
 
     data class ParsedMessage(

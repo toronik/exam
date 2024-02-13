@@ -104,7 +104,7 @@ open class RawHttpParser(
     override fun parseRequest(r: String) = parse(r).let { request ->
         HttpRequest(
             method = request.method,
-            url = request.uri.let { "${it.path}?${it.query}" },
+            url = request.uri.let { uri -> "${uri.path}${uri.query?.let { "?$it" } ?: ""}" },
             httpVersion = request.startLine.httpVersion.toString(),
             body = request.body.getOrNull()?.decodeBodyToString(StandardCharsets.UTF_8),
             headers = request.headers.headerNames
