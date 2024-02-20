@@ -1,4 +1,5 @@
 import {EditorView} from "codemirror"
+import { EditorState } from "@codemirror/state"
 import {json} from "@codemirror/lang-json"
 import {xml} from "@codemirror/lang-xml"
 import {http} from "codemirror-lang-http-bak"
@@ -9,7 +10,7 @@ import { drawSelection} from '@codemirror/view';
 
 function createMergeView(a, b, parent, type) {
     let e =  [
-        EditorView.editable.of(false),
+        EditorState.readOnly.of(true),
         drawSelection(),
         syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
         highlightSelectionMatches(),

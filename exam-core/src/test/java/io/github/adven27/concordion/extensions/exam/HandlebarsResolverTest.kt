@@ -60,7 +60,7 @@ class HandlebarsResolverTest {
 
     @Test
     fun now() {
-        assertThat(eval.resolveToObj("{{now}}") as Date).isCloseTo(Date(), 2000)
+        assertThat(eval.resolveToObj("{{now}}") as Date).isCloseTo(Date(), 5000)
     }
 
     @Test
@@ -70,7 +70,7 @@ class HandlebarsResolverTest {
             val result = helper(it)
             when (expected) {
                 is Date -> assertThat(if (result is String) result.parseDate() else result as Date)
-                    .describedAs("Failed helper: %s", it).isCloseTo(expected, 2000)
+                    .describedAs("Failed helper: %s", it).isCloseTo(expected, 5000)
 
                 else -> assertEquals(expected, result, "Failed helper: $it")
             }

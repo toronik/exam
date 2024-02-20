@@ -1,6 +1,6 @@
 {
   "date": "{{isoDate (at)}}",
-  "var1": "{{coalesce msg.v1 '1'}}",
-  "var2": "{{coalesce msg.v2 '2'}}",
-  "var3": "{{coalesce msg.v3 '3'}}"
+  "var1": "{{fnn msg.v1 '1'}}",
+  "var2": "{{fnn msg.v2 '2'}}",
+  "var3": "{{fnn msg.v3 '3'}}"
 }

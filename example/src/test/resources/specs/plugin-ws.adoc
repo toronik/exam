@@ -66,10 +66,7 @@ Content-Type: application/json
   "GET": "/mirror/headers",
   "Authorization": "token",
   "Accept-Language": "ru",
-  "cookies": {
-    "cookie1": "c1",
-    "cookie2": "c2"
-  }
+  "cookies": { "cookie1": "c1", "cookie2": "c2" }
 }
 ----
 --

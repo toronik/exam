@@ -34,7 +34,7 @@ enum class MiscHelpers(
             options.evaluator().setVariable("#$it", context)
         }.let { context }
     },
-    coalesce("""{{coalesce var1 var2 "default value"}}""", mapOf(), "default value") {
+    fnn("""{{fnn var1 var2 "default value"}}""", mapOf(), "default value") {
         override fun invoke(context: Any?, options: Options) = context ?: options.params.firstNotNullOfOrNull { it }
     },
     map("""{{map key='value'}}""", mapOf(), mapOf("key" to "value")) {

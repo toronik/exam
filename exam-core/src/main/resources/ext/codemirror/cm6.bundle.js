@@ -23736,7 +23736,7 @@ var cm6 = (function (exports) {
 
    function createMergeView(a, b, parent, type) {
        let e =  [
-           EditorView.editable.of(false),
+           EditorState.readOnly.of(true),
            drawSelection(),
            syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
            highlightSelectionMatches(),

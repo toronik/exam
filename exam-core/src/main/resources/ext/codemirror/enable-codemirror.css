@@ -1,14 +1,6 @@
-pre.htmlmixed > .CodeMirror {
-    height: auto;
-}
-
 .exp-body {
     width: 1px;
     max-width: 1px;
-}
-
-.httpstyle > .CodeMirror {
-    height: auto;
 }
 
 .cm-mergeView {
@@ -106,18 +98,13 @@ td.json.success, td.xml.success, td.htmlmixed.success, td.text.success {
 
 pre.code, pre > code, pre > code * {
     font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace !important;
-    font-size: 12px !important;
-    line-height: 1.5 !important;
+    font-size: x-small !important;
 }
 
-.row .doc-code {
-    width: fit-content;
-}
-
-.alert-warning .doc-code {
+.alert-warning .code {
     white-space: pre-wrap;
 }
 
-.alert-warning pre.doc-code * {
+.alert-warning pre.code * {
     font-size: x-small !important;
 }

@@ -80,30 +80,6 @@ div.fa-caret-square-down {
     color: indianred !important;
 }
 
-.mq-send > table {
-    table-layout: fixed;
-}
-
-.mq-send pre {
-    border-radius: 0.25rem !important;
-}
-
-.mq-check > table {
-    table-layout: fixed;
-}
-
-.mq-check pre {
-    border-radius: 0.25rem !important;
-}
-
-.nosql-set > table {
-    table-layout: fixed;
-}
-
-.nosql-set pre {
-    border-radius: 0.25rem !important;
-}
-
 dt a {
     text-decoration: none;
     font-size: 1.25rem;
@@ -112,33 +88,6 @@ dt a {
 
 dd a {
     text-decoration: none;
-}
-
-.file.collapse {
-    display: block !important;
-    height: 200px;
-    overflow: hidden;
-}
-
-.file.collapsing {
-    height: 200px;
-}
-
-.fa-caret-square-down.collapsed {
-    background: linear-gradient(to bottom, transparent, #f8f9fa);
-    justify-content: center;
-    width: 100%;
-}
-
-div.fa-caret-square-down {
-    position: absolute;
-    text-align: right;
-    z-index: 10;
-    height: 100%;
-    align-items: flex-end;
-    display: flex !important;
-    background: linear-gradient(transparent, #dee2e6);
-    margin-left: -10px;
 }
 
 .badge {
@@ -211,29 +160,9 @@ table.ws-cases > tbody > tr > td {
     white-space: nowrap;
 }
 
-div.given {
-    margin-bottom: 1rem;
-}
-
-div.when {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-}
-
-div.then {
-    margin-top: 1rem;
-}
-
 .blockquote-custom {
     position: relative;
     font-size: 1.1rem;
-}
-
-pre {
-    background-color: #eaeaea;
-    border-radius: 0.25rem!important;
-    padding: 0;
-    margin-top: 0.25rem!important;
 }
 
 .footer {
@@ -356,7 +285,7 @@ ins {
     margin-bottom: 1px;
 }
 
-.commentary {
+.comment {
     float: right;
     width: 200px;
     background-color: #ffffd0;
@@ -365,6 +294,26 @@ ins {
     margin: 10px 0 10px 10px;
 }
 
-.commentary, .commentary * {
+.comment, .comment * {
     font-size: 8pt;
+}
+
+/* custom scrollbar */
+::-webkit-scrollbar {
+    width: 20px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #d6dee1;
+    border-radius: 20px;
+    border: 6px solid transparent;
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #a8bbbf;
 }

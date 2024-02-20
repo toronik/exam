@@ -87,7 +87,7 @@ open class AdocExtension : ConcordionExtension {
         ex.linkedCss(BASE_CM, "enable-codemirror.css")
         ex.linkedJs(BASE_CM, "cm6.bundle.min.js", "enable-codemirror.js")
 
-        ex.linkedCss(BASE_BS, "bootstrap.min.css", "enable-bootstrap.css", "doc.min.css", "scrollToTop.css")
+        ex.linkedCss(BASE_BS, "bootstrap.min.css", "enable-bootstrap.css", "scrollToTop.css")
         ex.linkedJs(BASE_BS, "bootstrap.bundle.min.js", "jquery-3.2.1.slim.min.js", "scrollToTop.js")
 
         ex.linkedCss(
@@ -149,8 +149,8 @@ open class AdocExtension : ConcordionExtension {
         override fun getDocinfo(location: LocationType, document: Document, options: Map<String, Any>) =
             // language=html
             """
-            <link rel="stylesheet" href="../ext/ascii/highlight/styles/stackoverflow-light.min.css">.</link>
-            <link rel="stylesheet" href="../ext/ascii/highlight/styles/highlightjs-copy.min.css">.</link>
+            <link rel="stylesheet" href="../ext/ascii/highlight/styles/stackoverflow-light.min.css"/>
+            <link rel="stylesheet" href="../ext/ascii/highlight/styles/highlightjs-copy.min.css"/>
             <script src="../ext/ascii/highlight/highlight.min.js">.</script>
             <script src="../ext/ascii/highlight/highlightjs-copy.min.js">.</script>
             <script>
