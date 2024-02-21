@@ -1,4 +1,8 @@
-200 OK
+200
 Content-Type: application/json
 
-{"PUT":"/mirror/request?p=1","body":{"a": "ok", "b": 1 }}
+{
+  "PUT":"/mirror/request?p=1",
+  "headers": { "host": "{{ignore}}", "content-type": "application/json", "content-length": "{{ignore}}" },
+  "body":{"a": "ok", "b": 1 }
+}

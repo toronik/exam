@@ -49,7 +49,7 @@ include::plugin-ws.adoc[tags=ws-http]
 .Given request:
 [source,httprequest]
 ----
-GET /mirror/headers
+GET /mirror/request
 Content-Type: application/json
 Authorization: token
 Accept-Language: ru
@@ -59,13 +59,18 @@ Cookie: cookie1=c1; cookie2=c2
 .Expected response:
 [source,httprequest]
 ----
-200 OK
+200
 Content-Type: application/json
 
 {
-  "GET": "/mirror/headers",
-  "Authorization": "token",
-  "Accept-Language": "ru",
+  "GET": "/mirror/request",
+  "headers": {
+    "host": "{{ignore}}",
+    "content-type": "application/json",
+    "authorization": "token",
+    "accept-language": "ru",
+    "cookie": "cookie1=c1; cookie2=c2"
+  },
   "cookies": { "cookie1": "c1", "cookie2": "c2" }
 }
 ----
@@ -161,12 +166,11 @@ Content-Type: application/json
 ----
 
 .Check interactions
-[%header,cols="4,4,1,1",e-verify-rows="#i : #interactions"]
+[%header,cols="4,2,0",e-verify-rows="#i : #interactions"]
 |===
 |[e-eq=#i.req.raw]#Request#
 |[e-verifier=jsonIgnoreExtraFields e-eq=#i.resp.body]#Response#
 |[e-eq=#i.resp.statusCode]#Status#
-|[e-eq=#i.resp.statusPhrase]#Phrase#
 
 |[pre language-http]`GET /mirror/request?p=1 HTTP/1.1
 Host: localhost:8888
@@ -175,7 +179,6 @@ Content-Type: application/json
 {blank}`
 |[pre language-json]`{}`
 |200
-|OK
 |===
 //end::ws-http-v[]
 ====
@@ -207,10 +210,18 @@ Content-Type: application/json
 .Check with registered `jsonIgnoreExtraFields` verifier
 [source,httprequest,e-verifier=jsonIgnoreExtraFields]
 ----
-200 OK
+200
 Content-Type: application/json
 
-{ "POST": "/mirror/request" }
+{
+  "POST": "/mirror/request",
+  "body": {},
+  "headers": {
+    "host": "{{ignore}}",
+    "content-type": "application/json",
+    "content-length": "{{ignore}}"
+  }
+}
 ----
 --
 //end::ws-custom[]

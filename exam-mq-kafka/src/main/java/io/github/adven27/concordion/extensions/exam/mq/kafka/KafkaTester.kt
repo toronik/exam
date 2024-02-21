@@ -71,9 +71,6 @@ open class KafkaConsumeAndSendTester @JvmOverloads constructor(
     private fun toRecordHeader(it: Map.Entry<String, String?>) = RecordHeader(it.key, it.value?.toByteArray())
 
     companion object : KLogging() {
-        private const val PARAM_PARTITION = "partition"
-        private const val PARAM_KEY = "key"
-
         @JvmField
         val DEFAULT_PRODUCER_CONFIG: Map<String, String?> = mapOf(
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java.name,
@@ -174,6 +171,10 @@ open class KafkaConsumeOnlyTester @JvmOverloads constructor(
         }
 
     companion object : KLogging() {
+        const val PARAM_PARTITION = "partition"
+        const val PARAM_KEY = "key"
+        const val PARAM_OFFSET = "offset"
+        const val PARAM_TIMESTAMP = "timestamp"
         const val POLL_MILLIS: Long = 50
         private const val KAFKA_FETCHING_TIMEOUT: Long = 10
 
@@ -187,7 +188,16 @@ open class KafkaConsumeOnlyTester @JvmOverloads constructor(
 
         @JvmField
         val DEFAULT_RECORD_MAPPER: (ConsumerRecord<String, String>) -> Message = { record ->
-            Message(record.value(), record.headers().associate { it.key() to String(it.value()) })
+            Message(
+                body = record.value(),
+                headers = record.headers().associate { it.key() to String(it.value()) },
+                params = mapOf(
+                    PARAM_KEY to record.key(),
+                    PARAM_PARTITION to record.partition().toString(),
+                    PARAM_OFFSET to record.offset().toString(),
+                    PARAM_TIMESTAMP to record.timestamp().toString()
+                )
+            )
         }
     }
 }

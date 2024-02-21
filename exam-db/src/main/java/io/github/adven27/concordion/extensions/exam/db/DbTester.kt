@@ -1,5 +1,6 @@
 package io.github.adven27.concordion.extensions.exam.db
 
+import io.github.adven27.concordion.extensions.exam.core.Content
 import io.github.adven27.concordion.extensions.exam.core.commands.AwaitConfig
 import io.github.adven27.concordion.extensions.exam.core.commands.Verifier
 import io.github.adven27.concordion.extensions.exam.core.html.fileExt
@@ -8,6 +9,7 @@ import io.github.adven27.concordion.extensions.exam.db.builder.CompareOperation.
 import io.github.adven27.concordion.extensions.exam.db.builder.ContainsFilterTable
 import io.github.adven27.concordion.extensions.exam.db.builder.DataBaseSeedingException
 import io.github.adven27.concordion.extensions.exam.db.builder.ExamDataSet
+import io.github.adven27.concordion.extensions.exam.db.builder.ExamTable
 import io.github.adven27.concordion.extensions.exam.db.builder.JSONDataSet
 import io.github.adven27.concordion.extensions.exam.db.builder.SeedStrategy
 import io.github.adven27.concordion.extensions.exam.db.builder.SeedStrategy.CLEAN_INSERT
@@ -79,6 +81,19 @@ open class DbTester @JvmOverloads constructor(
     fun seed(seed: TableSeed, eval: Evaluator) = requireAllowedStrategy(seed).apply {
         strategy.operation.execute(connection(ds), ExamDataSet(table, eval))
     }
+
+    fun metaData(seed: TableSeed) = TableSeed(
+        seed.ds,
+        ExamTable(
+            CompositeTable(
+                connection(seed.ds)
+                    .createTable(seed.table.tableName()).withColumnsAsIn(seed.table).tableMetaData,
+                (seed.table as ExamTable).delegate
+            ),
+            seed.table.eval
+        ),
+        seed.strategy
+    )
 
     fun seed(seed: FilesSeed, eval: Evaluator) = requireAllowedStrategy(seed).let {
         try {
@@ -488,7 +503,7 @@ open class DbTesterBase @JvmOverloads constructor(
         createQueryTable(tableName, "SELECT * FROM $tableName WHERE $filter")
 
     fun actualWithDependentTables(ds: String?, table: String): IDataSet = connection(ds).let {
-        it.createDataSet(getAllDependentTables(it, QualifiedTableName(table.uppercase(), it.schema).qualifiedName))
+        it.createDataSet(getAllDependentTables(it, QualifiedTableName(table, it.schema).qualifiedName))
     }
 
     protected fun actualDataSet(tables: Array<String>): IDataSet = connection.createDataSet(tables)
@@ -570,13 +585,18 @@ private fun List<Difference>.prettyPrint(): String =
         .toSortedMap().entries.joinToString("\n") { """${it.key}: ${it.value}""" }
 
 class JsonbPostgresqlDataTypeFactory : PostgresqlDataTypeFactory() {
-    override fun createDataType(sqlType: Int, sqlTypeName: String?): DataType =
-        if (sqlTypeName == "jsonb") JsonbDataType() else super.createDataType(sqlType, sqlTypeName)
+    override fun createDataType(sqlType: Int, sqlTypeName: String?): DataType = when (sqlTypeName) {
+        in listOf("jsonb", "json") -> JsonbDataType(sqlTypeName!!)
+        else -> super.createDataType(sqlType, sqlTypeName)
+    }
 
-    class JsonbDataType : AbstractDataType("jsonb", Types.OTHER, String::class.java, false) {
-        override fun typeCast(obj: Any?): Any = obj.toString()
+    class JsonbDataType(name: String) : AbstractDataType(name, Types.OTHER, Content.Json::class.java, false) {
+        override fun typeCast(obj: Any?): Content.Json? = obj?.let {
+            if (it is Content.Json) it else Content.Json(it.toString())
+        }
 
-        override fun getSqlValue(column: Int, resultSet: ResultSet): Any? = resultSet.getString(column)
+        override fun getSqlValue(column: Int, resultSet: ResultSet): Any? =
+            resultSet.getString(column)?.let { Content.Json(it) }
 
         override fun setSqlValue(value: Any?, column: Int, statement: PreparedStatement) = statement.setObject(
             column,

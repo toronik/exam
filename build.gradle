@@ -1,10 +1,9 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 buildscript {
-    ext.kotlin_version = '1.9.10'
-    ext.ktor_version = '2.3.7'
-    ext.exposed_version = '0.41.1'
+    ext.kotlin_version = '1.9.22'
     ext.klogging_version = '3.0.4'
     ext.jacksonKt_version = '2.14.1'
-    ext.libVersion = '2024.0.3'
+    ext.libVersion = '2024.0.4'
     repositories {
         mavenCentral()
         maven {
@@ -13,7 +12,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.1"
+        classpath "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.23.5"
         classpath "org.jlleitschuh.gradle:ktlint-gradle:11.6.1"
     }
 }
@@ -52,22 +51,15 @@ subprojects {
     group = 'io.github.adven27'
     version = libVersion
 
-    sourceCompatibility = 11
-    targetCompatibility = 11
+    sourceCompatibility = 17
+    targetCompatibility = 17
     compileJava.options.encoding = 'utf-8'
     compileTestJava.options.encoding = 'utf-8'
 
-    compileKotlin {
+    tasks.withType(KotlinCompile) {
         kotlinOptions {
-            freeCompilerArgs = ['-Xjsr305=strict']
-            jvmTarget = '11'
-        }
-    }
-
-    compileTestKotlin {
-        kotlinOptions {
-            freeCompilerArgs = ['-Xjsr305=strict']
-            jvmTarget = '11'
+            freeCompilerArgs += '-Xjsr305=strict'
+            jvmTarget = '17'
         }
     }
 

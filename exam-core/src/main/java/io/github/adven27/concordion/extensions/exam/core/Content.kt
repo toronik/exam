@@ -43,6 +43,8 @@ open class Content(val body: String, val type: String) {
     class Text(content: String) : Content(content, "text")
 
     fun pretty() = body.pretty(type)
+
+    override fun toString() = pretty()
 }
 
 interface ContentPrinter {

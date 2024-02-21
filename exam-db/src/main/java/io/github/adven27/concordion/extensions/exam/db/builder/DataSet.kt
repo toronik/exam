@@ -144,17 +144,18 @@ class ExamDataSetIterator(private val delegate: ITableIterator, private val eval
     override fun getTable(): ITable = ExamTable(delegate.table, eval)
 }
 
-class ExamTable(private val delegate: ITable, private val eval: Evaluator) : ITable {
+class ExamTable(val delegate: ITable, val eval: Evaluator) : ITable {
     override fun getTableMetaData(): ITableMetaData = delegate.tableMetaData
     override fun getRowCount(): Int = delegate.rowCount
 
     @Throws(DataSetException::class)
     override fun getValue(row: Int, column: String): Any? {
         val value = delegate.getValue(row, column)
+        val dataType = tableMetaData.columns.first { it.columnName.equals(column, ignoreCase = true) }.dataType
         return try {
             when {
                 value is String && value.isRange() -> value.toRange().toList().let { it[row % it.size] }
-                value is String && !value.startsWith("!{") -> eval.resolveToObj(value)
+                value is String -> dataType.typeCast(eval.resolveToObj(value))
                 else -> value
             }
         } catch (expected: Throwable) {

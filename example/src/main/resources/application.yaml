@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    driver-class-name: ${env.db.postgresql.driver}
+    url: ${env.db.postgresql.url}
+    username: ${env.db.postgresql.username}
+    password: ${env.db.postgresql.password}

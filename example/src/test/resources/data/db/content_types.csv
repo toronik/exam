@@ -1,0 +1,21 @@
+data_json, data_json_with_extra_fields, data_xml
+"{
+  ""id"": ""a"",
+  ""code"": 1
+}","{
+  ""id"": ""a"",
+  ""code"": 1,
+  ""extra"": ""ignore""
+}","<some>
+  <ts>{{iso (at)}}</ts>
+</some>"
+"{
+  ""id"": ""b"",
+  ""code"": 2
+}","{
+  ""id"": ""b"",
+  ""code"": 2,
+  ""extra"": ""ignore""
+}","<some>
+  <data>any</data>
+</some>"

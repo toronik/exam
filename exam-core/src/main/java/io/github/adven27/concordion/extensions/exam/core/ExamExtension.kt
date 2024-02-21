@@ -176,12 +176,20 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
                 }.first
         }
 
+        const val VERIFIER_JSON = "json"
+        const val VERIFIER_JSON_IGNORE_EXTRA_FIELDS = "jsonIgnoreExtraFields"
+        const val VERIFIER_JSON_ARRAY_ORDERED = "jsonArrayOrdered"
+        const val VERIFIER_XML = "xml"
+        const val VERIFIER_TEXT = "text"
+
         val CONTENT_VERIFIERS: MutableMap<String, ContentVerifier> = mutableMapOf(
-            "json" to JsonVerifier(),
-            "jsonIgnoreExtraFields" to JsonVerifier { it.withOptions(IGNORING_EXTRA_FIELDS) },
-            "jsonArrayOrdered" to JsonVerifier { it.withOptions(it.options.apply { remove(IGNORING_ARRAY_ORDER) }) },
-            "xml" to XmlVerifier(),
-            "text" to ContentVerifier.Default("text")
+            VERIFIER_JSON to JsonVerifier(),
+            VERIFIER_JSON_IGNORE_EXTRA_FIELDS to JsonVerifier { it.withOptions(IGNORING_EXTRA_FIELDS) },
+            VERIFIER_JSON_ARRAY_ORDERED to JsonVerifier {
+                it.withOptions(it.options.apply { remove(IGNORING_ARRAY_ORDER) })
+            },
+            VERIFIER_XML to XmlVerifier(),
+            VERIFIER_TEXT to ContentVerifier.Default("text")
         )
 
         @JvmStatic

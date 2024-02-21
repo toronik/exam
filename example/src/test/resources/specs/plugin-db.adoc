@@ -145,15 +145,12 @@ include::plugin-db.adoc[tags=db-check-ordered]
 ====
 //tag::db-check-ordered[]
 [e-db-check=product, e-orderBy='rating, id']
-|===
-|name |rating
+,===
+name, rating
 
-|{{string}}
-|{{ignore}}
-
-|{{string}}
-|10
-|===
+{{string}}, {{ignore}}
+{{string}}, 10
+,===
 //end::db-check-ordered[]
 ====
 
@@ -322,3 +319,4 @@ id, name
 
 - link:DbSetOperations.adoc[What are set operation options?, role=e-run]
 - link:DbCheckFailures.adoc[How failures look like?, role=e-run]
+- link:DbCheckContentTypes.adoc[How to check content types?, role=e-run]

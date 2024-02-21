@@ -1,0 +1,80 @@
+= DB Check Content Types
+
+[#before]
+.Before each example
+****
+.Given table `content_types`
+[%header,format=csv, e-db-set=content_types]
+|===
+include::../data/db/content_types.csv[]
+|===
+****
+
+.Check content types
+[source,asciidoc]
+--
+include::DbCheckContentTypes.adoc[tags=db-check-ct]
+--
+
+.Check content types
+====
+//tag::db-check-ct[]
+[%header, cols="1a,1a,1a", e-db-check=content_types, e-orderBy="id"]
+|===
+|data_json |data_json_with_extra_fields |data_xml
+
+|[source,json]
+----
+{ "id": "a", "code": 1 }
+----
+|[source,json]
+----
+{ "id": "a", "code": 1 }
+----
+|[source,xml]
+----
+<some> <ts>{{iso (at)}}</ts> </some>
+----
+
+|[source,json]
+----
+{ "id": "{{string}}", "code": 2 }
+----
+|[source,json]
+----
+{ "id": "b", "code": "{{number}}" }
+----
+|[source,xml]
+----
+<some> <data>{{ignore}}</data> </some>
+----
+|===
+//end::db-check-ct[]
+====
+
+[.ExpectedToFail]
+.Failures
+====
+[%header, cols="1a,1a", e-db-check=content_types, e-orderBy="id"]
+|===
+|data_json  |data_xml
+
+|[source,json]
+----
+{ "id": "{{number}}", "code": 1 }
+----
+|[source,xml]
+----
+<some> <ts>{{iso (at)}}</ts> </some>
+----
+
+|[source,json]
+----
+{ "id": "{{string}}", "code": 2 }
+----
+|[source,xml]
+----
+<some> <data>{{number}}</data> </some>
+----
+|===
+====

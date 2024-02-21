@@ -20,7 +20,7 @@ open class DbSetCommand(
     override fun render(commandCall: CommandCall, result: Model) = renderer.render(commandCall, result)
     override fun process(model: Model, eval: Evaluator, recorder: ResultRecorder) = model.apply {
         dbTester.seed(model.seed, eval)
-    }
+    }.copy(seed = dbTester.metaData(model.seed))
 
     data class Model(val seed: TableSeed, val caption: String?)
 

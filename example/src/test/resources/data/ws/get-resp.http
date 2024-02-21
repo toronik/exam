@@ -1,4 +1,7 @@
-200 OK
+200
 Content-Type: application/json
 
-{"GET":"/mirror/request"}
+{
+  "GET":"/mirror/request",
+  "headers": { "host": "{{ignore}}", "content-type": "application/json" }
+}

@@ -1,10 +1,10 @@
 package specs
 
-import app.start
-import app.stop
+import com.example.demo.DemoApplication
 import com.github.jknack.handlebars.Helper
 import io.github.adven27.concordion.extensions.exam.core.AbstractSpecs
 import io.github.adven27.concordion.extensions.exam.core.ExamExtension
+import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.VERIFIER_XML
 import io.github.adven27.concordion.extensions.exam.core.JsonVerifier
 import io.github.adven27.concordion.extensions.exam.core.handlebars.date.DateHelpers
 import io.github.adven27.concordion.extensions.exam.core.handlebars.matchers.MatcherHelpers
@@ -15,31 +15,38 @@ import io.github.adven27.concordion.extensions.exam.db.DbPlugin.ValuePrinter.Def
 import io.github.adven27.concordion.extensions.exam.db.DbTester
 import io.github.adven27.concordion.extensions.exam.db.DbUnitConfig
 import io.github.adven27.concordion.extensions.exam.db.DbUnitConfig.TableColumnValueComparer
-import io.github.adven27.concordion.extensions.exam.db.commands.IgnoreMillisComparer
-import io.github.adven27.concordion.extensions.exam.db.commands.JsonColumnComparer
+import io.github.adven27.concordion.extensions.exam.db.commands.VerifierColumnComparer
 import io.github.adven27.concordion.extensions.exam.mq.MqPlugin
 import io.github.adven27.concordion.extensions.exam.mq.MqTester
 import io.github.adven27.concordion.extensions.exam.mq.MqTester.Message
 import io.github.adven27.concordion.extensions.exam.ws.WsPlugin
+import io.github.adven27.env.core.Environment
+import io.github.adven27.env.db.postgresql.PostgreSqlContainerSystem
 import net.javacrumbs.jsonunit.core.Option.IGNORING_EXTRA_FIELDS
-import java.util.ArrayDeque
+import org.springframework.boot.SpringApplication
+import org.springframework.context.ConfigurableApplicationContext
+import java.util.*
 
 class Nested : Specs()
 class WsCheckFailures : Specs()
 class MqCheckFailures : Specs()
 class DbSetOperations : Specs()
 class DbCheckFailures : Specs()
+class DbCheckContentTypes : Specs()
 
 @Suppress("FunctionOnlyReturningConstant")
 open class Specs : AbstractSpecs() {
 
     override fun init(): ExamExtension = ExamExtension(
-        WsPlugin(PORT.also { System.setProperty("server.port", it.toString()) }),
+        WsPlugin(port = ENV.sutPort()),
         MqPlugin("myQueue" to DummyMq(), "myAnotherQueue" to DummyMq()),
         DbPlugin(
             dbTester,
             valuePrinter = ValuePrinter.Default(
-                tableColumnType = mapOf(TableColumn("product", "meta_json") to "json")
+                tableColumnStyle = mapOf(
+                    TableColumn("content_types", "data_xml") to "xml",
+                    TableColumn("content_types", "data_json_with_extra_fields") to "details"
+                )
             )
         )
     ).withHandlebar { hb ->
@@ -58,11 +65,11 @@ open class Specs : AbstractSpecs() {
     )
 
     override fun startSut() {
-        start()
+        SUT = SpringApplication(DemoApplication::class.java).run()
     }
 
     override fun stopSut() {
-        stop()
+        SUT.stop()
     }
 
     private val users = mutableListOf<String>()
@@ -85,27 +92,29 @@ open class Specs : AbstractSpecs() {
     val miscHelpers: String = MiscHelpers.entries.joinToString("\n") { it.describe() }
 
     companion object {
-        const val PORT = 8888
+        private lateinit var SUT: ConfigurableApplicationContext
+        val ENV: ApplicationEnvironment = ApplicationEnvironment().apply { up() }
 
         @JvmStatic
-        val dbTester = DbTester(
-            driver = "org.h2.Driver",
-            url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:sql/populate.sql'",
-            user = "sa",
-            password = "",
-            dbUnitConfig = DbUnitConfig(
-                tableColumnValueComparer = listOf(
-                    TableColumnValueComparer(
-                        table = "types",
-                        columnValueComparer = mapOf("DATETIME_TYPE" to IgnoreMillisComparer())
-                    ),
-                    TableColumnValueComparer(
-                        table = "product",
-                        columnValueComparer = mapOf("META_JSON" to JsonColumnComparer())
+        val dbTester = with(ENV.database()) {
+            DbTester(
+                driver = driver,
+                url = jdbcUrl,
+                user = username,
+                password = password,
+                dbUnitConfig = DbUnitConfig(
+                    tableColumnValueComparer = listOf(
+                        TableColumnValueComparer(
+                            table = "content_types",
+                            columnValueComparer = mapOf(
+                                "data_json_with_extra_fields" to VerifierColumnComparer("jsonIgnoreExtraFields"),
+                                "data_xml" to VerifierColumnComparer(VERIFIER_XML)
+                            )
+                        )
                     )
                 )
             )
-        )
+        }
 
         private class DummyMq : MqTester.NOOP() {
             private val queue = ArrayDeque<Message>()
@@ -116,4 +125,11 @@ open class Specs : AbstractSpecs() {
             }
         }
     }
+}
+
+class ApplicationEnvironment : Environment(
+    "DB" to PostgreSqlContainerSystem()
+) {
+    fun database() = env<PostgreSqlContainerSystem>().config
+    fun sutPort() = 8888.also { System.setProperty("server.port", it.toString()) }
 }

@@ -1,5 +1,6 @@
 package io.github.adven27.concordion.extensions.exam.db.commands.check
 
+import io.github.adven27.concordion.extensions.exam.core.Content
 import io.github.adven27.concordion.extensions.exam.core.html.Html
 import io.github.adven27.concordion.extensions.exam.core.html.div
 import io.github.adven27.concordion.extensions.exam.core.html.errorMessage
@@ -97,10 +98,14 @@ open class BaseResultRenderer(private val printer: ValuePrinter) : DbCheckComman
                 ?: td.success(expected.tableName(), col, expected[row, col], actual[row, col])
         }
 
-    private fun Html.diff(d: Difference) = this(
-        Html("del", printer.print(d.expectedTable.tableName(), d.columnName, d.expectedValue), "class" to "me-1"),
-        Html("ins", printer.print(d.actualTable.tableName(), d.columnName, d.actualValue))
-    ).css("table-danger").tooltip(d.failMessage)
+    private fun Html.diff(d: Difference): Html {
+        val act = d.actualValue
+        val exp = if (act is Content) Content(body = d.expectedValue.toString(), type = act.type) else d.expectedValue
+        return this(
+            Html("del", printer.print(d.actualTable.tableName(), d.columnName, exp)).css("expected"),
+            Html("ins", printer.print(d.actualTable.tableName(), d.columnName, act)).css("actual")
+        ).css("${if (act is Content) act.type else ""} failure").tooltip(d.failMessage)
+    }
 
     private operator fun List<Difference>.get(row: Int, col: String) =
         singleOrNull { it.rowIndex == row && it.columnName.equals(col, ignoreCase = true) }

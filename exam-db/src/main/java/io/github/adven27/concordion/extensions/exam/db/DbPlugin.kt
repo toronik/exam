@@ -1,7 +1,9 @@
 package io.github.adven27.concordion.extensions.exam.db
 
 import com.github.jknack.handlebars.Options
+import io.github.adven27.concordion.extensions.exam.core.Content
 import io.github.adven27.concordion.extensions.exam.core.ExamPlugin
+import io.github.adven27.concordion.extensions.exam.core.html.pre
 import io.github.adven27.concordion.extensions.exam.core.html.span
 import io.github.adven27.concordion.extensions.exam.db.commands.DbCleanCommand
 import io.github.adven27.concordion.extensions.exam.db.commands.DbExecuteCommand
@@ -107,19 +109,21 @@ class DbPlugin @JvmOverloads constructor(
     interface ValuePrinter {
         open class Default @JvmOverloads constructor(
             formatter: DateTimeFormatter = ISO_LOCAL_DATE_TIME,
-            private val tableColumnType: Map<TableColumn, String> = mapOf()
+            private val tableColumnStyle: Map<TableColumn, String> = mapOf()
         ) : AbstractDefault(formatter) {
             data class TableColumn(val table: String, val column: String)
 
             override fun orElse(value: Any): String = value.toString()
 
             override fun wrap(table: String, column: String, value: Any?): Element =
-                tableColumnType.entries
-                    .filter { (tc, _) -> tc.eq(table, column) }
-                    .map { it.value }
-                    .firstOrNull()
-                    ?.let { Element("pre").addStyleClass(it).appendText(print(table, column, value)) }
-                    ?: super.wrap(table, column, value)
+                super.wrap(table, column, value).let { e ->
+                    tableColumnStyle.entries
+                        .filter { (tc, _) -> tc.eq(table, column) }
+                        .map { it.value }
+                        .firstOrNull()
+                        ?.let { e.addStyleClass(it) }
+                        ?: e
+                }
 
             private fun TableColumn.eq(t: String, c: String) =
                 table.equals(t, ignoreCase = true) && column.equals(c, ignoreCase = true)
@@ -131,12 +135,16 @@ class DbPlugin @JvmOverloads constructor(
                 is Array<*> -> value.contentToString()
                 is java.sql.Date -> printDate(Date(value.time))
                 is Date -> printDate(value)
+                is Content -> value.pretty()
                 else -> orElse(value)
             }
 
             private fun printDate(value: Date) = formatter.withZone(ZoneId.systemDefault()).format(value.toInstant())
             override fun wrap(table: String, column: String, value: Any?): Element =
-                span(print(table, column, value)).el
+                when (value) {
+                    is Content -> pre(print(table, column, value), "class" to value.type).el
+                    else -> span(print(table, column, value)).el
+                }
 
             abstract fun orElse(value: Any): String
         }

@@ -1,20 +1,16 @@
 package io.github.adven27.concordion.extensions.exam.core.handlebars.matchers
 
-import com.github.jknack.handlebars.Context
 import com.github.jknack.handlebars.Options
 import io.github.adven27.concordion.extensions.exam.core.handlebars.ExamHelper
 import io.github.adven27.concordion.extensions.exam.core.utils.DateFormattedAndWithin.Companion.PARAMS_SEPARATOR
 import io.github.adven27.concordion.extensions.exam.core.utils.parseDate
 import io.github.adven27.concordion.extensions.exam.core.utils.toLocalDate
 import io.github.adven27.concordion.extensions.exam.core.utils.toLocalDateTime
-import org.concordion.api.Evaluator
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.*
-import java.util.regex.Pattern
 
 const val PLACEHOLDER_TYPE = "placeholder_type"
-const val DB_ACTUAL = "db_actual"
 const val ISO_LOCAL_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
 const val ISO_LOCAL_DATE_FORMAT = "yyyy-MM-dd"
 
@@ -80,11 +76,7 @@ enum class MatcherHelpers(
         expected = "\${json-unit.regex}\\d+"
     ) {
         override fun invoke(context: Any?, options: Options): Any =
-            if (placeholderType(options.context) == "db") {
-                regexMatches(context.toString(), dbActual(options.context))
-            } else {
-                "\${${placeholderType(options.context)}-unit.regex}$context"
-            }
+            "\${${placeholderType(options.context)}-unit.regex}$context"
     },
     after(
         example = "{{after (today)}}",
@@ -175,8 +167,6 @@ enum class MatcherHelpers(
             "\${${placeholderType(options.context)}-unit.matches:$context}${options.param(0, "")}"
     };
 
-    protected fun dbActual(context: Context) = (context.model() as Evaluator).getVariable("#$DB_ACTUAL")
-
     override fun apply(context: Any?, options: Options): Any? {
         validate(options)
         val result = try {
@@ -190,6 +180,3 @@ enum class MatcherHelpers(
     override fun toString() = this.describe()
     abstract operator fun invoke(context: Any?, options: Options): Any?
 }
-
-private fun regexMatches(p: String, value: Any?): Boolean =
-    value.takeIf { it != null }?.let { Pattern.compile(p).matcher(it.toString()).matches() } ?: false

@@ -1,5 +1,6 @@
 package io.github.adven27.concordion.extensions.exam.db.commands
 
+import io.github.adven27.concordion.extensions.exam.core.Content
 import io.github.adven27.concordion.extensions.exam.core.ContentVerifier
 import io.github.adven27.concordion.extensions.exam.core.ContentVerifier.Companion.setActualIfNeeded
 import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.contentVerifier
@@ -16,6 +17,7 @@ import java.util.*
 
 open class ExamMatchersAwareValueComparer : IsActualEqualToExpectedValueComparer() {
     protected lateinit var evaluator: Evaluator
+    protected var error = ""
 
     fun setEvaluator(evaluator: Evaluator): ExamMatchersAwareValueComparer {
         this.evaluator = evaluator
@@ -30,14 +32,28 @@ open class ExamMatchersAwareValueComparer : IsActualEqualToExpectedValueComparer
         dataType: DataType,
         expected: Any?,
         actual: Any?
-    ): Boolean = when {
-        expected.isError() -> false
-        expected.isMatcher() -> setActualIfNeeded(expected as String, actual, evaluator).let {
-            ContentVerifier.matcher(it, "\${test-unit.").matches(actual)
-        }
+    ): Boolean {
+        error = ""
+        return when {
+            expected.isError() -> false
+            expected.isMatcher() -> setActualIfNeeded(expected as String, actual, evaluator).let {
+                ContentVerifier.matcher(it, "\${test-unit.").matches(actual)
+            }
 
-        else -> super.isExpected(expectedTable, actualTable, rowNum, columnName, dataType, expected, actual)
+            actual is Content && expected is Content -> verify(actual, expected.body)
+            actual is Content && expected is String -> verify(actual, expected)
+
+            else -> super.isExpected(expectedTable, actualTable, rowNum, columnName, dataType, expected, actual)
+        }
     }
+
+    private fun verify(actual: Content, expected: String) =
+        contentVerifier(actual.type).verify(expected, actual.body, evaluator)
+            .onFailure { error = " because:\n" + it.rootCauseMessage() }
+            .isSuccess
+
+    override fun makeFailMessage(expectedValue: Any?, actualValue: Any?): String =
+        super.makeFailMessage(expectedValue, actualValue) + error
 
     companion object {
         @JvmField
@@ -84,8 +100,7 @@ fun sortedTable(table: ITable, columns: Array<String>, rowComparator: RowCompara
         setRowComparator(rowComparator.init(table, columns))
     }
 
-open class TypedColumnComparer(val type: String) : ExamMatchersAwareValueComparer() {
-    private var error = ""
+open class VerifierColumnComparer(private val verifier: String) : ExamMatchersAwareValueComparer() {
     override fun isExpected(
         expectedTable: ITable?,
         actualTable: ITable?,
@@ -94,14 +109,11 @@ open class TypedColumnComparer(val type: String) : ExamMatchersAwareValueCompare
         dataType: DataType,
         expected: Any?,
         actual: Any?
-    ) = contentVerifier(type).verify(expected.toString(), actual.toString(), evaluator)
+    ) = contentVerifier(verifier).verify(expected.toString(), actual.toString(), evaluator)
         .onFailure { error = " because:\n" + it.rootCauseMessage() }
         .onSuccess { error = "" }
         .isSuccess
-
-    override fun makeFailMessage(expectedValue: Any?, actualValue: Any?): String =
-        super.makeFailMessage(expectedValue, actualValue) + error
 }
 
 @Suppress("unused")
-class JsonColumnComparer : TypedColumnComparer("json")
+class JsonColumnComparer : VerifierColumnComparer("json")

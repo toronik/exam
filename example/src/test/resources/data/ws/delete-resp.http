@@ -1,4 +1,7 @@
-200 OK
+200
 Content-Type: application/json
 
-{"DELETE":"/mirror/request"}
+{
+  "DELETE":"/mirror/request",
+  "headers": { "host": "{{ignore}}", "content-type": "application/json" }
+}
