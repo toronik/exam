@@ -38,7 +38,8 @@ open class BaseParser {
     }
 
     private fun parseContent(msg: ParsedMessage, item: Html, eval: Evaluator): ParsedMessage = msg.copy(
-        content = Content(item.resolveAndSwap(eval), item.child("code").attr("data-lang") ?: "text"),
+        content = Content(item.resolveAndSwap(eval), item.child("code").attr("data-lang") ?: "text")
+            .also { item.swapText(it.pretty()) },
         verifier = item.child("code").el.getAttributeValue("verifier", ExamExtension.NS)
     )
 

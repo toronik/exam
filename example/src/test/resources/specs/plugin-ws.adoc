@@ -124,7 +124,7 @@ include::plugin-ws.adoc[tags=ws-where]
 ====
 //tag::ws-where[]
 .Data-driven check
-[e-http=, awaitAtMostSec=4]
+[e-http=]
 --
 .Request
 [source,httprequest]

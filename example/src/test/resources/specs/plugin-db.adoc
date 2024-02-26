@@ -282,7 +282,7 @@ Prints content of specified database table and optionally generates DbUnit datas
 [horizontal]
 include::attr-where.adoc[]
 include::attr-ds.adoc[]
-`saveToResources`:: _Optional. Default: not set._
+`saveTo`:: _Optional. Default: not set._
 +
 Path in 'srs/test/resources/' to store generated dataset
 
@@ -295,7 +295,7 @@ include::plugin-db.adoc[tags=db-show]
 ====
 //tag::db-show[]
 .Show all and generate dataset
-[e-db-show=person, e-saveToResources=/data/db/person.xml]
+[e-db-show=person, e-saveTo=/data/db/person.xml]
 ,===
 ,===
 

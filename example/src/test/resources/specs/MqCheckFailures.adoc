@@ -22,12 +22,42 @@
 ====
 
 [.ExpectedToFail]
+.Surplus messages: await
+====
+.Got message
+[source,json,e-mq-set=myQueue]
+----
+{ "a": 1, "b": "some" }
+----
+
+.Expected no messages
+[caption=, e-mq-check=myQueue,e-await=1s]
+|===
+|===
+====
+
+[.ExpectedToFail]
 .Missing messages
 ====
 Got no messages.
 
 .Expected single message
 [cols="a", caption=, e-mq-check=myQueue]
+|===
+|[source,json]
+----
+{ "a": 1, "b": "some" }
+----
+|===
+====
+
+[.ExpectedToFail]
+.Missing messages: await
+====
+Got no messages.
+
+.Expected single message
+[cols="a", caption=, e-mq-check=myQueue,e-await=1s]
 |===
 |[source,json]
 ----

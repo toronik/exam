@@ -1,12 +1,13 @@
-`awaitAtMostSec`:: _Optional. Default: 4._
+`await`:: _Optional. Default: `4s,0s,1s`._
 +
-How long to wait in seconds before failing the verification
-`awaitPollDelayMillis`:: _Optional. Default: 0._
+Format: `<at_most>,<poll_delay>,<poll_interval>`
 +
-How long to wait in millis before starting verification
-`awaitPollIntervalMillis`:: _Optional. Default: 1000._
+Where:
 +
-How long to wait in millis between verification attempts
+[horizontal]
+`at_most`::: How long to wait before failing the verification
+`poll_delay`::: How long to wait before starting verification
+`poll_interval`::: How long to wait between verification attempts
 
-IMPORTANT: *Waiting is disabled by default*. Check will fail immediately in case of mismatch unless at least one of the
-`awaitAtMostSec`, `awaitPollDelayMillis` or `awaitPollIntervalMillis` attributes are set.
++
+IMPORTANT: *Waiting is disabled by default*. Check will fail immediately in case of mismatch unless the `await` attribute is set.

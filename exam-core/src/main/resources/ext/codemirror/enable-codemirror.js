@@ -1,4 +1,6 @@
 function enableCM() {
+    enableCodeMirror('pre code[data-lang="json"]', 'json');
+    enableCodeMirror('pre code[data-lang="xml"]', 'xml');
     enableCodeMirror('.json:not(.failure)', 'json');
     enableCodeMirrorMerge('.json.failure', 'json');
     enableCodeMirror('.xml:not(.failure)', 'xml');
@@ -14,9 +16,9 @@ function unescape(input) {
 }
 
 function enableCodeMirror(selector, mode) {
-  let value, jsons = document.querySelectorAll(selector);
-  for (let i = 0; i < jsons.length; i++) {
-    const el = jsons[i];
+  let value, listings = document.querySelectorAll(selector);
+  for (let i = 0; i < listings.length; i++) {
+    const el = listings[i];
     value = unescape(el.innerHTML);
     if (el.childNodes.length === 1) el.innerHTML = "";
     cm6.createEditorView(value, el, mode);
@@ -24,9 +26,9 @@ function enableCodeMirror(selector, mode) {
 }
 
 function enableCodeMirrorMerge(selector, mode) {
-    let jsons = document.querySelectorAll(selector);
-    for (let i = 0; i < jsons.length; i++) {
-        let target = jsons[i];
+    let listings = document.querySelectorAll(selector);
+    for (let i = 0; i < listings.length; i++) {
+        let target = listings[i];
         let expectedValue, actualValue,
             expected = target.querySelector('.expected'),
             actual = target.querySelector('.actual');
@@ -39,7 +41,7 @@ function enableCodeMirrorMerge(selector, mode) {
           expected.parentNode.removeChild(expected);
           target.innerHTML = '';
 
-          cm6.createMergeView(expectedValue, actualValue, target);
+          cm6.createMergeView(expectedValue, actualValue, target, mode);
         }
     }
 }

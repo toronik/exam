@@ -84,7 +84,7 @@ var cm6 = (function (exports) {
        Return a cursor that iterates over the given range of lines,
        _without_ returning the line breaks between, and yielding empty
        strings for empty lines.
-       
+
        When `from` and `to` are given, they should be 1-based line numbers.
        */
        iterLines(from, to) {
@@ -534,16 +534,16 @@ var cm6 = (function (exports) {
        /**
        The position of the start of the line.
        */
-       from, 
+       from,
        /**
        The position at the end of the line (_before_ the line break,
        or at the end of document for the last line).
        */
-       to, 
+       to,
        /**
        This line's line number (1-based).
        */
-       number, 
+       number,
        /**
        The line's content.
        */
@@ -759,7 +759,7 @@ var cm6 = (function (exports) {
        `fromA`/`toA` provides the extent of the change in the starting
        document, `fromB`/`toB` the extent of the replacement in the
        changed document.
-       
+
        When `individual` is true, adjacent changes (which are kept
        separate for [position mapping](https://codemirror.net/6/docs/ref/#state.ChangeDesc.mapPos)) are
        reported separately.
@@ -868,7 +868,7 @@ var cm6 = (function (exports) {
    with exactly that length.
    */
    class ChangeSet extends ChangeDesc {
-       constructor(sections, 
+       constructor(sections,
        /**
        @internal
        */
@@ -922,7 +922,7 @@ var cm6 = (function (exports) {
        applied to the document produced by applying `other`. When
        `before` is `true`, order changes as if `this` comes before
        `other`, otherwise (the default) treat `other` as coming first.
-       
+
        Given two changes `A` and `B`, `A.compose(B.map(A))` and
        `B.compose(A.map(B, true))` will produce the same document. This
        provides a basic form of [operational
@@ -935,7 +935,7 @@ var cm6 = (function (exports) {
        each, with the range in the original document (`fromA`-`toA`)
        and the range that replaces it in the new document
        (`fromB`-`toB`).
-       
+
        When `individual` is true, adjacent changes are reported
        separately.
        */
@@ -1316,7 +1316,7 @@ var cm6 = (function (exports) {
        /**
        The lower boundary of the range.
        */
-       from, 
+       from,
        /**
        The upper boundary of the range.
        */
@@ -1424,7 +1424,7 @@ var cm6 = (function (exports) {
        The ranges in the selection, sorted by position. Ranges cannot
        overlap (but they may touch, if they aren't empty).
        */
-       ranges, 
+       ranges,
        /**
        The index of the _main_ range in the selection (which is
        usually the range that was added last).
@@ -1583,11 +1583,11 @@ var cm6 = (function (exports) {
        /**
        @internal
        */
-       combine, 
+       combine,
        /**
        @internal
        */
-       compareInput, 
+       compareInput,
        /**
        @internal
        */
@@ -1625,7 +1625,7 @@ var cm6 = (function (exports) {
        state. You must take care to declare the parts of the state that
        this value depends on, since your function is only called again
        for a new state when one of those parts changed.
-       
+
        In cases where your value depends only on a single field, you'll
        want to use the [`from`](https://codemirror.net/6/docs/ref/#state.Facet.from) method instead.
        */
@@ -1785,7 +1785,7 @@ var cm6 = (function (exports) {
        /**
        @internal
        */
-       id, createF, updateF, compareF, 
+       id, createF, updateF, compareF,
        /**
        @internal
        */
@@ -2101,7 +2101,7 @@ var cm6 = (function (exports) {
        /**
        The annotation type.
        */
-       type, 
+       type,
        /**
        The value of this annotation.
        */
@@ -2163,7 +2163,7 @@ var cm6 = (function (exports) {
        /**
        @internal
        */
-       type, 
+       type,
        /**
        The value of this effect.
        */
@@ -2235,24 +2235,24 @@ var cm6 = (function (exports) {
        /**
        The state from which the transaction starts.
        */
-       startState, 
+       startState,
        /**
        The document changes made by this transaction.
        */
-       changes, 
+       changes,
        /**
        The selection set by this transaction, or undefined if it
        doesn't explicitly set a selection.
        */
-       selection, 
+       selection,
        /**
        The effects added to the transaction.
        */
-       effects, 
+       effects,
        /**
        @internal
        */
-       annotations, 
+       annotations,
        /**
        Whether the selection should be scrolled into view after this
        transaction is dispatched.
@@ -2573,15 +2573,15 @@ var cm6 = (function (exports) {
        /**
        @internal
        */
-       config, 
+       config,
        /**
        The current document.
        */
-       doc, 
+       doc,
        /**
        The current selection.
        */
-       selection, 
+       selection,
        /**
        @internal
        */
@@ -2817,7 +2817,7 @@ var cm6 = (function (exports) {
        Look up a translation for the given phrase (via the
        [`phrases`](https://codemirror.net/6/docs/ref/#state.EditorState^phrases) facet), or return the
        original string if no translation is found.
-       
+
        If additional arguments are passed, they will be inserted in
        place of markers like `$1` (for the first value) and `$2`, etc.
        A single `$` is equivalent to `$1`, and `$$` will produce a
@@ -2841,9 +2841,9 @@ var cm6 = (function (exports) {
        /**
        Find the values for a given language data field, provided by the
        the [`languageData`](https://codemirror.net/6/docs/ref/#state.EditorState^languageData) facet.
-       
+
        Examples of language data fields are...
-       
+
        - [`"commentTokens"`](https://codemirror.net/6/docs/ref/#commands.CommentTokens) for specifying
          comment syntax.
        - [`"autocomplete"`](https://codemirror.net/6/docs/ref/#autocomplete.autocompletion^config.override)
@@ -2868,7 +2868,7 @@ var cm6 = (function (exports) {
        Return a function that can categorize strings (expected to
        represent a single [grapheme cluster](https://codemirror.net/6/docs/ref/#state.findClusterBreak))
        into one of:
-       
+
         - Word (contains an alphanumeric character or a character
           explicitly listed in the local language's `"wordChars"`
           language data, which should be a string)
@@ -3070,11 +3070,11 @@ var cm6 = (function (exports) {
        /**
        The range's start position.
        */
-       from, 
+       from,
        /**
        Its end position.
        */
-       to, 
+       to,
        /**
        The value associated with this range.
        */
@@ -3094,7 +3094,7 @@ var cm6 = (function (exports) {
        return a.from - b.from || a.value.startSide - b.value.startSide;
    }
    let Chunk$1 = class Chunk {
-       constructor(from, to, value, 
+       constructor(from, to, value,
        // Chunks are marked with the largest point that occurs
        // in them (or -1 for no points), so that scans that are
        // only interested in points (such as the
@@ -3173,15 +3173,15 @@ var cm6 = (function (exports) {
        /**
        @internal
        */
-       chunkPos, 
+       chunkPos,
        /**
        @internal
        */
-       chunk, 
+       chunk,
        /**
        @internal
        */
-       nextLayer, 
+       nextLayer,
        /**
        @internal
        */
@@ -3224,7 +3224,7 @@ var cm6 = (function (exports) {
        /**
        Update the range set, optionally adding new ranges or filtering
        out existing ones.
-       
+
        (Note: The type parameter is just there as a kludge to work
        around TypeScript variance issues that prevented `RangeSet<X>`
        from being a subtype of `RangeSet<Y>` when `X` is a subtype of
@@ -3330,12 +3330,12 @@ var cm6 = (function (exports) {
        Iterate over two groups of sets, calling methods on `comparator`
        to notify it of possible differences.
        */
-       static compare(oldSets, newSets, 
+       static compare(oldSets, newSets,
        /**
        This indicates how the underlying data changed between these
        ranges, and is needed to synchronize the iteration.
        */
-       textDiff, comparator, 
+       textDiff, comparator,
        /**
        Can be used to ignore all non-point ranges, and points below
        the given size. When -1, all ranges are compared.
@@ -3383,7 +3383,7 @@ var cm6 = (function (exports) {
        [`SpanIterator.span`](https://codemirror.net/6/docs/ref/#state.SpanIterator.span)) at the end
        of the iteration.
        */
-       static spans(sets, from, to, iterator, 
+       static spans(sets, from, to, iterator,
        /**
        When given and greater than -1, only points of at least this
        size are taken into account.
@@ -5639,15 +5639,15 @@ var cm6 = (function (exports) {
        /**
        @internal
        */
-       startSide, 
+       startSide,
        /**
        @internal
        */
-       endSide, 
+       endSide,
        /**
        @internal
        */
-       widget, 
+       widget,
        /**
        The config object used to create this decoration. You can
        include additional properties in there to store metadata about
@@ -6048,11 +6048,11 @@ var cm6 = (function (exports) {
        /**
        The start of the span (relative to the start of the line).
        */
-       from, 
+       from,
        /**
        The end of the span.
        */
-       to, 
+       to,
        /**
        The ["bidi
        level"](https://unicode.org/reports/tr9/#Basic_Display_Algorithm)
@@ -6484,7 +6484,7 @@ var cm6 = (function (exports) {
        combine: values => values.some(x => x)
    });
    class ScrollTarget {
-       constructor(range, y = "nearest", x = "nearest", yMargin = 5, xMargin = 5, 
+       constructor(range, y = "nearest", x = "nearest", yMargin = 5, xMargin = 5,
        // This data structure is abused to also store precise scroll
        // snapshots, instead of a `scrollIntoView` request. When this
        // flag is `true`, `range` points at a position in the reference
@@ -6545,15 +6545,15 @@ var cm6 = (function (exports) {
        /**
        @internal
        */
-       id, 
+       id,
        /**
        @internal
        */
-       create, 
+       create,
        /**
        @internal
        */
-       domEventHandlers, 
+       domEventHandlers,
        /**
        @internal
        */
@@ -6763,11 +6763,11 @@ var cm6 = (function (exports) {
        /**
        The editor view that the update is associated with.
        */
-       view, 
+       view,
        /**
        The new editor state.
        */
-       state, 
+       state,
        /**
        The transactions involved in the update. May be empty.
        */
@@ -8771,20 +8771,20 @@ var cm6 = (function (exports) {
        /**
        The start of the element in the document.
        */
-       from, 
+       from,
        /**
        The length of the element.
        */
-       length, 
+       length,
        /**
        The top position of the element (relative to the top of the
        document).
        */
-       top, 
+       top,
        /**
        Its height.
        */
-       height, 
+       height,
        /**
        @internal Weird packed field that holds an array of children
        for composite blocks, a decoration for block widgets, and a
@@ -11687,7 +11687,7 @@ var cm6 = (function (exports) {
        When the start position was the last one on the line, the
        returned position will be across the line break. If there is no
        further line, the original position is returned.
-       
+
        By default, this method moves over a single cluster. The
        optional `by` argument can be used to move across more. It will
        be called with the first cluster as argument, and should return
@@ -11731,7 +11731,7 @@ var cm6 = (function (exports) {
        it defaults to moving to the next line (including wrapped
        lines). Otherwise, `distance` should provide a positive distance
        in pixels.
-       
+
        When `start` has a
        [`goalColumn`](https://codemirror.net/6/docs/ref/#state.SelectionRange.goalColumn), the vertical
        motion will use that as a target horizontal position. Otherwise,
@@ -11746,7 +11746,7 @@ var cm6 = (function (exports) {
        Find the DOM parent node and offset (child offset if `node` is
        an element, character offset when it is a text node) at the
        given document position.
-       
+
        Note that for positions that aren't currently in
        `visibleRanges`, the resulting DOM position isn't necessarily
        meaningful (it may just point before or after a placeholder
@@ -11921,7 +11921,7 @@ var cm6 = (function (exports) {
        only affects the editor's own scrollable element, not parents.
        See also
        [`EditorViewConfig.scrollTo`](https://codemirror.net/6/docs/ref/#view.EditorViewConfig.scrollTo).
-       
+
        The effect should be used with a document identical to the one
        it was created for. Failing to do so is not an error, but may
        not scroll to the expected position. You can
@@ -11963,14 +11963,14 @@ var cm6 = (function (exports) {
        [`style-mod`](https://github.com/marijnh/style-mod#documentation)
        style spec providing the styles for the theme. These will be
        prefixed with a generated class for the style.
-       
+
        Because the selectors will be prefixed with a scope class, rule
        that directly match the editor's [wrapper
        element](https://codemirror.net/6/docs/ref/#view.EditorView.dom)—to which the scope class will be
        added—need to be explicitly differentiated by adding an `&` to
        the selector for that element—for example
        `&.cm-focused`.
-       
+
        When `dark` is set to true, the theme will be marked as dark,
        which will cause the `&dark` rules from [base
        themes](https://codemirror.net/6/docs/ref/#view.EditorView^baseTheme) to be used (as opposed to
@@ -12414,19 +12414,19 @@ var cm6 = (function (exports) {
        Create a marker with the given class and dimensions. If `width`
        is null, the DOM element will get no width style.
        */
-       constructor(className, 
+       constructor(className,
        /**
        The left position of the marker (in pixels, document-relative).
        */
-       left, 
+       left,
        /**
        The top position of the marker.
        */
-       top, 
+       top,
        /**
        The width of the marker, or null if it shouldn't get a width assigned.
        */
-       width, 
+       width,
        /**
        The height of the marker.
        */
@@ -13251,7 +13251,7 @@ var cm6 = (function (exports) {
        /**
        The inner tree.
        */
-       tree, 
+       tree,
        /**
        If this is null, this tree replaces the entire node (it will
        be included in the regular iteration instead of its host
@@ -13261,7 +13261,7 @@ var cm6 = (function (exports) {
        only entered by [`resolveInner`](#common.Tree.resolveInner)
        and [`enter`](#common.SyntaxNode.enter).
        */
-       overlay, 
+       overlay,
        /**
        The parser used to create this subtree.
        */
@@ -13292,16 +13292,16 @@ var cm6 = (function (exports) {
        same name within a node set should play the same semantic
        role.
        */
-       name, 
+       name,
        /**
        @internal
        */
-       props, 
+       props,
        /**
        The id of this node in its set. Corresponds to the term ids
        used in the parser.
        */
-       id, 
+       id,
        /**
        @internal
        */
@@ -13495,20 +13495,20 @@ var cm6 = (function (exports) {
        /**
        The type of the top node.
        */
-       type, 
+       type,
        /**
        This node's child nodes.
        */
-       children, 
+       children,
        /**
        The positions (offsets relative to the start of this tree) of
        the children.
        */
-       positions, 
+       positions,
        /**
        The total length of this tree
        */
-       length, 
+       length,
        /**
        Per-node [node props](#common.NodeProp) to associate with this node.
        */
@@ -13580,7 +13580,7 @@ var cm6 = (function (exports) {
        position. If 1, it'll move into nodes that start at the
        position. With 0, it'll only enter nodes that cover the position
        from both sides.
-       
+
        Note that this will not enter
        [overlays](#common.MountedTree.overlay), and you often want
        [`resolveInner`](#common.Tree.resolveInner) instead.
@@ -13705,11 +13705,11 @@ var cm6 = (function (exports) {
        /**
        The buffer's content.
        */
-       buffer, 
+       buffer,
        /**
        The total length of the group of nodes in the buffer.
        */
-       length, 
+       length,
        /**
        The node set used in this buffer.
        */
@@ -13854,7 +13854,7 @@ var cm6 = (function (exports) {
        get next() { return this.parent; }
    }
    class TreeNode extends BaseNode {
-       constructor(_tree, from, 
+       constructor(_tree, from,
        // Index in parent node, set to -1 if the node is not a direct child of _parent.node (overlay)
        index, _parent) {
            super();
@@ -14097,7 +14097,7 @@ var cm6 = (function (exports) {
        /**
        @internal
        */
-       constructor(node, 
+       constructor(node,
        /**
        @internal
        */
@@ -14647,17 +14647,17 @@ var cm6 = (function (exports) {
    }
    function balanceRange(
    // The type the balanced tree's inner nodes.
-   balanceType, 
+   balanceType,
    // The direct children and their positions
-   children, positions, 
+   children, positions,
    // The index range in children/positions to use
-   from, to, 
+   from, to,
    // The start position of the nodes, relative to their parent.
-   start, 
+   start,
    // Length of the outer node
-   length, 
+   length,
    // Function to build the top node of the balanced tree
-   mkTop, 
+   mkTop,
    // Function to build internal nodes for the balanced tree
    mkTree) {
        let total = 0;
@@ -14768,15 +14768,15 @@ var cm6 = (function (exports) {
        This refers to an offset in the _updated_ document (as opposed
        to the original tree).
        */
-       from, 
+       from,
        /**
        The end of the unchanged range.
        */
-       to, 
+       to,
        /**
        The tree that this fragment is based on.
        */
-       tree, 
+       tree,
        /**
        The offset between the fragment's tree and the document that
        this fragment can be used against. Add this when going from
@@ -14859,7 +14859,7 @@ var cm6 = (function (exports) {
        Start a parse, returning a [partial parse](#common.PartialParse)
        object. [`fragments`](#common.TreeFragment) can be passed in to
        make the parse incremental.
-       
+
        By default, the entire input is parsed. You can pass `ranges`,
        which should be a sorted array of non-empty, non-overlapping
        ranges, to parse only those ranges. The tree returned in that
@@ -15331,12 +15331,12 @@ var cm6 = (function (exports) {
        The set of this tag and all its parent tags, starting with
        this one itself and sorted in order of decreasing specificity.
        */
-       set, 
+       set,
        /**
        The base unmodified tag that this one is based on, if it's
        modified @internal
        */
-       base, 
+       base,
        /**
        The modifiers applied to this.base @internal
        */
@@ -15372,7 +15372,7 @@ var cm6 = (function (exports) {
        same modifier to a twice tag will return the same value (`m1(t1)
        == m1(t1)`) and applying multiple modifiers will, regardless or
        order, produce the same tag (`m1(m2(t1)) == m2(m1(t1))`).
-       
+
        When multiple modifiers are applied to a given base tag, each
        smaller set of modifiers is registered as a parent, so that for
        example `m1(m2(m3(t1)))` is a subtype of `m1(m2(t1))`,
@@ -15580,17 +15580,17 @@ var cm6 = (function (exports) {
    [`highlightCode`](#highlight.highlightCode) function is easier to
    use.
    */
-   function highlightTree(tree, highlighter, 
+   function highlightTree(tree, highlighter,
    /**
    Assign styling to a region of the text. Will be called, in order
    of position, for any ranges where more than zero classes apply.
    `classes` is a space separated string of CSS classes.
    */
-   putStyle, 
+   putStyle,
    /**
    The start of the range to highlight.
    */
-   from = 0, 
+   from = 0,
    /**
    The end of the range.
    */
@@ -16206,7 +16206,7 @@ var cm6 = (function (exports) {
        The [language data](https://codemirror.net/6/docs/ref/#state.EditorState.languageDataAt) facet
        used for this language.
        */
-       data, parser, extraExtensions = [], 
+       data, parser, extraExtensions = [],
        /**
        A language name.
        */
@@ -16383,23 +16383,23 @@ var cm6 = (function (exports) {
    A parse context provided to parsers working on the editor content.
    */
    class ParseContext {
-       constructor(parser, 
+       constructor(parser,
        /**
        The current editor state.
        */
-       state, 
+       state,
        /**
        Tree fragments that can be reused by incremental re-parses.
        */
-       fragments = [], 
+       fragments = [],
        /**
        @internal
        */
-       tree, 
+       tree,
        /**
        @internal
        */
-       treeLen, 
+       treeLen,
        /**
        The current editor viewport (or some overapproximation
        thereof). Intended to be used for opportunistically avoiding
@@ -16408,11 +16408,11 @@ var cm6 = (function (exports) {
        should be called to make sure the parser is restarted when the
        skipped region becomes visible).
        */
-       viewport, 
+       viewport,
        /**
        @internal
        */
-       skipped, 
+       skipped,
        /**
        This is where skipping parsers can register a promise that,
        when resolved, will schedule a new parse. It is cleared when
@@ -16576,7 +16576,7 @@ var cm6 = (function (exports) {
        asynchronously loading a nested parser. It'll skip its input and
        mark it as not-really-parsed, so that the next update will parse
        it again.
-       
+
        When `until` is given, a reparse will be scheduled when that
        promise resolves.
        */
@@ -16782,7 +16782,7 @@ var cm6 = (function (exports) {
        /**
        The language object.
        */
-       language, 
+       language,
        /**
        An optional set of supporting extensions. When nesting a
        language in another language, the outer language is encouraged
@@ -17217,7 +17217,7 @@ var cm6 = (function (exports) {
        that rely on external styling), or a
        [`style-mod`](https://github.com/marijnh/style-mod#documentation)-style
        set of CSS properties (which define the styling for those tags).
-       
+
        The CSS rules created for a highlighter will be emitted in the
        order of the spec's properties. That means that for elements that
        have multiple tags associated with them, styles defined further
@@ -17431,12 +17431,12 @@ var cm6 = (function (exports) {
        /**
        Create a text cursor. The query is the search string, `from` to
        `to` provides the region to search.
-       
+
        When `normalize` is given, it will be called, on both the query
        string and the content it is matched against, before comparing.
        You can, for example, create a case-insensitive search by
        passing `s => s.toLowerCase()`.
-       
+
        Text is always normalized with
        [`.normalize("NFKD")`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/normalize)
        (when supported).
@@ -18094,16 +18094,16 @@ var cm6 = (function (exports) {
        /**
        The parse that this stack is part of @internal
        */
-       p, 
+       p,
        /**
        Holds state, input pos, buffer index triplets for all but the
        top state @internal
        */
-       stack, 
+       stack,
        /**
        The current parse state @internal
        */
-       state, 
+       state,
        // The position at which the next reduce should take place. This
        // can be less than `this.pos` when skipped expressions have been
        // added to the stack (which should be moved outside of the next
@@ -18111,24 +18111,24 @@ var cm6 = (function (exports) {
        /**
        @internal
        */
-       reducePos, 
+       reducePos,
        /**
        The input position up to which this stack has parsed.
        */
-       pos, 
+       pos,
        /**
        The dynamic score of the stack, including dynamic precedence
        and error-recovery penalties
        @internal
        */
-       score, 
+       score,
        // The output buffer. Holds (type, start, end, size) quads
        // representing nodes created by the parser, where `size` is
        // amount of buffer array entries covered by this node.
        /**
        @internal
        */
-       buffer, 
+       buffer,
        // The base offset of the buffer. When stacks are split, the split
        // instance shared the buffer history with its parent up to
        // `bufferBase`, which is the absolute offset (including the
@@ -18137,15 +18137,15 @@ var cm6 = (function (exports) {
        /**
        @internal
        */
-       bufferBase, 
+       bufferBase,
        /**
        @internal
        */
-       curContext, 
+       curContext,
        /**
        @internal
        */
-       lookAhead = 0, 
+       lookAhead = 0,
        // A parent stack from which this was split off, if any. This is
        // set up so that it always points to a stack that has some
        // additional buffer content, never to a stack with an equal
@@ -18730,7 +18730,7 @@ var cm6 = (function (exports) {
        /**
        @internal
        */
-       input, 
+       input,
        /**
        @internal
        */
@@ -18802,7 +18802,7 @@ var cm6 = (function (exports) {
        Look at a code unit near the stream position. `.peek(0)` equals
        `.next`, `.peek(-1)` gives you the previous character, and so
        on.
-       
+
        Note that looking around during tokenizing creates dependencies
        on potentially far-away content, which may reduce the
        effectiveness incremental parsing—when looking forward—or even
@@ -20693,7 +20693,7 @@ var cm6 = (function (exports) {
    //   tagName?: string,
    //   parser: Parser
    // }[]
-    
+
    function configureNesting(tags = [], attributes = []) {
      let script = [], style = [], textarea = [], other = [];
      for (let tag of tags) {
@@ -22441,16 +22441,16 @@ var cm6 = (function (exports) {
        /**
        The start of the change in document A.
        */
-       fromA, 
+       fromA,
        /**
        The end of the change in document A. This is equal to `fromA`
        in case of insertions.
        */
-       toA, 
+       toA,
        /**
        The start of the change in document B.
        */
-       fromB, 
+       fromB,
        /**
        The end of the change in document B. This is equal to `fromB`
        for deletions.
@@ -22942,21 +22942,21 @@ var cm6 = (function (exports) {
        relative to the start of the chunk, so you have to add
        `chunk.fromA`/`fromB` to get document positions.
        */
-       changes, 
+       changes,
        /**
        The start of the chunk in document A.
        */
-       fromA, 
+       fromA,
        /**
        The end of the chunk in document A. This is equal to `fromA`
        when the chunk covers no lines in document A, or is one unit
        past the end of the last line in the chunk if it does.
        */
-       toA, 
+       toA,
        /**
        The start of the chunk in document B.
        */
-       fromB, 
+       fromB,
        /**
        The end of the chunk in document A.
        */
@@ -23756,7 +23756,7 @@ var cm6 = (function (exports) {
        return new EditorView({
            doc: d,
            extensions: [
-               EditorView.editable.of(false),
+               EditorState.readOnly.of(true),
                foldGutter(),
                drawSelection(),
                syntaxHighlighting(defaultHighlightStyle, { fallback: true }),

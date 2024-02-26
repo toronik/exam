@@ -1,11 +1,6 @@
 package io.github.adven27.concordion.extensions.exam.core
 
-import io.github.adven27.concordion.extensions.exam.core.commands.AwaitConfig.Companion.AWAIT_AT_MOST_SEC_CAMEL
-import io.github.adven27.concordion.extensions.exam.core.commands.AwaitConfig.Companion.AWAIT_AT_MOST_SEC_SPINAL
-import io.github.adven27.concordion.extensions.exam.core.commands.AwaitConfig.Companion.AWAIT_POLL_DELAY_MILLIS_CAMEL
-import io.github.adven27.concordion.extensions.exam.core.commands.AwaitConfig.Companion.AWAIT_POLL_DELAY_MILLIS_SPINAL
-import io.github.adven27.concordion.extensions.exam.core.commands.AwaitConfig.Companion.AWAIT_POLL_INTERVAL_MILLIS_CAMEL
-import io.github.adven27.concordion.extensions.exam.core.commands.AwaitConfig.Companion.AWAIT_POLL_INTERVAL_MILLIS_SPINAL
+import io.github.adven27.concordion.extensions.exam.core.commands.AwaitConfig.Companion.AWAIT
 import io.github.adven27.concordion.extensions.exam.core.html.addCcAttr
 import io.github.adven27.concordion.extensions.exam.core.html.addExamAttr
 import io.github.adven27.concordion.extensions.exam.core.html.html
@@ -61,12 +56,7 @@ open class ConcordionPostprocessor : Postprocessor() {
             "eq-xml",
             "verifier",
             "ds",
-            AWAIT_AT_MOST_SEC_SPINAL,
-            AWAIT_AT_MOST_SEC_CAMEL,
-            AWAIT_POLL_DELAY_MILLIS_SPINAL,
-            AWAIT_POLL_DELAY_MILLIS_CAMEL,
-            AWAIT_POLL_INTERVAL_MILLIS_SPINAL,
-            AWAIT_POLL_INTERVAL_MILLIS_CAMEL
+            AWAIT
         ).onEach { p ->
             find("e-$p=").forEach { thExp(it, "e-$p=", p) }
         }

@@ -4,7 +4,7 @@ import io.github.adven27.concordion.extensions.exam.core.html.Html
 import io.github.adven27.concordion.extensions.exam.core.html.html
 import io.github.adven27.concordion.extensions.exam.core.html.rootCauseMessage
 import io.github.adven27.concordion.extensions.exam.core.resolveToObj
-import io.github.adven27.concordion.extensions.exam.core.vars
+import io.github.adven27.concordion.extensions.exam.core.utils.DurationStyle.Companion.detectAndParse
 import org.awaitility.Awaitility
 import org.awaitility.core.ConditionFactory
 import org.concordion.api.AbstractCommand
@@ -14,8 +14,7 @@ import org.concordion.api.Fixture
 import org.concordion.api.ResultRecorder
 import org.concordion.api.listener.ExecuteEvent
 import org.concordion.api.listener.ExecuteListener
-import java.util.concurrent.TimeUnit.MILLISECONDS
-import java.util.concurrent.TimeUnit.SECONDS
+import java.time.Duration
 
 abstract class ExamCommand<M, R>(
     private val attrs: Set<String> = setOf(),
@@ -75,66 +74,37 @@ open class SimpleCommand : ExamCommand<Unit, Unit>() {
 }
 
 data class AwaitConfig(
-    val atMostSec: Long = DEFAULT_AT_MOST_SEC,
-    val pollDelay: Long = DEFAULT_POLL_DELAY,
-    val pollInterval: Long = DEFAULT_POLL_INTERVAL
+    val atMost: Duration = DEFAULT_AT_MOST,
+    val pollDelay: Duration = DEFAULT_POLL_DELAY,
+    val pollInterval: Duration = DEFAULT_POLL_INTERVAL
 ) {
-    fun timeoutMessage(e: Throwable?) = "Check didn't complete within $atMostSec seconds " +
-        "(poll delay $pollDelay ms, interval $pollInterval ms) because :\n ${e?.rootCauseMessage() ?: ""}"
+    fun timeoutMessage(e: Throwable?) = "Check didn't complete within ${atMost.toMillis()}ms " +
+        "(poll delay ${pollDelay.toMillis()}ms, interval ${pollInterval.toMillis()}ms) " +
+        "because:\n ${e?.rootCauseMessage() ?: ""}"
 
     fun await(desc: String? = null): ConditionFactory = Awaitility.await(desc)
-        .atMost(atMostSec, SECONDS)
-        .pollDelay(pollDelay, MILLISECONDS)
-        .pollInterval(pollInterval, MILLISECONDS)
+        .atMost(atMost)
+        .pollDelay(pollDelay)
+        .pollInterval(pollInterval)
 
     companion object {
-        var DEFAULT_AT_MOST_SEC = 4L
-        var DEFAULT_POLL_DELAY = 0L
-        var DEFAULT_POLL_INTERVAL = 1000L
+        var DEFAULT_AT_MOST: Duration = Duration.ofSeconds(4)
+        var DEFAULT_POLL_DELAY: Duration = Duration.ofMillis(0)
+        var DEFAULT_POLL_INTERVAL: Duration = Duration.ofMillis(1000)
 
-        const val AWAIT_AT_MOST_SEC_SPINAL = "await-at-most-sec"
-        const val AWAIT_POLL_DELAY_MILLIS_SPINAL = "await-poll-delay-millis"
-        const val AWAIT_POLL_INTERVAL_MILLIS_SPINAL = "await-poll-interval-millis"
-        const val AWAIT_AT_MOST_SEC_CAMEL = "awaitAtMostSec"
-        const val AWAIT_POLL_DELAY_MILLIS_CAMEL = "awaitPollDelayMillis"
-        const val AWAIT_POLL_INTERVAL_MILLIS_CAMEL = "awaitPollIntervalMillis"
+        const val AWAIT = "await"
 
-        fun build(command: CommandCall) = build(
-            command.getParameter(AWAIT_AT_MOST_SEC_CAMEL, AWAIT_AT_MOST_SEC_SPINAL)?.toLong(),
-            command.getParameter(AWAIT_POLL_DELAY_MILLIS_CAMEL, AWAIT_POLL_DELAY_MILLIS_SPINAL)?.toLong(),
-            command.getParameter(AWAIT_POLL_INTERVAL_MILLIS_CAMEL, AWAIT_POLL_INTERVAL_MILLIS_SPINAL)?.toLong()
-        )
-
-        fun build(atMostSec: Long?, pollDelay: Long?, pollInterval: Long?): AwaitConfig? =
-            if (enabled(atMostSec, pollDelay, pollInterval)) {
+        fun build(command: CommandCall) = command.getParameter(AWAIT)
+            ?.let(::parseDurations)
+            ?.let {
                 AwaitConfig(
-                    atMostSec ?: DEFAULT_AT_MOST_SEC,
-                    pollDelay ?: DEFAULT_POLL_DELAY,
-                    pollInterval ?: DEFAULT_POLL_INTERVAL
+                    atMost = it.getOrNull(0) ?: DEFAULT_AT_MOST,
+                    pollDelay = it.getOrNull(1) ?: DEFAULT_POLL_DELAY,
+                    pollInterval = it.getOrNull(2) ?: DEFAULT_POLL_INTERVAL
                 )
-            } else {
-                null
             }
 
-        private fun enabled(atMostSec: Long?, pollDelay: Long?, pollInterval: Long?) =
-            !(atMostSec == null && pollDelay == null && pollInterval == null)
-    }
-}
-
-class VarsAttrs(root: Html, evaluator: Evaluator) {
-    val vars: String? = root.getAttr(VARS)
-    val varsSeparator: String = root.getAttr(VARS_SEPARATOR, ",")
-
-    init {
-        setVarsToContext(evaluator)
-    }
-
-    private fun setVarsToContext(evaluator: Evaluator) {
-        vars.vars(evaluator, true, varsSeparator)
-    }
-
-    companion object {
-        private const val VARS = "vars"
-        private const val VARS_SEPARATOR = "varsSeparator"
+        private fun parseDurations(s: String) = s.split(",")
+            .map { d -> d.trim().takeIf { it.isNotBlank() }?.let { detectAndParse(it.trim()) as Duration } }
     }
 }

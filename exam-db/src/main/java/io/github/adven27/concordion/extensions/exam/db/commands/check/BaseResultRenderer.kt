@@ -15,6 +15,7 @@ import io.github.adven27.concordion.extensions.exam.db.commands.ExamMatchersAwar
 import io.github.adven27.concordion.extensions.exam.db.commands.get
 import io.github.adven27.concordion.extensions.exam.db.commands.renderTable
 import io.github.adven27.concordion.extensions.exam.db.commands.tableName
+import org.awaitility.core.ConditionTimeoutException
 import org.concordion.api.CommandCall
 import org.dbunit.assertion.Difference
 import org.dbunit.dataset.ITable
@@ -42,15 +43,15 @@ open class BaseResultRenderer(private val printer: ValuePrinter) : DbCheckComman
         Html(printer.wrap(table, col, actual)).tooltip(printer.print(table, col, expected), expected.isMatcher())
     ).css("table-success")
 
-    private fun renderFail(result: DbCheckCommand.Result) = when (result.check.fail) {
-        is SizeMismatch -> renderSizeMismatch(result.check.fail as SizeMismatch, result.check.expected, result.caption)
-        is ContentMismatch -> renderContentMismatch(
-            result.check.fail as ContentMismatch,
-            result.check.expected,
-            result.caption
-        )
+    private fun renderFail(result: DbCheckCommand.Result): Html = with(result) {
+        when (check.fail) {
+            is SizeMismatch -> renderSizeMismatch(check.fail as SizeMismatch, check.expected, caption)
+            is ContentMismatch -> renderContentMismatch(check.fail as ContentMismatch, check.expected, caption)
+            is ConditionTimeoutException ->
+                renderFail(copy(check = check.copy(fail = (check.fail as ConditionTimeoutException).cause)))
 
-        else -> renderUnknownError(result.check.fail!!, result.check.expected, result.caption)
+            else -> renderUnknownError(check.fail!!, check.expected, caption)
+        }
     }
 
     private fun renderSizeMismatch(fail: SizeMismatch, expected: TableExpectation, caption: String?) = errorTemplate(

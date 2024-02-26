@@ -154,6 +154,7 @@ h1, {{isoDate (at '-1d')}}
 h2, 2
 ,===
 
+.Payload
 [source,json]
 ----
 include::../data/mq/msg.json/[msg=(map v1='c' v2='d')]

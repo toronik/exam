@@ -30,7 +30,7 @@ function createEditorView(d, parent, type) {
     return new EditorView({
         doc: d,
         extensions: [
-            EditorView.editable.of(false),
+            EditorState.readOnly.of(true),
             foldGutter(),
             drawSelection(),
             syntaxHighlighting(defaultHighlightStyle, { fallback: true }),

@@ -157,8 +157,8 @@ open class AdocExtension : ConcordionExtension {
             window.addEventListener('DOMContentLoaded', function (event) {
                 jQuery(".details").wrap(unescape("&lt;details&gt;&lt;/details&gt;"));
                 jQuery(".pre").wrap(unescape("&lt;pre&gt;&lt;/pre&gt;"));
-                jQuery("table").wrap(unescape("&lt;div class='table-responsive'&gt;&lt;/div&gt;"));
-                hljs.configure({cssSelector: 'pre code[data-lang], pre code[class^="language-"], pre code[class*=" language-"], pre.code' });
+                jQuery(".table").wrap(unescape("&lt;div class='table-responsive'&gt;&lt;/div&gt;"));
+                hljs.configure({cssSelector: 'pre code[data-lang]:not([data-lang="json"], [data-lang="xml"]), pre code[class^="language-"], pre code[class*=" language-"], pre.code' });
                 hljs.addPlugin(new CopyButtonPlugin());
                 hljs.highlightAll();
                 let fail = $(".failure").get(0);

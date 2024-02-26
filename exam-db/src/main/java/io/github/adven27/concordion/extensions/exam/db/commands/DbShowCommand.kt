@@ -28,10 +28,10 @@ open class DbShowCommand(
     dbTester: DbTester,
     private val valuePrinter: DbPlugin.ValuePrinter,
     private val parser: Parser = Parser.Default()
-) : DbCommand<Model, Result>(dbTester, setOf(CREATE_DATASET, SAVE_TO_RESOURCES)) {
+) : DbCommand<Model, Result>(dbTester, setOf(CREATE_DATASET, SAVE_TO)) {
     companion object {
         const val CREATE_DATASET = "createDataSet"
-        const val SAVE_TO_RESOURCES = "saveToResources"
+        const val SAVE_TO = "saveTo"
     }
 
     override fun model(context: Context) = parser.parse(context)
@@ -45,10 +45,10 @@ open class DbShowCommand(
     }
 
     private fun dataset(model: Model) =
-        if (model.createDataSet || !model.saveToResources.isNullOrEmpty()) {
+        if (model.createDataSet || !model.saveTo.isNullOrEmpty()) {
             ByteArrayOutputStream().use {
                 save(
-                    path = model.saveToResources,
+                    path = model.saveTo,
                     dataSet = dbTester.actualWithDependentTables(model.ds, model.table),
                     out = it
                 )
@@ -71,7 +71,7 @@ open class DbShowCommand(
         val table: String,
         val caption: String?,
         val createDataSet: Boolean,
-        val saveToResources: String?,
+        val saveTo: String?,
         val where: String?,
         val cols: Set<String>
     )
@@ -115,7 +115,7 @@ open class DbShowCommand(
                 caption = context.el.firstOrNull("caption")?.text(),
                 where = context[WHERE],
                 createDataSet = context[CREATE_DATASET].toBoolean(),
-                saveToResources = context[SAVE_TO_RESOURCES],
+                saveTo = context[SAVE_TO],
                 cols = parseCols(context.el).toSet()
             )
 

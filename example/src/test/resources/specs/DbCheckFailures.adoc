@@ -26,6 +26,18 @@ id, name, price, created_At
 ====
 
 [.ExpectedToFail]
+.Surplus rows: await
+====
+.Wrong expectation
+[e-db-check=product,e-await=1s]
+,===
+id, name, price, created_At
+
+1, Model A, 1.70, {{at}}
+,===
+====
+
+[.ExpectedToFail]
 .Missing rows
 ====
 .Wrong expectation
@@ -40,10 +52,37 @@ id, name, price, created_At
 ====
 
 [.ExpectedToFail]
+.Missing rows: await
+====
+.Wrong expectation
+[e-db-check=product,e-await="1s,500ms"]
+,===
+id, name, price, created_At
+
+1, Model A, 1.70, {{at}}
+2, Model B, 2.00, {{at '-1h'}}
+3, Model C, 3.00, {{at '1h'}}
+,===
+====
+
+[.ExpectedToFail]
 .Wrong content
 ====
 .Wrong expectation
 [e-db-check=product]
+,===
+id, name, price, created_At
+
+1, {{number}}, 0, {{within '10s'}}
+2, Model B, {{string}}, {{within '10s'}}
+,===
+====
+
+[.ExpectedToFail]
+.Wrong content: await
+====
+.Wrong expectation
+[e-db-check=product,e-await="1s,,500ms"]
 ,===
 id, name, price, created_At
 
