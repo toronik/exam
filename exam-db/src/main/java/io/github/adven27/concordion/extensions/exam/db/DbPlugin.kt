@@ -22,9 +22,11 @@ import org.dbunit.dataset.ITable
 import org.dbunit.dataset.SortedTable
 import java.sql.ResultSet
 import java.sql.Statement
+import java.sql.Time
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
+import java.time.format.DateTimeFormatter.ISO_TIME
 import java.util.*
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -133,6 +135,7 @@ class DbPlugin @JvmOverloads constructor(
             override fun print(table: String, column: String, value: Any?): String = when (value) {
                 null -> "(null)"
                 is Array<*> -> value.contentToString()
+                is Time -> printTime(value)
                 is java.sql.Date -> printDate(Date(value.time))
                 is Date -> printDate(value)
                 is Content -> value.pretty()
@@ -140,6 +143,7 @@ class DbPlugin @JvmOverloads constructor(
             }
 
             private fun printDate(value: Date) = formatter.withZone(ZoneId.systemDefault()).format(value.toInstant())
+            private fun printTime(value: Time) = ISO_TIME.withZone(ZoneId.systemDefault()).format(value.toLocalTime())
             override fun wrap(table: String, column: String, value: Any?): Element =
                 when (value) {
                     is Content -> pre(print(table, column, value), "class" to value.type).el
