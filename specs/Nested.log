@@ -1,4 +1,0 @@
-21:22:39.920 [Test worker] INFO  i.g.a.c.e.exam.core.AdocExtension.addTo$lambda$3 - Specs.adoc converted in 3.647us
-21:22:40.056 [http-nio-8888-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/].log - Initializing Spring DispatcherServlet 'dispatcherServlet'
-21:22:40.057 [http-nio-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Initializing Servlet 'dispatcherServlet'
-21:22:40.063 [http-nio-8888-exec-1] INFO  o.s.web.servlet.DispatcherServlet.initServletBean - Completed initialization in 2 ms
