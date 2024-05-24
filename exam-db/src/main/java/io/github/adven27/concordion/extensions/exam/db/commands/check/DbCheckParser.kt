@@ -2,10 +2,13 @@ package io.github.adven27.concordion.extensions.exam.db.commands.check
 
 import io.github.adven27.concordion.extensions.exam.core.commands.ExamCommand.Context
 import io.github.adven27.concordion.extensions.exam.core.html.Html
+import io.github.adven27.concordion.extensions.exam.core.resolve
 import io.github.adven27.concordion.extensions.exam.db.DbTester.TableExpectation
 import io.github.adven27.concordion.extensions.exam.db.builder.DataSetBuilder
 import io.github.adven27.concordion.extensions.exam.db.builder.ExamTable
 import io.github.adven27.concordion.extensions.exam.db.commands.DbCommand.Companion.DS
+import io.github.adven27.concordion.extensions.exam.db.commands.DbCommand.Companion.ORDER_BY
+import io.github.adven27.concordion.extensions.exam.db.commands.DbCommand.Companion.WHERE
 import org.concordion.api.Evaluator
 import org.dbunit.dataset.Column
 import org.dbunit.dataset.DefaultTable
@@ -36,10 +39,16 @@ class DbCheckParser : DbCheckCommand.Parser {
         caption = context.el.firstOrNull("caption")?.text(),
         expectation = TableExpectation(
             ds = context[DS],
-            table = table(context.expression, context.el, context.eval),
-            orderBy = context["orderBy"]?.split(",")?.map { it.trim() }?.toSet() ?: setOf(),
+            table = table(parseTableName(context), context.el, context.eval),
+            where = context[WHERE] ?: "",
+            orderBy = context[ORDER_BY]?.split(",")?.map { it.trim() }?.toSet() ?: setOf(),
             await = context.awaitConfig
         )
+    )
+
+    private fun parseTableName(context: Context) = context.eval.resolve(
+        context.expression.takeUnless { it.isBlank() }
+            ?: requireNotNull(context.el.childOrNull("caption")?.text()) { "Absent table name" }
     )
 
     private fun toColumns(cols: List<String>) = cols.map { Column(it, DataType.UNKNOWN) }.toTypedArray()

@@ -13,7 +13,7 @@ class WsPlugin @JvmOverloads constructor(
     private val basePath: String = "",
     private val port: Int? = 8080,
     private val httpContentTypeResolver: HttpContentTypeResolver = HttpContentTypeResolver.Simple(),
-    private val httpParser: HttpParser = RawHttpParser("$host${port?.let { ":$it" } ?: ""}$basePath"),
+    private val httpTester: HttpTester = RawHttpTester("$host${port?.let { ":$it" } ?: ""}$basePath"),
     private val override: Map<String, Command> = mapOf()
 ) : ExamPlugin.NoSetUp(), ExamPlugin {
 
@@ -21,11 +21,11 @@ class WsPlugin @JvmOverloads constructor(
     constructor(withBasePath: String, withPort: Int) : this(basePath = withBasePath, port = withPort)
 
     init {
-        HANDLEBARS.registerHelpers(WsHelperSource::class.java.apply { WsHelperSource.httpParser = httpParser })
+        HANDLEBARS.registerHelpers(WsHelperSource::class.java.apply { WsHelperSource.httpTester = httpTester })
     }
 
     override fun commands(): Map<String, Command> =
-        mapOf("http" to HttpCommand(httpContentTypeResolver, httpParser)) + override
+        mapOf("http" to HttpCommand(httpContentTypeResolver, httpTester)) + override
 
     interface HttpContentTypeResolver {
         open class Simple : HttpContentTypeResolver {
@@ -50,7 +50,7 @@ enum class WsHelperSource(
         mapOf(),
         HttpResponse.ok("{\"POST\":\"/mirror/request\",\"body\":{\"a\":1}}")
     ) {
-        override fun apply(context: Any?, options: Options) = httpParser.send(
+        override fun apply(context: Any?, options: Options) = httpTester.send(
             """
                 $context ${options.param<String>(0)}
                 ${options.hash.entries.joinToString("\r\n") { (k, v) -> "$k: $v" }}
@@ -62,6 +62,6 @@ enum class WsHelperSource(
     override fun toString() = describe()
 
     companion object {
-        lateinit var httpParser: HttpParser
+        lateinit var httpTester: HttpTester
     }
 }

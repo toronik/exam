@@ -3,7 +3,7 @@ buildscript {
     ext.kotlin_version = '1.9.22'
     ext.klogging_version = '3.0.4'
     ext.jacksonKt_version = '2.14.1'
-    ext.libVersion = '2024.0.4'
+    ext.libVersion = '2024.0.5'
     repositories {
         mavenCentral()
         maven {

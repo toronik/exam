@@ -13,7 +13,7 @@ import io.github.adven27.concordion.extensions.exam.core.utils.toDate
 import java.time.LocalDate
 
 /* ktlint-disable enum-entry-name-case */
-@Suppress("EnumNaming", "EnumEntryNameCase")
+@Suppress("EnumNaming", "EnumEntryNameCase", "MagicNumber")
 enum class MiscHelpers(
     override val example: String,
     override val context: Map<String, Any?> = emptyMap(),
@@ -84,6 +84,15 @@ enum class MiscHelpers(
             runCatching { JsonPath.read<Any>(context.toString(), options.param(0)) }
                 .recover { if (it is PathNotFoundException) null else throw it }
                 .getOrThrow()
+    },
+    math("{{math '+' 1 2}}", mapOf(), 3.0) {
+        override fun invoke(context: Any?, options: Options) = when (context.toString()) {
+            "+" -> options.params.reduce { acc, next -> acc.toString().toDouble() + next.toString().toDouble() }
+            "-" -> options.params.reduce { acc, next -> acc.toString().toDouble() - next.toString().toDouble() }
+            "*" -> options.params.reduce { acc, next -> acc.toString().toDouble() * next.toString().toDouble() }
+            "/" -> options.params.reduce { acc, next -> acc.toString().toDouble() / next.toString().toDouble() }
+            else -> error("Unsupported math operation: $context. Supported: +, - , *, /.")
+        }
     },
     prop("{{prop 'system.property' 'optional default'}}", mapOf(), "optional default") {
         override fun invoke(context: Any?, options: Options) = System.getProperty(context.toString(), options.param(0))

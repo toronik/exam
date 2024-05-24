@@ -76,3 +76,10 @@ fun date(item: Any?, pattern: String? = null): Result<ZonedDateTime> = try {
 } catch (expected: Exception) {
     Result.failure(expected)
 }
+
+fun ldt(item: Any?): LocalDateTime = when (item) {
+    is ZonedDateTime -> item.toLocalDateTime()
+    is LocalDateTime -> item
+    is Date -> item.toLocalDateTime()
+    else -> item.toString().parseDate().toLocalDateTime()
+}

@@ -2,6 +2,7 @@ package io.github.adven27.concordion.extensions.exam.db.commands
 
 import io.github.adven27.concordion.extensions.exam.core.commands.ExamCommand.Context
 import io.github.adven27.concordion.extensions.exam.core.html.Html
+import io.github.adven27.concordion.extensions.exam.core.resolve
 import io.github.adven27.concordion.extensions.exam.db.DbTester
 import io.github.adven27.concordion.extensions.exam.db.builder.DataSetBuilder
 import io.github.adven27.concordion.extensions.exam.db.builder.ExamTable
@@ -23,12 +24,17 @@ open class DbSetTableParser : DbSetCommand.Parser {
 
     private fun table(context: Context): ITable {
         val builder = DataSetBuilder()
-        val tableName = context.expression
+        val tableName = parseTableName(context)
         context.el.let { parseCols(it) to parseValues(it) }.let { (cols, rows) ->
             rows.forEach { row -> builder.newRowTo(tableName).withFields(cols.zip(row).toMap()).add() }
             return ExamTable(tableFrom(builder.build(), tableName), context.eval)
         }
     }
+
+    private fun parseTableName(context: Context) = context.eval.resolve(
+        context.expression.takeUnless { it.isBlank() }
+            ?: requireNotNull(context.el.childOrNull("caption")?.text()) { "Absent table name" }
+    )
 
     private fun tableFrom(dataSet: IDataSet, tableName: String) =
         if (dataSet.tableNames.isEmpty()) DefaultTable(tableName) else dataSet.getTable(tableName)

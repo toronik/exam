@@ -29,7 +29,7 @@ open class EqCommand(val verifier: ContentVerifier) : AssertEqualsCommand() {
         val verifier = verifier(command)
         val await = AwaitConfig.build(command)
         val html = command.html()
-        val expected = eval.resolve(html.text())
+        val expected = eval.resolve(html.deepestChild().text())
         var lastFailed: Result<Content>? = null
         val result = await?.let { c ->
             runCatching {
@@ -57,10 +57,10 @@ open class EqCommand(val verifier: ContentVerifier) : AssertEqualsCommand() {
             }
     }
 
-    private fun actual(evaluator: Evaluator, command: CommandCall): String =
+    protected fun actual(evaluator: Evaluator, command: CommandCall): String =
         objectToString(evaluator.evaluate(command.expression))
 
-    private fun renderError(error: Fail, await: AwaitConfig?) = errorMessage(
+    protected fun renderError(error: Fail, await: AwaitConfig?) = errorMessage(
         message = await?.timeoutMessage(error) ?: error.details,
         html = div("class" to "${error.type} failure")(
             Html("del", error.expected, "class" to "expected"),

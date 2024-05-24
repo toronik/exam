@@ -244,6 +244,14 @@ class Html(val el: Element) {
         "style" to if (decorate) "text-decoration: underline grey dashed !important;" else ""
     )
 
+    fun deepestChild(): Html {
+        var c = this
+        while (c.childs().isNotEmpty()) {
+            c = c.childs()[0]
+        }
+        return c
+    }
+
     fun removeClass(name: String): Html {
         el.addAttribute(
             "class",

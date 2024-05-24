@@ -32,7 +32,7 @@ import kotlin.Result.Companion.success
 @Suppress("TooManyFunctions")
 open class HttpCommand(
     private val typeResolver: HttpContentTypeResolver,
-    private val parser: HttpParser
+    private val tester: HttpTester
 ) : ExamCommand<Model, List<Verification>>() {
 
     override fun model(context: Context) = findListings(context.el)
@@ -92,7 +92,7 @@ open class HttpCommand(
             listOf(
                 await(m, eval) { m, eval ->
                     val r = eval.resolve(m.req)
-                    verify(m.resp?.let { eval.resolve(it) }, parser.parseRequest(r), parser.send(r), eval, m.verifier)
+                    verify(m.resp?.let { eval.resolve(it) }, tester.parseRequest(r), tester.send(r), eval, m.verifier)
                 }
             )
         }
@@ -111,8 +111,8 @@ open class HttpCommand(
     private fun verifyWhere(vars: Map<String, String>, eval: Evaluator, m: Model): Verification {
         vars.setTo(eval)
         val req = eval.resolve(m.req)
-        return verify(m.resp?.let { eval.resolve(it) }, parser.parseRequest(req), parser.send(req), eval, m.verifier)
-            .also { vars.nullify(eval) }
+        return verify(m.resp?.let { eval.resolve(it) }, tester.parseRequest(req), tester.send(req), eval, m.verifier)
+            .also { vars.removeFrom(eval) }
             .also { v -> v.desc = vars.description() }
     }
 
@@ -122,12 +122,12 @@ open class HttpCommand(
         filterKeys(String::isNotBlank).onEach { (k, v) -> eval.setVariable("#$k", v) }
     }
 
-    private fun Map<String, String>.nullify(eval: Evaluator) {
+    private fun Map<String, String>.removeFrom(eval: Evaluator) {
         filterKeys(String::isNotBlank).onEach { (k, _) -> eval.setVariable("#$k", null) }
     }
 
     private fun verify(resp: String?, req: HttpRequest, actual: HttpResponse, eval: Evaluator, verifier: String?) =
-        resp?.let { parser.parseResponse(it) }
+        resp?.let { tester.parseResponse(it) }
             ?.let { verify(req = req, act = actual, exp = it, eval = eval, verifier = verifier) }
             ?: Verification.success(req, actual)
 

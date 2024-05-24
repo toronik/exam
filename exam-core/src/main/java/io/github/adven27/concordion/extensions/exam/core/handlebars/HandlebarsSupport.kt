@@ -6,6 +6,7 @@ import com.github.jknack.handlebars.Formatter
 import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.Helper
 import com.github.jknack.handlebars.Options
+import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.HANDLEBAR_RESOLVERS
 import io.github.adven27.concordion.extensions.exam.core.handlebars.date.DateHelpers
 import io.github.adven27.concordion.extensions.exam.core.handlebars.matchers.MatcherHelpers
 import io.github.adven27.concordion.extensions.exam.core.handlebars.matchers.PLACEHOLDER_TYPE
@@ -46,9 +47,10 @@ class HelperMissing : Helper<Any?> {
     }
 }
 
+@Suppress("SpreadOperator")
 private fun Handlebars.resolve(eval: Any?, placeholder: String): Any? = compileInline(placeholder).let { template ->
     HELPER_RESULTS.clear()
-    template.apply(Context.newBuilder(eval).resolver(EvaluatorValueResolver.INSTANCE).build()).let {
+    template.apply(Context.newBuilder(eval).resolver(*HANDLEBAR_RESOLVERS).build()).let {
         if (HELPER_RESULTS.size == 1 && placeholder.singleHelper()) HELPER_RESULTS.single() else it
     }
 }

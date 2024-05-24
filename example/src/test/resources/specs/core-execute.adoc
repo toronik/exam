@@ -47,7 +47,7 @@ Variable `someVar` = [e-set=someVar]`123`
 
 [.then]
 .Lowercase test
-[%header, cols="1,1,2,2,3,3", e-execute="#r = lowercase(#param)"]
+[%header, cols="1,1,2a,2a,3,3", e-execute="#r = lowercase(#param)"]
 |===
 |[e-set=param]#Param#
 |[e-eq=#r.text]#Text#
@@ -65,8 +65,14 @@ Variable `someVar` = [e-set=someVar]`123`
 
 |aBc {{someVar}}
 |abc {{someVar}}
-|[.json]`{"result": "abc {{someVar}}"}`
-|[.xml]`<result>abc {{someVar}}</result>`
+|[source,json]
+----
+{"result": "abc {{someVar}}"}
+----
+|[source,xml]
+----
+<result>abc {{someVar}}</result>
+----
 |[pre language-json]`{empty}`
 |[pre language-xml details]`{empty}`
 |===

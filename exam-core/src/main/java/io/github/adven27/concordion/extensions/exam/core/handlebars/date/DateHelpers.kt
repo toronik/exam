@@ -107,6 +107,6 @@ enum class DateHelpers(
     abstract operator fun invoke(context: Any?, options: Options): Any?
 
     companion object {
-        private val AT = LocalDateTime.now()
+        val AT = LocalDateTime.now()
     }
 }

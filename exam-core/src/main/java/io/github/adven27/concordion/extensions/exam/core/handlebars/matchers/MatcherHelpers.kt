@@ -2,9 +2,10 @@ package io.github.adven27.concordion.extensions.exam.core.handlebars.matchers
 
 import com.github.jknack.handlebars.Options
 import io.github.adven27.concordion.extensions.exam.core.handlebars.ExamHelper
+import io.github.adven27.concordion.extensions.exam.core.handlebars.date.DateHelpers
 import io.github.adven27.concordion.extensions.exam.core.utils.DateFormattedAndWithin.Companion.PARAMS_SEPARATOR
+import io.github.adven27.concordion.extensions.exam.core.utils.ldt
 import io.github.adven27.concordion.extensions.exam.core.utils.parseDate
-import io.github.adven27.concordion.extensions.exam.core.utils.toLocalDate
 import io.github.adven27.concordion.extensions.exam.core.utils.toLocalDateTime
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -119,7 +120,7 @@ enum class MatcherHelpers(
     ) {
         override fun invoke(context: Any?, options: Options): Any =
             "\${${placeholderType(options.context)}-unit.matches:$name}$context" +
-                "$PARAMS_SEPARATOR${options.param(0, Date()).toLocalDateTime()}"
+                "$PARAMS_SEPARATOR${ldt(options.param(0, DateHelpers.AT))}"
     },
     formattedAs(
         example = "{{formattedAs \"yyyy-MM-dd'T'hh:mm:ss\"}}",
@@ -138,7 +139,7 @@ enum class MatcherHelpers(
             when (context) {
                 is Date -> DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(context.toLocalDateTime())
                 is String -> "\${${placeholderType(options.context)}-unit.matches:formattedAndWithin}ISO_LOCAL" +
-                    "$PARAMS_SEPARATOR$context$PARAMS_SEPARATOR${options.param(0, Date()).toLocalDateTime()}"
+                    "$PARAMS_SEPARATOR$context$PARAMS_SEPARATOR${ldt(options.param(0, DateHelpers.AT))}"
 
                 else -> "\${${placeholderType(options.context)}-unit.matches:formattedAs}ISO_LOCAL"
             }
@@ -153,7 +154,7 @@ enum class MatcherHelpers(
                 is Date -> DateTimeFormatter.ISO_LOCAL_DATE.format(context.toLocalDateTime())
                 is String ->
                     "\${${placeholderType(options.context)}-unit.matches:formattedAndWithin}$ISO_LOCAL_DATE_FORMAT" +
-                        "$PARAMS_SEPARATOR$context$PARAMS_SEPARATOR${options.param(0, Date()).toLocalDate()}"
+                        "$PARAMS_SEPARATOR$context$PARAMS_SEPARATOR${ldt(options.param(0, DateHelpers.AT))}"
 
                 else -> "\${${placeholderType(options.context)}-unit.matches:formattedAs}$ISO_LOCAL_DATE_FORMAT"
             }

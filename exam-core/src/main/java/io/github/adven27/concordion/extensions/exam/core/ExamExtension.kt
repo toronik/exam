@@ -4,6 +4,11 @@ package io.github.adven27.concordion.extensions.exam.core
 
 import ch.qos.logback.classic.turbo.TurboFilter
 import com.github.jknack.handlebars.Handlebars
+import com.github.jknack.handlebars.ValueResolver
+import com.github.jknack.handlebars.context.JavaBeanValueResolver
+import com.github.jknack.handlebars.context.MapValueResolver
+import com.github.jknack.handlebars.context.MethodValueResolver
+import io.github.adven27.concordion.extensions.exam.core.handlebars.EvaluatorValueResolver
 import io.github.adven27.concordion.extensions.exam.core.handlebars.HANDLEBARS
 import io.github.adven27.concordion.extensions.exam.core.json.DefaultObjectMapperProvider
 import io.github.adven27.concordion.extensions.exam.core.logger.LoggerLevelFilter
@@ -33,6 +38,7 @@ import java.util.function.Consumer
 
 class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtension {
     private var focusOnError: Boolean = true
+    private var enableLoggingFormatterExtension: Boolean = true
     private var nodeMatcher: NodeMatcher = DEFAULT_NODE_MATCHER
     private var skipDecider: SkipDecider = SkipDecider.NoSkip()
 
@@ -62,6 +68,12 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
     }
 
     @Suppress("unused")
+    fun withHandlebarResolvers(vararg resolvers: ValueResolver): ExamExtension {
+        HANDLEBAR_RESOLVERS = resolvers.toList().toTypedArray()
+        return this
+    }
+
+    @Suppress("unused")
     fun withHandlebar(fn: Consumer<Handlebars>): ExamExtension {
         fn.accept(HANDLEBARS)
         return this
@@ -79,6 +91,12 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
     @Suppress("unused")
     fun withFocusOnFailed(enabled: Boolean): ExamExtension {
         focusOnError = enabled
+        return this
+    }
+
+    @Suppress("unused")
+    fun enableLoggingFormatterExtension(enabled: Boolean): ExamExtension {
+        enableLoggingFormatterExtension = enabled
         return this
     }
 
@@ -128,7 +146,9 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
 
         TopButtonExtension().addTo(ex)
 //        TocbotExtension().addTo(ex)
-        LoggingFormatterExtension().addTo(ex)
+        if (enableLoggingFormatterExtension) {
+            LoggingFormatterExtension().addTo(ex)
+        }
 //        ex.withThrowableListener(ErrorListener())
         if (focusOnError) {
             ex.withSpecificationProcessingListener(FocusOnErrorsListener())
@@ -158,6 +178,14 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
             "uuid" to uuid(),
             "after" to After(),
             "before" to Before()
+        )
+
+        @JvmField
+        var HANDLEBAR_RESOLVERS = arrayOf<ValueResolver>(
+            EvaluatorValueResolver.INSTANCE,
+            JavaBeanValueResolver.INSTANCE,
+            MethodValueResolver.INSTANCE,
+            MapValueResolver.INSTANCE
         )
 
         @JvmField

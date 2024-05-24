@@ -227,6 +227,8 @@ open class RowComparator {
 @Suppress("unused")
 open class DbHelpers(protected val dbTester: DbTester) {
 
+    fun dbCount(context: Any, options: Options) = dbTester.connection.getRowCount(context.toString())
+
     protected fun queryStringFrom(table: String, target: String, filter: Map<String, Any>): String =
         dbTester.useStatement {
             it.query(target, table, filter)

@@ -10,7 +10,7 @@ import rawhttp.core.client.TcpRawHttpClient
 import java.nio.charset.StandardCharsets
 import kotlin.jvm.optionals.getOrNull
 
-interface HttpParser {
+interface HttpTester {
     fun parseResponse(r: String): HttpResponse
     fun parseRequest(r: String): HttpRequest
     fun send(r: String): HttpResponse
@@ -84,10 +84,10 @@ data class HttpRequest(
         """.trimIndent()
 }
 
-open class RawHttpParser(
+open class RawHttpTester(
     private val host: String,
     private val http: RawHttp = RawHttp(RawHttpOptions.newBuilder().allowContentLengthMismatch().build())
-) : HttpParser {
+) : HttpTester {
 
     override fun send(r: String) = TcpRawHttpClient().use { toHttpResponse(it.send(parse(r)).eagerly()) }
     override fun parseResponse(r: String) = toHttpResponse(http.parseResponse(r).eagerly(false))

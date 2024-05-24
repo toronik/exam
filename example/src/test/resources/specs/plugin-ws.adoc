@@ -177,9 +177,14 @@ Host: localhost:8888
 Content-Type: application/json
 {blank}
 {blank}`
-|[pre language-json]`{}`
+|[pre language-json]`{"GET":"/mirror/request?p=1"}`
 |200
 |===
+
+Доступ к полям через jsonPath:
+
+`{{jsonPath interactions.[0].resp.body '$.GET'}}` = [e-set=r]`{{jsonPath interactions.[0].resp.body '$.GET'}}`
+
 //end::ws-http-v[]
 ====
 
