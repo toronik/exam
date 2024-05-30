@@ -9,7 +9,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class DateFormattedAndWithinTest {
-
     companion object {
         private const val DATE_PATTERN = "yyyy-MM-dd"
         private const val DATE_WITH_REGEXP_PATTERN =

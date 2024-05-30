@@ -14,7 +14,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter.ofPattern
 import java.util.*
 
-/* ktlint-disable enum-entry-name-case */
 @Suppress("EnumEntryNameCase", "EnumNaming", "MagicNumber")
 enum class DateHelpers(
     override val example: String,

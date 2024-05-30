@@ -114,6 +114,7 @@ open class RabbitTester @JvmOverloads constructor(
     }
 
     interface SendConverter : Function<MqTester.Message?, ByteArray?>
+
     interface ReceiveConverter : Function<GetResponse?, MqTester.Message?>
 
     data class SendConfig @JvmOverloads constructor(

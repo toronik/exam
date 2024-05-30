@@ -1,6 +1,5 @@
 package io.github.adven27.concordion.extensions.exam.mq.commands
 
-import com.github.jknack.handlebars.internal.text.StringEscapeUtils.escapeJava
 import io.github.adven27.concordion.extensions.exam.core.Content
 import io.github.adven27.concordion.extensions.exam.core.ContentVerifier.Fail
 import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.contentVerifier
@@ -19,6 +18,7 @@ import io.github.adven27.concordion.extensions.exam.mq.commands.MqCheckCommand.E
 import io.github.adven27.concordion.extensions.exam.mq.commands.MqVerifier.MessageVerifyResult
 import io.github.adven27.concordion.extensions.exam.mq.commands.MqVerifier.MessageVerifyingError
 import io.github.adven27.concordion.extensions.exam.mq.commands.MqVerifier.SizeVerifyingError
+import org.apache.commons.text.StringEscapeUtils.escapeJava
 import org.concordion.api.CommandCall
 
 @Suppress("TooManyFunctions")

@@ -1,8 +1,8 @@
 package io.github.adven27.concordion.extensions.exam.core
 
-import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.DEFAULT_JSON_UNIT_CFG
-import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.DEFAULT_NODE_MATCHER
 import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.MATCHERS
+import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.defaultJsonUnitCfg
+import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.defaultNodeMatcher
 import io.github.adven27.concordion.extensions.exam.core.utils.ExamDiffEvaluator
 import io.github.adven27.concordion.extensions.exam.core.utils.JsonPrettyPrinter
 import io.github.adven27.concordion.extensions.exam.core.utils.XmlPlaceholderAwareMatcher
@@ -174,7 +174,7 @@ open class XmlVerifier(
         diffEvaluator: DifferenceEvaluator = ExamDiffEvaluator(XmlPlaceholderAwareMatcher(MATCHERS)),
         printer: ContentPrinter = XmlPrinter(),
         configureNodeMatcher: (NodeMatcher) -> NodeMatcher = { it }
-    ) : this(configureNodeMatcher(DEFAULT_NODE_MATCHER), diffEvaluator, printer)
+    ) : this(configureNodeMatcher(defaultNodeMatcher), diffEvaluator, printer)
 
     override fun assertThat(expected: String, actual: String) = diff(expected, actual).let {
         if (it.hasDifferences()) throw AssertionError(it.toString())
@@ -195,7 +195,7 @@ open class JsonVerifier(
 
     @JvmOverloads
     constructor(printer: ContentPrinter = JsonPrinter(), configure: (Configuration) -> Configuration = { it }) :
-        this(configure(DEFAULT_JSON_UNIT_CFG), printer)
+        this(configure(defaultJsonUnitCfg), printer)
 
     override fun assertThat(expected: String, actual: String) {
         validate(actual)

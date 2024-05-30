@@ -15,7 +15,7 @@ import org.concordion.internal.FixtureInstance
 import org.concordion.internal.OgnlEvaluator
 import org.junit.Test
 import java.time.LocalDate
-import java.util.*
+import java.util.Date
 import kotlin.test.assertEquals
 
 class HandlebarsResolverTest {

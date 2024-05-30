@@ -39,7 +39,7 @@ import java.util.function.Consumer
 class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtension {
     private var focusOnError: Boolean = true
     private var enableLoggingFormatterExtension: Boolean = true
-    private var nodeMatcher: NodeMatcher = DEFAULT_NODE_MATCHER
+    private var nodeMatcher: NodeMatcher = defaultNodeMatcher
     private var skipDecider: SkipDecider = SkipDecider.NoSkip()
 
     /**
@@ -63,13 +63,13 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
 
     @Suppress("unused")
     fun withJackson2ObjectMapperProvider(provider: Jackson2ObjectMapperProvider): ExamExtension {
-        JACKSON_2_OBJECT_MAPPER_PROVIDER = provider
+        jackson2ObjectMapperProvider = provider
         return this
     }
 
     @Suppress("unused")
     fun withHandlebarResolvers(vararg resolvers: ValueResolver): ExamExtension {
-        HANDLEBAR_RESOLVERS = resolvers.toList().toTypedArray()
+        handlebarResolvers = resolvers.toList().toTypedArray()
         return this
     }
 
@@ -82,6 +82,12 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
     @Suppress("unused")
     fun withVerifiers(vararg overrideVerifiers: Pair<String, ContentVerifier>): ExamExtension {
         CONTENT_VERIFIERS += overrideVerifiers.toMap()
+        return this
+    }
+
+    @Suppress("unused")
+    fun withHelpers(vararg helperSources: Any): ExamExtension {
+        withHandlebar { hb -> helperSources.forEach { hb.registerHelpers(it) } }
         return this
     }
 
@@ -134,7 +140,7 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
 
     @Suppress("unused")
     fun withLoggingFilter(loggerLevel: Map<String, String>): ExamExtension {
-        LOGGING_FILTER = LoggerLevelFilter(loggerLevel)
+        loggingFilter = LoggerLevelFilter(loggerLevel)
         return this
     }
 
@@ -181,7 +187,7 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
         )
 
         @JvmField
-        var HANDLEBAR_RESOLVERS = arrayOf<ValueResolver>(
+        var handlebarResolvers = arrayOf<ValueResolver>(
             EvaluatorValueResolver.INSTANCE,
             JavaBeanValueResolver.INSTANCE,
             MethodValueResolver.INSTANCE,
@@ -189,13 +195,13 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
         )
 
         @JvmField
-        var JACKSON_2_OBJECT_MAPPER_PROVIDER: Jackson2ObjectMapperProvider = DefaultObjectMapperProvider()
+        var jackson2ObjectMapperProvider: Jackson2ObjectMapperProvider = DefaultObjectMapperProvider()
 
         @JvmField
-        val DEFAULT_NODE_MATCHER = DefaultNodeMatcher(byNameAndText, byName)
+        val defaultNodeMatcher = DefaultNodeMatcher(byNameAndText, byName)
 
         @JvmField
-        val DEFAULT_JSON_UNIT_CFG: Configuration = `when`(IGNORING_ARRAY_ORDER).let { cfg ->
+        val defaultJsonUnitCfg: Configuration = `when`(IGNORING_ARRAY_ORDER).let { cfg ->
             MATCHERS.map { cfg to it }
                 .reduce { acc, cur ->
                     acc.first
@@ -225,6 +231,6 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
             "Content verifier '$verifier' not found. Provide it via ExamExtension(...).withVerifiers(...)"
         }
 
-        var LOGGING_FILTER: TurboFilter = LoggerLevelFilter()
+        var loggingFilter: TurboFilter = LoggerLevelFilter()
     }
 }

@@ -14,7 +14,8 @@ class TocbotExtension : ConcordionExtension {
     override fun addTo(e: ConcordionExtender) {
         e.linkedCss(BASE, "tocbot.css")
         e.linkedJs(BASE, "tocbot.min.js")
-        e.withEmbeddedJavaScript( // language=js
+        e.withEmbeddedJavaScript(
+            // language=js
             """
             window.addEventListener('DOMContentLoaded', function (event) {
                 anchors.options = {

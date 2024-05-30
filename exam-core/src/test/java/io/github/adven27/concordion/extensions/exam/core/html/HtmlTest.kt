@@ -6,7 +6,6 @@ import org.xmlunit.diff.Diff
 import kotlin.test.assertFalse
 
 class HtmlTest {
-
     @Test
     fun htmlDSLExample() {
         val cols = 1..2

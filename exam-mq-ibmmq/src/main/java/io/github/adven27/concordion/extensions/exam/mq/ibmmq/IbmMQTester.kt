@@ -173,7 +173,9 @@ abstract class JmsTester(protected val config: Config) : MqTester.NOOP() {
     data class Config(val host: String, val port: Int, val queue: String, val manager: String, val channel: String)
 
     interface SendConverter : Function<Pair<MqTester.Message, Session>, Message>
+
     interface ReceiveConverter : Function<Message, MqTester.Message>
+
     companion object : KLogging() {
         @JvmField
         val DEFAULT_SEND_CONVERTER: SendConverter = object : SendConverter {

@@ -27,7 +27,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 import java.time.format.DateTimeFormatter.ISO_TIME
-import java.util.*
+import java.util.Date
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
@@ -38,7 +38,6 @@ class DbPlugin @JvmOverloads constructor(
     private val valuePrinter: ValuePrinter = ValuePrinter.Default(),
     private val override: Map<String, Command> = mapOf()
 ) : ExamPlugin {
-
     /**
      * @param dbUnitConfig properties for org.dbunit.database.DatabaseConfig
      */
@@ -166,7 +165,6 @@ data class DbUnitConfig @JvmOverloads constructor(
     val diffFailureHandler: DiffCollectingFailureHandler = DiffCollectingFailureHandler(),
     val isColumnSensing: Boolean = false
 ) {
-
     data class TableColumnValueComparer(
         val table: String,
         val columnValueComparer: Map<String, ExamMatchersAwareValueComparer>

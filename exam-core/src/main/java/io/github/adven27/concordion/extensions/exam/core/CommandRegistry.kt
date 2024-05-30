@@ -12,12 +12,10 @@ import org.concordion.internal.command.executeCommand.ExecuteCommand
 class CommandRegistry {
     private val commands = mutableMapOf<String, Command>(
         "example" to ExamExampleCommand(),
-
         "set" to SetCommand(),
         "echo" to EchoCommand(),
         "execute" to ExecuteCommand(),
         "verify-rows" to VerifyRowsCommand(),
-
         "eq" to EqCommand(contentVerifier("text")),
         "eq-xml" to EqCommand(contentVerifier("xml")),
         "eq-json" to EqCommand(contentVerifier("json"))

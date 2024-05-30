@@ -6,5 +6,5 @@ import net.javacrumbs.jsonunit.providers.Jackson2ObjectMapperProvider
 
 class ObjectMapperProvider : Jackson2ObjectMapperProvider {
     override fun getObjectMapper(lenient: Boolean): ObjectMapper =
-        ExamExtension.JACKSON_2_OBJECT_MAPPER_PROVIDER.getObjectMapper(lenient)
+        ExamExtension.jackson2ObjectMapperProvider.getObjectMapper(lenient)
 }

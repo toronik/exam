@@ -19,7 +19,7 @@ class ExamDelegatingFilter : TurboFilter() {
         format: String?,
         params: Array<out Any>?,
         t: Throwable?
-    ): FilterReply = ExamExtension.LOGGING_FILTER.decide(marker, logger, level, format, params, t)
+    ): FilterReply = ExamExtension.loggingFilter.decide(marker, logger, level, format, params, t)
 }
 
 open class LoggerLevelFilter(

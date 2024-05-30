@@ -7,7 +7,10 @@ import rawhttp.core.RawHttpOptions
 import rawhttp.core.RawHttpRequest
 import rawhttp.core.body.StringBody
 import rawhttp.core.client.TcpRawHttpClient
+import rawhttp.core.client.TcpRawHttpClient.TcpRawHttpClientOptions
+import java.net.URI
 import java.nio.charset.StandardCharsets
+import java.time.Duration
 import kotlin.jvm.optionals.getOrNull
 
 interface HttpTester {
@@ -86,10 +89,23 @@ data class HttpRequest(
 
 open class RawHttpTester(
     private val host: String,
-    private val http: RawHttp = RawHttp(RawHttpOptions.newBuilder().allowContentLengthMismatch().build())
+    private val http: RawHttp = RawHttp(RawHttpOptions.newBuilder().allowContentLengthMismatch().build()),
+    private val options: () -> TcpRawHttpClientOptions
 ) : HttpTester {
 
-    override fun send(r: String) = TcpRawHttpClient().use { toHttpResponse(it.send(parse(r)).eagerly()) }
+    @Suppress("MagicNumber")
+    constructor(host: String, timeout: Duration = Duration.ofSeconds(600)) : this(
+        host = host,
+        options = {
+            object : TcpRawHttpClient.DefaultOptions() {
+                override fun getSocket(uri: URI?) =
+                    super.getSocket(uri).apply { soTimeout = timeout.toMillis().toInt() }
+            }
+        }
+    )
+
+    override fun send(r: String) = TcpRawHttpClient(options()).use { toHttpResponse(it.send(parse(r)).eagerly()) }
+
     override fun parseResponse(r: String) = toHttpResponse(http.parseResponse(r).eagerly(false))
 
     private fun toHttpResponse(response: EagerHttpResponse<Void>) = HttpResponse(

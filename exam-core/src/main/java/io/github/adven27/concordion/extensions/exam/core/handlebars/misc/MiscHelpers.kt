@@ -3,7 +3,7 @@ package io.github.adven27.concordion.extensions.exam.core.handlebars.misc
 import com.github.jknack.handlebars.Options
 import com.jayway.jsonpath.JsonPath
 import com.jayway.jsonpath.PathNotFoundException
-import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.JACKSON_2_OBJECT_MAPPER_PROVIDER
+import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.jackson2ObjectMapperProvider
 import io.github.adven27.concordion.extensions.exam.core.handlebars.ExamHelper
 import io.github.adven27.concordion.extensions.exam.core.handlebars.evaluator
 import io.github.adven27.concordion.extensions.exam.core.prettyJson
@@ -12,7 +12,6 @@ import io.github.adven27.concordion.extensions.exam.core.resolveToObj
 import io.github.adven27.concordion.extensions.exam.core.utils.toDate
 import java.time.LocalDate
 
-/* ktlint-disable enum-entry-name-case */
 @Suppress("EnumNaming", "EnumEntryNameCase", "MagicNumber")
 enum class MiscHelpers(
     override val example: String,
@@ -47,7 +46,7 @@ enum class MiscHelpers(
     },
     json("""{{json (map f1='1' f2=(ls '1' '2'))}}""", mapOf(), """{"f1":"1","f2":["1","2"]}""") {
         override fun invoke(context: Any?, options: Options): String =
-            JACKSON_2_OBJECT_MAPPER_PROVIDER.getObjectMapper(false).writeValueAsString(
+            jackson2ObjectMapperProvider.getObjectMapper(false).writeValueAsString(
                 if (options.params.isEmpty()) context else listOf(context) + options.params
             )
     },

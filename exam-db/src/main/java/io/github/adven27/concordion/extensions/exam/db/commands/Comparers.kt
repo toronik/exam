@@ -13,7 +13,7 @@ import org.dbunit.dataset.ITable
 import org.dbunit.dataset.SortedTable
 import org.dbunit.dataset.datatype.DataType
 import java.sql.Timestamp
-import java.util.*
+import java.util.Date
 
 open class ExamMatchersAwareValueComparer : IsActualEqualToExpectedValueComparer() {
     protected lateinit var evaluator: Evaluator

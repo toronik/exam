@@ -17,7 +17,6 @@ open class DbExecuteCommand(
     dbTester: DbTester,
     private var valuePrinter: DbPlugin.ValuePrinter
 ) : DbCommand<FilesSeed, IDataSet>(dbTester) {
-
     override fun model(context: Context) = FilesSeed(
         ds = context.el.getAttr(DS),
         datasets = context.expression.split(",").map { context.el.getAttr("dir") + it.trim() },

@@ -1,7 +1,7 @@
 package specs
 
 import com.example.demo.DemoApplication
-import com.github.jknack.handlebars.Helper
+import com.github.jknack.handlebars.Options
 import io.github.adven27.concordion.extensions.exam.core.AbstractSpecs
 import io.github.adven27.concordion.extensions.exam.core.ExamExtension
 import io.github.adven27.concordion.extensions.exam.core.ExamExtension.Companion.VERIFIER_XML
@@ -49,20 +49,17 @@ open class Specs : AbstractSpecs() {
                 )
             )
         )
-    ).withHandlebar { hb ->
-        hb.registerHelper(
-            "hi",
-            Helper { context: Any?, options ->
-                /*
-                    {{hi '1' 'p1 'p2' o1='a' o2='b'}} => Hello context = 1; params = [p1, p2]; options = {o1=a, o2=b}!
-                    {{hi variable1 variable2 o1=variable3}} => Hello context = 1; params = [2]; options = {o1=3}!
+    )
+        .withVerifiers("jsonIgnoreExtraFields" to JsonVerifier { it.withOptions(IGNORING_EXTRA_FIELDS) })
+        .withHelpers(
+            object {
+                /**
+                {{echo '1' 'p1 'p2' o1='a' o2='b'}} => context = 1; params = [p1, p2]; options = {o1=a, o2=b}!
                  */
-                "Hello context = $context; params = ${options.params.map { it.toString() }}; options = ${options.hash}!"
+                fun echo(context: Any, options: Options) =
+                    "context = $context; params = ${options.params.map { it.toString() }}; options = ${options.hash}!"
             }
         )
-    }.withVerifiers(
-        "jsonIgnoreExtraFields" to JsonVerifier { it.withOptions(IGNORING_EXTRA_FIELDS) }
-    )
 
     override fun startSut() {
         SUT = SpringApplication(DemoApplication::class.java).run()

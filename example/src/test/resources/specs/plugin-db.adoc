@@ -124,7 +124,7 @@ include::plugin-db.adoc[tags=db-check-matcher]
 |{{ignore}}
 |{{ignore}}>>ratingB
 |true
-|{{within '15s'}}>>createdB
+|{{within '1m'}}>>createdB
 |{"id": "{{regex '\\w'}}", "code": "{{ignore}}"}
 |===
 

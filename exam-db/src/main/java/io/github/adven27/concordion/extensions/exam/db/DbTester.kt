@@ -74,7 +74,6 @@ open class DbTester @JvmOverloads constructor(
     dataTypeConfig: Map<String, (DatabaseConfig) -> DatabaseConfig> = DATA_TYPES,
     private val allowedSeedStrategies: List<SeedStrategy> = SeedStrategy.entries
 ) : DbTesterBase(driver, url, user, password, schema, dbUnitConfig, dataTypeConfig), AutoCloseable {
-
     private val dataSetVerifier: DataSetVerifier = DataSetVerifier(dbUnitConfig)
     private val tableVerifier: TableVerifier = TableVerifier(dbUnitConfig)
 
@@ -410,7 +409,6 @@ open class DbTester @JvmOverloads constructor(
                 config.valueComparer,
                 config.tableColumnValueComparer.filter { it.table == expected.tableName() }
                     .flatMap { it.columnValueComparer.toList() }.toMap()
-
             )
         }
     }
@@ -426,7 +424,6 @@ open class DbTesterBase @JvmOverloads constructor(
     val dbUnitConfig: DbUnitConfig = DbUnitConfig(),
     private val dataTypeConfig: Map<String, (DatabaseConfig) -> DatabaseConfig> = DATA_TYPES
 ) : JdbcDatabaseTester(driver, url, user, password, schema), AutoCloseable {
-
     companion object : KLogging() {
         const val DEFAULT_DATASOURCE = "default"
         val DATA_TYPES: Map<String, (DatabaseConfig) -> DatabaseConfig> = mapOf(

@@ -37,7 +37,6 @@ class WsPlugin @JvmOverloads constructor(
     }
 }
 
-/* ktlint-disable enum-entry-name-case */
 @Suppress("EnumNaming")
 enum class WsHelperSource(
     override val example: String,
