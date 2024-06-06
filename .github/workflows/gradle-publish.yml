@@ -15,7 +15,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 17
+          java-version: 19
       - name: Build
         run: gradle build
       - name: Update live specs
@@ -33,7 +33,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 17
+          java-version: 19
 
       - name: Publish
         run: gradle publishMaven closeAndReleaseSonatypeStagingRepository -i
