@@ -2,7 +2,7 @@ buildscript {
     ext.kotlin_version = '2.0.0'
     ext.klogging_version = '3.0.5'
     ext.jacksonKt_version = '2.17.1'
-    ext.libVersion = '2024.0.6'
+    ext.libVersion = '2024.0.7'
     repositories {
         mavenCentral()
         maven {
@@ -52,10 +52,17 @@ subprojects {
     group = 'io.github.adven27'
     version = libVersion
 
-    sourceCompatibility = 19
-    targetCompatibility = 19
+    sourceCompatibility = 17
+    targetCompatibility = 17
     compileJava.options.encoding = 'utf-8'
     compileTestJava.options.encoding = 'utf-8'
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+        kotlinOptions {
+            freeCompilerArgs += '-Xjsr305=strict'
+            jvmTarget = '17'
+        }
+    }
 
     dependencies {
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
