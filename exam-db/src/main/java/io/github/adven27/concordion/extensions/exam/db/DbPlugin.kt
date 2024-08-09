@@ -6,10 +6,8 @@ import io.github.adven27.concordion.extensions.exam.core.ExamPlugin
 import io.github.adven27.concordion.extensions.exam.core.html.pre
 import io.github.adven27.concordion.extensions.exam.core.html.span
 import io.github.adven27.concordion.extensions.exam.db.commands.DbCleanCommand
-import io.github.adven27.concordion.extensions.exam.db.commands.DbExecuteCommand
-import io.github.adven27.concordion.extensions.exam.db.commands.DbSetCommand
+import io.github.adven27.concordion.extensions.exam.db.commands.set.DbSetCommand
 import io.github.adven27.concordion.extensions.exam.db.commands.DbShowCommand
-import io.github.adven27.concordion.extensions.exam.db.commands.DbVerifyCommand
 import io.github.adven27.concordion.extensions.exam.db.commands.ExamMatchersAwareValueComparer
 import io.github.adven27.concordion.extensions.exam.db.commands.check.DbCheckCommand
 import mu.KLogging
@@ -27,7 +25,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 import java.time.format.DateTimeFormatter.ISO_TIME
-import java.util.Date
+import java.util.*
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
@@ -90,8 +88,6 @@ class DbPlugin @JvmOverloads constructor(
     }
 
     override fun commands(): Map<String, Command> = mapOf(
-        "db-execute" to DbExecuteCommand(dbTester, valuePrinter),
-        "db-verify" to DbVerifyCommand(dbTester, valuePrinter),
         "db-show" to DbShowCommand(dbTester, valuePrinter),
         "db-check" to DbCheckCommand(dbTester, valuePrinter),
         "db-set" to DbSetCommand(dbTester, valuePrinter),

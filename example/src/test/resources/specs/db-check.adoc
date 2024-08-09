@@ -1,0 +1,181 @@
+=== e-db-check [[e-db-check]]
+
+Verifies database state.
+
+.Attributes
+[horizontal]
+include::attr-where.adoc[]
+include::attr-orderBy.adoc[]
+include::attr-ds.adoc[]
+include::attr-await.adoc[]
+
+==== Verifying tables
+
+Creates http://dbunit.sourceforge.net/[DbUnit] dataset for table and verifies it against a database.
+
+.Check single table
+[source,asciidoc]
+--
+include::db-check.adoc[tags=db-check]
+--
+
+====
+//tag::db-check[]
+.customer
+[e-db-check=]
+|===
+|name |balance |is_active |comment |created_at
+
+|Alex |10.01 |true |{{NULL}} |{{at '-1d'}}
+|===
+//end::db-check[]
+====
+
+.Check single table from CSV file
+[source,asciidoc]
+--
+include::db-check.adoc[tags=db-check-csv]
+--
+
+====
+//tag::db-check-csv[]
+.product
+[%header,e-db-check=]
+,===
+//include::../data/db/product.csv[]
+include::../data/db/product.csv[]
+,===
+//end::db-check-csv[]
+====
+
+.Check with matchers
+[source,asciidoc]
+--
+include::db-check.adoc[tags=db-check-matcher]
+--
+
+====
+//tag::db-check-matcher[]
+.product
+[e-db-check=]
+|===
+|name |price |rating |disabled |created_at |meta_json
+
+|{{string}}
+|{{number}}>>priceA
+|{{notNull}}
+|{{bool}}>>disabledA
+|{{within '15s' (at '-1d')}}
+|{"id": "{{string}}", "code": "{{number}}"}
+
+|{{regex '.*'}}>>nameB
+|{{ignore}}
+|{{ignore}}>>ratingB
+|true
+|{{within '1m'}}>>createdB
+|{"id": "{{regex '\\w'}}", "code": "{{ignore}}"}
+|===
+
+nameB = [e-eq=#nameB]`Model B`
+priceA = [e-eq=#priceA]`100.50`
+ratingB = [e-eq=#ratingB]`(null)`
+disabledA = [e-eq=#disabledA]`false`
+createdB = [e-eq=#createdB]`{{format (at) 'yyyy-MM-dd HH:mm:ss.SSS'}}`
+//end::db-check-matcher[]
+====
+
+.Check ordered
+[source,asciidoc]
+--
+include::db-check.adoc[tags=db-check-ordered]
+--
+
+====
+//tag::db-check-ordered[]
+.product
+[e-db-check=, e-orderBy='rating, id']
+,===
+name, rating
+
+{{string}}, {{ignore}}
+{{string}}, 10
+,===
+//end::db-check-ordered[]
+====
+
+.Check emptiness
+[source,asciidoc]
+--
+include::db-check.adoc[tags=db-check-empty]
+--
+
+====
+Given empty table:
+
+.product
+[e-db-set=]
+|===
+|===
+
+Then:
+
+//tag::db-check-empty[]
+.product
+[e-db-check=]
+|===
+|===
+//end::db-check-empty[]
+====
+
+==== Verifying DbUnit datasets
+
+Verifies http://dbunit.sourceforge.net/[DbUnit] datasets against a database.
+
+.Check single dataset
+[source,asciidoc]
+--
+include::db-check.adoc[tags=db-check-ds-single]
+--
+
+====
+[e-set=a1 hide]#1#
+[e-set=a2 hide]#2#
+//tag::db-check-ds-single[]
+
+.Dataset
+[,xml,e-db-check=]
+----
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <cart name="Cart 1"/>
+  <item name="item 1" price="10.01" cart_id="1"/>
+</dataset>
+----
+//end::db-check-ds-single[]
+====
+
+.Check several datasets:
+[source,asciidoc]
+-----
+include::db-check.adoc[tags=db-check-ds-several]
+-----
+
+====
+//tag::db-check-ds-several[]
+.Dataset
+[e-db-check=]
+--
+.carl.xml
+[,xml]
+----
+include::../data/db/carl.xml[]
+----
+
+.bob.json
+[,json]
+----
+include::../data/db/bob.json[]
+----
+--
+//end::db-check-ds-several[]
+====

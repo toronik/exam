@@ -3,8 +3,8 @@
 [#before]
 .Before each example
 ****
-.Given table `content_types`
-[%header,format=csv, e-db-set=content_types]
+.content_types
+[%header,format=csv, e-db-set=]
 |===
 include::../data/db/content_types.csv[]
 |===
@@ -19,7 +19,8 @@ include::DbCheckContentTypes.adoc[tags=db-check-ct]
 .Check content types
 ====
 //tag::db-check-ct[]
-[%header, cols="1a,1a,1a", e-db-check=content_types, e-orderBy="id"]
+.content_types
+[%header, cols="1a,1a,1a", e-db-check=, e-orderBy="id"]
 |===
 |data_json |data_json_with_extra_fields |data_xml
 
@@ -55,7 +56,8 @@ include::DbCheckContentTypes.adoc[tags=db-check-ct]
 [.ExpectedToFail]
 .Failures
 ====
-[%header, cols="1a,1a", e-db-check=content_types, e-orderBy="id"]
+.content_types
+[%header, cols="1a,1a", e-db-check=, e-orderBy="id"]
 |===
 |data_json  |data_xml
 

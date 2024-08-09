@@ -28,9 +28,6 @@ class DataSetBuilder(private val stringPolicy: StringPolicy = CaseInsensitiveStr
         return dataSet
     }
 
-    /**
-     * {@inheritDoc}
-     */
     override fun add(row: BasicDataRowBuilder): DataSetBuilder {
         row.fillUndefinedColumns()
         notifyConsumer(extractValues(row, updateTableMetaData(row)))
@@ -61,6 +58,7 @@ class DataSetBuilder(private val stringPolicy: StringPolicy = CaseInsensitiveStr
                 endTableIfNecessary()
                 startTable(metaData)
             }
+
             addedNewColumn -> startTable(metaData)
         }
     }
@@ -86,10 +84,8 @@ class DataSetBuilder(private val stringPolicy: StringPolicy = CaseInsensitiveStr
     private fun isNewTable(tableName: String) =
         !hasCurrentTable() || !stringPolicy.areEqual(currentTableName!!, tableName)
 
-    private fun metaDataBuilderFor(tableName: String): TableMetaDataBuilder = tableNameToMetaData.getOrPut(
-        stringPolicy.toKey(tableName),
-        { createNewTableMetaDataBuilder(tableName) }
-    )
+    private fun metaDataBuilderFor(tableName: String): TableMetaDataBuilder =
+        tableNameToMetaData.getOrPut(stringPolicy.toKey(tableName)) { createNewTableMetaDataBuilder(tableName) }
 
     private fun createNewTableMetaDataBuilder(tableName: String) = TableMetaDataBuilder(tableName, stringPolicy)
 }

@@ -1,3 +1,4 @@
+include::.asciidoctorconfig[]
 = Exam BDD Framework
 
 [.lead]

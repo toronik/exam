@@ -1,2 +1,2 @@
 ID, NAME, AGE, BIRTHDAY
-2, "Carl", 30, {{date "2003-03-03"}}
+2, "Carl", 30, {{parse "2003-03-03"}}

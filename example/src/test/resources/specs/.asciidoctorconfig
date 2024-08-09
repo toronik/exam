@@ -1,0 +1,20 @@
+:table-caption!:
+:mq-params: .params
+:mq-set: cols="a", grid=rows, frame=ends, e-mq-set=
+:mq-check: e-mq-check=, e-await=1s, cols=a
+:mq-clean: e-mq-clean
+:db-check: e-db-check=
+:db-set: e-db-set=
+:db-clean: e-db-clean
+:orderBy: e-orderBy=
+:http: e-http=
+:set: e-set=
+:run: role=e-run
+:nil: {{NULL}}
+:just: {{within '10s'}}
+:t0: {{at}}
+:2d-: {{at '-2d'}}
+:1d-: {{at '-1d'}}
+:2h-: {{at '-2h'}}
+:1h-: {{at '-1h'}}
+:1h: {{at '1h'}}

@@ -3,7 +3,6 @@ package io.github.adven27.concordion.extensions.exam.db
 import io.github.adven27.concordion.extensions.exam.core.Content
 import io.github.adven27.concordion.extensions.exam.core.commands.AwaitConfig
 import io.github.adven27.concordion.extensions.exam.core.commands.Verifier
-import io.github.adven27.concordion.extensions.exam.core.html.fileExt
 import io.github.adven27.concordion.extensions.exam.db.builder.CompareOperation
 import io.github.adven27.concordion.extensions.exam.db.builder.CompareOperation.EQUALS
 import io.github.adven27.concordion.extensions.exam.db.builder.ContainsFilterTable
@@ -34,10 +33,10 @@ import org.dbunit.database.search.TablesDependencyHelper.getAllDependentTables
 import org.dbunit.dataset.AbstractDataSet
 import org.dbunit.dataset.CompositeDataSet
 import org.dbunit.dataset.CompositeTable
+import org.dbunit.dataset.DefaultDataSet
 import org.dbunit.dataset.FilteredDataSet
 import org.dbunit.dataset.IDataSet
 import org.dbunit.dataset.ITable
-import org.dbunit.dataset.csv.CsvDataSet
 import org.dbunit.dataset.datatype.AbstractDataType
 import org.dbunit.dataset.datatype.DataType
 import org.dbunit.dataset.excel.XlsDataSet
@@ -55,7 +54,6 @@ import org.dbunit.ext.oracle.OracleDataTypeFactory
 import org.dbunit.ext.postgresql.PostgresqlDataTypeFactory
 import org.dbunit.util.QualifiedTableName
 import org.postgresql.util.PGobject
-import java.io.File
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
@@ -77,83 +75,60 @@ open class DbTester @JvmOverloads constructor(
     private val dataSetVerifier: DataSetVerifier = DataSetVerifier(dbUnitConfig)
     private val tableVerifier: TableVerifier = TableVerifier(dbUnitConfig)
 
-    fun seed(seed: TableSeed, eval: Evaluator) = requireAllowedStrategy(seed).apply {
-        strategy.operation.execute(connection(ds), ExamDataSet(table, eval))
+    fun updateMetaData(ds: String?, table: ITable) = when (table) {
+        is ExamTable -> ExamTable(
+            CompositeTable(
+                connection(ds).createTable(table.tableName()).withColumnsAsIn(table).tableMetaData,
+                table.delegate
+            ),
+            table.eval
+        )
+
+        else -> CompositeTable(
+            connection(ds).createTable(table.tableName()).withColumnsAsIn(table).tableMetaData,
+            table
+        )
     }
 
-    fun metaData(seed: TableSeed) = TableSeed(
-        seed.ds,
-        ExamTable(
-            CompositeTable(
-                connection(seed.ds)
-                    .createTable(seed.table.tableName()).withColumnsAsIn(seed.table).tableMetaData,
-                (seed.table as ExamTable).delegate
-            ),
-            seed.table.eval
-        ),
-        seed.strategy
-    )
-
-    fun seed(seed: FilesSeed, eval: Evaluator) = requireAllowedStrategy(seed).let {
+    fun seed(seed: DatasetSeed): IDataSet = requireAllowedStrategy(seed).let { s ->
         try {
-            order(loadDataSet(eval, it.datasets), it.tableOrdering).apply {
-                it.strategy.operation.execute(connection(it.ds), this)
+            order(s.dataset, s.tableOrdering).also {
+                s.strategy.operation.execute(connection(s.ds), it)
             }
         } catch (expected: Exception) {
-            throw DataBaseSeedingException("Could not seed dataset: $this", expected)
+            throw DataBaseSeedingException("Failed to seed dataset: $this", expected)
         }
     }
 
-    fun seed(seed: DatasetSeed) = requireAllowedStrategy(seed).let {
-        try {
-            it.strategy.operation.execute(connection(it.ds), it.dataset)
-        } catch (expected: Exception) {
-            throw DataBaseSeedingException("Could not seed dataset: $this", expected)
-        }
-    }
-
-    private fun <T : Seed> requireAllowedStrategy(seed: T) = seed.apply {
+    private fun requireAllowedStrategy(seed: DatasetSeed) = seed.apply {
         require(strategy in allowedSeedStrategies) {
             "Forbidden seed strategy $strategy. Allowed: $allowedSeedStrategies"
         }
     }
 
-    fun test(expectation: DataSetFilesExpectation, eval: Evaluator) = test(
-        DataSetExpectation(
-            loadDataSet(eval, expectation.datasets),
-            expectation.ds,
-            expectation.await,
-            expectation.orderBy,
-            expectation.excludeCols,
-            expectation.compareOperation
-        ),
-        eval
-    )
+    fun test(expectation: Expectation, eval: Evaluator) = when (expectation) {
+        is TableExpectation -> test(expectation, eval)
+        is DataSetExpectation -> test(expectation, eval)
+    }
 
-    fun test(expectation: DataSetExpectation, eval: Evaluator) =
+    private fun test(expectation: DataSetExpectation, eval: Evaluator) =
         dataSetVerifier.verify(eval, expectation) { this[it.ds].actualDataSet(it.dataset.tableNames) }
 
-    fun test(expectation: TableExpectation, eval: Evaluator) = tableVerifier.verify(eval, expectation) {
+    private fun test(expectation: TableExpectation, eval: Evaluator) = tableVerifier.verify(eval, expectation) {
         with(connection(it.ds)) {
             val qualifiedName = QualifiedTableName(it.table.tableName(), schema).qualifiedName
-            createQueryTable(
-                qualifiedName,
-                "SELECT * FROM $qualifiedName ${if (it.where.isEmpty()) "" else "WHERE ${it.where}"}"
+            ExamDataSet(
+                createQueryTable(
+                    qualifiedName,
+                    "SELECT * FROM $qualifiedName ${if (it.where.isEmpty()) "" else "WHERE ${it.where}"}"
+                ),
+                eval
             )
         }
     }
 
-    data class DataSetFilesExpectation(
-        val datasets: List<String>,
-        override val ds: String? = null,
-        override val await: AwaitConfig? = null,
-        override val orderBy: Set<String> = setOf(),
-        override val excludeCols: Set<String> = setOf(),
-        override val compareOperation: CompareOperation = EQUALS
-    ) : Expectation
-
     data class DataSetExpectation(
-        val dataset: IDataSet,
+        override val dataset: IDataSet,
         override val ds: String? = null,
         override val await: AwaitConfig? = null,
         override val orderBy: Set<String> = setOf(),
@@ -169,9 +144,13 @@ open class DbTester @JvmOverloads constructor(
         val where: String = "",
         override val excludeCols: Set<String> = setOf(),
         override val compareOperation: CompareOperation = EQUALS
-    ) : Expectation
+    ) : Expectation {
+        override val dataset: IDataSet
+            get() = DefaultDataSet(table)
+    }
 
-    interface Expectation {
+    sealed interface Expectation {
+        val dataset: IDataSet
         val ds: String?
         val await: AwaitConfig?
         val orderBy: Set<String>
@@ -179,29 +158,12 @@ open class DbTester @JvmOverloads constructor(
         val compareOperation: CompareOperation
     }
 
-    data class TableSeed(
-        override val ds: String?,
-        val table: ITable,
-        override val strategy: SeedStrategy = CLEAN_INSERT
-    ) : Seed
-
     data class DatasetSeed(
-        override val ds: String?,
+        val ds: String?,
         val dataset: IDataSet,
-        override val strategy: SeedStrategy = CLEAN_INSERT
-    ) : Seed
-
-    data class FilesSeed(
-        override val ds: String?,
-        val datasets: List<String>,
-        override val strategy: SeedStrategy = CLEAN_INSERT,
+        val strategy: SeedStrategy = CLEAN_INSERT,
         val tableOrdering: List<String> = listOf()
-    ) : Seed
-
-    interface Seed {
-        val ds: String?
-        val strategy: SeedStrategy
-    }
+    )
 
     open class DataSetVerifier(private val dbUnitConfig: DbUnitConfig) : Verifier<DataSetExpectation, IDataSet> {
         companion object : KLogging()
@@ -262,7 +224,7 @@ open class DbTester @JvmOverloads constructor(
                     sortedTable(actual.getTable(table), sortCols, dbUnitConfig.overrideRowSortingComparer),
                     columns(expectedTable, sortCols).toTypedArray()
                 )
-                expectedTable = CompositeTable(actualTable.tableMetaData, expectedTable)
+                expectedTable = sortedTable(CompositeTable(actualTable.tableMetaData, expectedTable), sortCols, dbUnitConfig.overrideRowSortingComparer)
                 if (compareOperation == CompareOperation.CONTAINS) {
                     actualTable = ContainsFilterTable(actualTable, expectedTable, excludeCols.toList())
                 }
@@ -320,14 +282,14 @@ open class DbTester @JvmOverloads constructor(
         }
     }
 
-    open class TableVerifier(private val dbUnitConfig: DbUnitConfig) : Verifier<TableExpectation, ITable> {
+    open class TableVerifier(private val dbUnitConfig: DbUnitConfig) : Verifier<TableExpectation, IDataSet> {
         companion object : KLogging()
 
         override fun verify(
             eval: Evaluator,
             expected: TableExpectation,
-            actual: (TableExpectation) -> ITable
-        ): Verifier.Check<TableExpectation, ITable> {
+            actual: (TableExpectation) -> IDataSet
+        ): Verifier.Check<TableExpectation, IDataSet> {
             dbUnitConfig.apply {
                 valueComparer.setEvaluator(eval)
                 tableColumnValueComparer.forEach {
@@ -337,7 +299,7 @@ open class DbTester @JvmOverloads constructor(
             return with(expected) {
                 val sortCols =
                     (if (orderBy.isEmpty() && table.rowCount > 0) table.columnNames() else orderBy).toTypedArray()
-                val actualTable = actual(this)
+                val actualTable = actual(this).iterator().apply { next() }.table
                 var sortedActual = sortedTable(
                     actualTable.withColumnsAsIn(table, sortCols),
                     sortCols,
@@ -348,17 +310,17 @@ open class DbTester @JvmOverloads constructor(
                     await?.let {
                         it.await("Await DB table ${expectedTable.tableName()}").untilAsserted {
                             sortedActual = sortedTable(
-                                actual(this).withColumnsAsIn(expectedTable),
+                                actual(this).iterator().apply { next() }.table.withColumnsAsIn(expectedTable),
                                 sortCols,
                                 dbUnitConfig.overrideRowSortingComparer
                             )
                             dbUnitAssert(expectedTable, sortedActual, sortCols)
                         }
                     } ?: dbUnitAssert(expectedTable, sortedActual, sortCols)
-                    Verifier.Check(expected = expected, actual = sortedActual)
+                    Verifier.Check(expected = expected, actual = ExamDataSet(sortedActual, eval))
                 } catch (ignore: Throwable) {
                     logger.warn("Check failed", ignore)
-                    Verifier.Check(expected = expected, actual = sortedActual, fail = ignore)
+                    Verifier.Check(expected = expected, actual = ExamDataSet(sortedActual, eval), fail = ignore)
                 }
             }
         }
@@ -506,10 +468,10 @@ open class DbTesterBase @JvmOverloads constructor(
     protected fun actualDataSet(tables: Array<String>): IDataSet = connection.createDataSet(tables)
 
     /**
-     * @param dataSets one or more dataset names to instantiate
+     * @param dataSets one or more dataset contents
      * @return loaded dataset (in case of multiple dataSets they will be merged in composite dataset)
      */
-    fun loadDataSet(eval: Evaluator, dataSets: List<String>): IDataSet = Loader().load(
+    fun loadDataSet(eval: Evaluator, dataSets: List<Content>): IDataSet = Loader().load(
         dataSets,
         eval,
         dbUnitConfig.isCaseSensitiveTableNames(),
@@ -531,49 +493,40 @@ open class DbTesterBase @JvmOverloads constructor(
         requireNotNull(executors[ds ?: DEFAULT_DATASOURCE]) { "Datasource $ds not found. Registered: $executors" }
 
     open class Loader {
-        fun load(dataSets: List<String>, eval: Evaluator, tableSensing: Boolean, columnSensing: Boolean) =
+        fun load(dataSets: List<Content>, eval: Evaluator, tableSensing: Boolean, columnSensing: Boolean) =
             CompositeDataSet(
                 loadAll(dataSets, eval, tableSensing, columnSensing).toTypedArray(),
                 true,
                 tableSensing
             )
 
-        private fun loadAll(dataSets: List<String>, eval: Evaluator, tableSensing: Boolean, columnSensing: Boolean) =
+        private fun loadAll(dataSets: List<Content>, eval: Evaluator, tableSensing: Boolean, columnSensing: Boolean) =
             dataSets
                 .mapNotNull { load(it, columnSensing, tableSensing) }
                 .map { ExamDataSet(tableSensing, it, eval) }
                 .ifEmpty { throw NoDatasetLoaded(dataSets) }
 
-        private fun load(dataSet: String, columnSensing: Boolean, tableSensing: Boolean): AbstractDataSet? {
-            val name = dataSet.trim()
-            val url = dataSetUrl(name)
-            return when (name.fileExt()) {
+        private fun load(data: Content, columnSensing: Boolean, tableSensing: Boolean): AbstractDataSet? {
+            return when (data.type) {
                 "xml" -> try {
                     FlatXmlDataSetBuilder()
                         .setColumnSensing(columnSensing)
                         .setCaseSensitiveTableNames(tableSensing)
-                        .build(url)
+                        .build(data.body.reader())
                 } catch (expected: Exception) {
                     FlatXmlDataSetBuilder()
                         .setColumnSensing(columnSensing)
                         .setCaseSensitiveTableNames(tableSensing)
-                        .build(url.openStream())
+                        .build(data.body.byteInputStream())
                 }
 
-                "json" -> JSONDataSet(url.openStream())
-                "xls" -> XlsDataSet(url.openStream())
-                "csv" -> CsvDataSet(File(url.file).parentFile)
+                "json" -> JSONDataSet(data.body.byteInputStream())
+                "xls" -> XlsDataSet(data.body.byteInputStream())
                 else -> null.also { logger.error("Unsupported dataset extension") }
             }
         }
 
-        class NoDatasetLoaded(names: List<String>) : RuntimeException("No dataset loaded for $names")
-
-        private fun dataSetUrl(ds: String) = (ds.takeIf { it.startsWith("/") } ?: "/$ds").let {
-            requireNotNull(javaClass.getResource(it) ?: javaClass.getResource("/datasets$it")) {
-                "Could not find dataset '$it' under 'resources' or 'resources/datasets' directory."
-            }
-        }
+        class NoDatasetLoaded(contents: List<Content>) : RuntimeException("No dataset loaded:\n$contents")
     }
 }
 

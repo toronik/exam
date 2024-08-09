@@ -57,6 +57,7 @@ open class AdocExtension : ConcordionExtension {
                     .icons(FONT_ICONS)
                     .attributes(
                         mapOf(
+                            "table-caption!" to "",
                             "toclevels" to "4",
                             "diagram-cachedir" to getBaseOutputDir().path,
                             "imagesoutdir" to getBaseOutputDir().path + BASE_DIR,

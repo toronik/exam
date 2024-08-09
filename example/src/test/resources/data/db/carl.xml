@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <PERSON ID="2" NAME="Carl" AGE="30" BIRTHDAY="{{parse '2003-03-03'}}" BIRTH_TIME="11:30:00"/>
+  <PERSON_FIELDS ID="41..40" NAME="c1" VAL="vc" PERSON_ID="2"/>
+</dataset>

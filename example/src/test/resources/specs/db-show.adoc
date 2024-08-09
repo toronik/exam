@@ -1,0 +1,40 @@
+=== e-db-show [[e-db-show]]
+
+Prints content of specified database table and optionally generates DbUnit dataset.
+
+.Attributes
+[horizontal]
+include::attr-where.adoc[]
+include::attr-ds.adoc[]
+`saveTo`:: _Optional. Default: not set._
++
+Path in 'srs/test/resources/' to store generated dataset
+
+.Usage
+[source,asciidoc]
+--
+include::db-show.adoc[tags=db-show]
+--
+
+====
+//tag::db-show[]
+.Show all and generate dataset
+[e-db-show=person, e-saveTo=/data/db/person.xml]
+,===
+,===
+
+.Show specific columns
+[e-db-show=person]
+,===
+id, name
+
+,===
+
+.Show specific rows
+[e-db-show=person, e-where="name='Bob'"]
+,===
+id, name
+
+,===
+//end::db-show[]
+====

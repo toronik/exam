@@ -1,0 +1,21 @@
+=== e-db-clean [[e-db-clean]]
+
+Cleans specified tables in a database.
+
+.Attributes
+[horizontal]
+include::attr-ds.adoc[]
+
+.Usage
+[source,asciidoc]
+--
+include::db-clean.adoc[tags=db-clean]
+--
+
+NOTE: Tables will be cleaned up in the order opposite to declaration, hence the "referenced" tables should go first and the "referencing" - last.
+
+====
+//tag::db-clean[]
+Clean tables: [e-db-clean]#person, person_fields#
+//end::db-clean[]
+====

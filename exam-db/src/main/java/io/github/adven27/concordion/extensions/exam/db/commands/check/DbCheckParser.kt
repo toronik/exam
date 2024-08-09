@@ -1,63 +1,53 @@
 package io.github.adven27.concordion.extensions.exam.db.commands.check
 
 import io.github.adven27.concordion.extensions.exam.core.commands.ExamCommand.Context
-import io.github.adven27.concordion.extensions.exam.core.html.Html
-import io.github.adven27.concordion.extensions.exam.core.resolve
+import io.github.adven27.concordion.extensions.exam.db.DbTester
+import io.github.adven27.concordion.extensions.exam.db.DbTester.DataSetExpectation
 import io.github.adven27.concordion.extensions.exam.db.DbTester.TableExpectation
-import io.github.adven27.concordion.extensions.exam.db.builder.DataSetBuilder
-import io.github.adven27.concordion.extensions.exam.db.builder.ExamTable
+import io.github.adven27.concordion.extensions.exam.db.builder.CompareOperation
+import io.github.adven27.concordion.extensions.exam.db.builder.CompareOperation.EQUALS
+import io.github.adven27.concordion.extensions.exam.db.commands.BaseParser
 import io.github.adven27.concordion.extensions.exam.db.commands.DbCommand.Companion.DS
+import io.github.adven27.concordion.extensions.exam.db.commands.DbCommand.Companion.OPERATION
 import io.github.adven27.concordion.extensions.exam.db.commands.DbCommand.Companion.ORDER_BY
 import io.github.adven27.concordion.extensions.exam.db.commands.DbCommand.Companion.WHERE
-import org.concordion.api.Evaluator
-import org.dbunit.dataset.Column
-import org.dbunit.dataset.DefaultTable
-import org.dbunit.dataset.ITable
-import org.dbunit.dataset.datatype.DataType
 
-class DbCheckParser : DbCheckCommand.Parser {
-    private fun table(tableName: String, el: Html, evaluator: Evaluator): ITable {
-        val builder = DataSetBuilder()
-        return el
-            .let { cols(it) to values(it) }
-            .let { (cols, rows) ->
-                rows.forEach { row -> builder.newRowTo(tableName).withFields(cols.zip(row).toMap()).add() }
-                builder.build().let {
-                    ExamTable(
-                        if (it.tableNames.isEmpty()) {
-                            DefaultTable(tableName, toColumns(cols))
-                        } else {
-                            it.getTable(tableName)
-                        },
-                        evaluator
-                    )
-                }
-            }
-    }
-
+class DbCheckParser(val dbTester: DbTester) : DbCheckCommand.Parser, BaseParser() {
     override fun parse(context: Context): DbCheckCommand.Model = DbCheckCommand.Model(
         caption = context.el.firstOrNull("caption")?.text(),
-        expectation = TableExpectation(
-            ds = context[DS],
-            table = table(parseTableName(context), context.el, context.eval),
-            where = context[WHERE] ?: "",
-            orderBy = context[ORDER_BY]?.split(",")?.map { it.trim() }?.toSet() ?: setOf(),
-            await = context.awaitConfig
-        )
+        expectation = when {
+            isSource(context) -> DataSetExpectation(
+                buildDataSetFromSource(dbTester, context.el, context.eval),
+                ds = context[DS],
+                await = context.awaitConfig,
+                compareOperation = compareStrategy(context),
+                orderBy = orderBy(context),
+            )
+
+            isBlock(context) -> DataSetExpectation(
+                buildDataSetFromBlock(dbTester, context.el, context.eval),
+                ds = context[DS],
+                await = context.awaitConfig,
+                compareOperation = compareStrategy(context),
+                orderBy = orderBy(context),
+            )
+
+            isTable(context) -> TableExpectation(
+                ds = context[DS],
+                table = table(parseTableName(context.el), context.el, context.eval),
+                where = context[WHERE] ?: "",
+                orderBy = orderBy(context),
+                compareOperation = compareStrategy(context),
+                await = context.awaitConfig
+            )
+
+            else -> throw UnsupportedOperationException("Unsupported markup ${context.el}")
+        }
     )
 
-    private fun parseTableName(context: Context) = context.eval.resolve(
-        context.expression.takeUnless { it.isBlank() }
-            ?: requireNotNull(context.el.childOrNull("caption")?.text()) { "Absent table name" }
-    )
+    private fun compareStrategy(context: Context) =
+        context[OPERATION]?.let { CompareOperation.valueOf(it.uppercase()) } ?: EQUALS
 
-    private fun toColumns(cols: List<String>) = cols.map { Column(it, DataType.UNKNOWN) }.toTypedArray()
-
-    private fun cols(html: Html) =
-        html.el.getFirstChildElement("thead")?.getFirstChildElement("tr")?.childElements?.map { it.text.trim() }
-            ?: listOf()
-
-    private fun values(html: Html) =
-        html.el.getFirstChildElement("tbody")?.childElements?.map { tr -> tr.childElements.map { it.text.trim() } }
-            ?: listOf()
+    private fun orderBy(context: Context) =
+        context[ORDER_BY]?.split(",")?.map { it.trim() }?.toSet() ?: setOf()
 }

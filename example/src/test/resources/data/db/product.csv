@@ -1,9 +1,9 @@
 id, name, price, rating, disabled, created_at, meta_json
-1, Model A, 100.50,       10, false,       {{at '-1d'}},"{
+1, Model A, 100.50,       10, false,{{at '-1d'}},"{
   ""id"": ""a"",
   ""code"": 1
 }"
-2, Model B,    200, {{NULL}},  true, {{at}},"{
+2, Model B,    200, {{NULL}}, true,{{at}},"{
   ""id"": ""b"",
   ""code"": 2
 }"

@@ -1,0 +1,124 @@
+=== e-db-set [[e-db-set]]
+
+Applies datasets to database.
+
+.Attributes
+[horizontal]
+include::attr-operation.adoc[]
+include::attr-ds.adoc[]
+
+==== Applying tables
+
+Creates http://dbunit.sourceforge.net/[DbUnit] dataset for specified table(s) and applies it to database.
+
+.Execute single table
+[source,asciidoc]
+--
+include::db-set.adoc[tags=db-set]
+--
+
+====
+//tag::db-set[]
+.customer
+[e-db-set=]
+|===
+|name |balance |is_active |comment |created_at
+
+|Alex |10.01 |true |{{NULL}} |{{at '-1d'}}
+|===
+//end::db-set[]
+====
+
+.Execute single table from CSV file
+[source,asciidoc]
+--
+include::db-set.adoc[tags=db-set-csv]
+--
+
+====
+//tag::db-set-csv[]
+.product
+[%header, e-db-set=]
+,===
+//include::../data/db/product.csv[]
+include::../data/db/product.csv[]
+,===
+//end::db-set-csv[]
+====
+
+.Execute several tables transactionally
+[source,asciidoc]
+----
+include::db-set.adoc[tags=db-set-several]
+----
+
+====
+//tag::db-set-several[]
+.Dataset
+[e-db-set=]
+--
+.cart
+,===
+id, name
+
+1, Cart 1
+,===
+
+.item
+,===
+cart_id, name, price
+
+1, item 1, 10.01
+,===
+--
+//end::db-set-several[]
+====
+
+==== Applying DbUnit datasets
+
+Applies specified http://dbunit.sourceforge.net/[DbUnit] datasets to database.
+
+.Execute single DbUnit dataset
+[source,asciidoc]
+--
+include::db-set.adoc[tags=db-set-ds-single]
+--
+
+====
+[e-set=a1 hide]#1#
+[e-set=a2 hide]#2#
+//tag::db-set-ds-single[]
+
+.Dataset
+[,xml,e-db-set=]
+----
+include::../data/db/adam.xml[]
+----
+//end::db-set-ds-single[]
+====
+
+.Execute several DbUnit datasets:
+[source,asciidoc]
+-----
+include::db-set.adoc[tags=db-set-ds-several]
+-----
+
+====
+//tag::db-set-ds-several[]
+.Dataset
+[e-db-set=]
+--
+.carl.xml
+[,xml]
+----
+include::../data/db/carl.xml[]
+----
+
+.bob.json
+[,json]
+----
+include::../data/db/bob.json[]
+----
+--
+//end::db-set-ds-several[]
+====

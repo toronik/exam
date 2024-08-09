@@ -7,7 +7,7 @@ end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.{yml,yaml,js,json,md,adoc,asciidoc,asc}]
+[*.{yml,yaml,js,json,md,asc}]
 indent_size = 2
 
 [*.{kt,kts}]
@@ -28,3 +28,9 @@ ktlint_standard_blank-line-before-declaration = disabled
 ktlint_standard_property-naming = disabled
 ktlint_standard_multiline-expression-wrapping = disabled
 ktlint_standard_annotation = disabled
+
+[{*.ad,*.adoc,*.asciidoc,.asciidoctorconfig}]
+ij_asciidoc_blank_lines_after_header = 1
+ij_asciidoc_blank_lines_keep_after_header = 1
+ij_asciidoc_formatting_enabled = true
+ij_asciidoc_one_sentence_per_line = true

@@ -14,6 +14,7 @@ import org.concordion.api.Fixture
 import org.concordion.api.ResultRecorder
 import org.concordion.api.listener.ExecuteEvent
 import org.concordion.api.listener.ExecuteListener
+import org.concordion.internal.FailFastException
 import java.time.Duration
 
 abstract class ExamCommand<M, R>(
@@ -27,30 +28,38 @@ abstract class ExamCommand<M, R>(
         resultRecorder: ResultRecorder,
         fixture: Fixture
     ) {
-        commandCall.children.processSequentially(evaluator, resultRecorder, fixture)
-        val el = commandCall.html()
-        val result = process(
-            model = model(
-                Context(
-                    attrs = attrs.associateWith {
-                        el.getAttr(it, evaluator)
-                            ?: evaluator.resolveToObj(commandCall.getParameter(it.removePrefix("e:")))?.toString()
-                    },
-                    el = el,
-                    expression = commandCall.expression.trim(),
-                    eval = evaluator,
-                    awaitConfig = AwaitConfig.build(commandCall)
-                )
-            ),
-            eval = evaluator,
-            recorder = resultRecorder
-        )
-        if (el["rendered"] == null) {
-            render(commandCall = commandCall, result = result)
-            el.attr("rendered", "true")
+        runCatching {
+            commandCall.children.processSequentially(evaluator, resultRecorder, fixture)
+            val el = commandCall.html()
+            val result = process(
+                model = model(
+                    Context(
+                        attrs = attrs.associateWith {
+                            el.getAttr(it, evaluator)
+                                ?: evaluator.resolveToObj(commandCall.getParameter(it.removePrefix("e:")))?.toString()
+                        },
+                        el = el,
+                        expression = commandCall.expression.trim(),
+                        eval = evaluator,
+                        awaitConfig = AwaitConfig.build(commandCall)
+                    )
+                ),
+                eval = evaluator,
+                recorder = resultRecorder
+            )
+            if (el["rendered"] == null) {
+                render(commandCall = commandCall, result = result)
+                el.attr("rendered", "true")
+            }
+            listener.executeCompleted(ExecuteEvent(commandCall.element))
+        }.onFailure {
+            if (inBeforeExample(commandCall)) {
+                throw FailFastException("Failed before example", it)
+            } else throw it
         }
-        listener.executeCompleted(ExecuteEvent(commandCall.element))
     }
+
+    private fun inBeforeExample(commandCall: CommandCall) = commandCall.parent.getParameter("example") == "before"
 
     data class Context(
         val attrs: Map<String, String?>,

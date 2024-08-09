@@ -44,6 +44,7 @@ open class Specs : AbstractSpecs() {
             dbTester,
             valuePrinter = ValuePrinter.Default(
                 tableColumnStyle = mapOf(
+                    TableColumn("product", "meta_json") to "json",
                     TableColumn("content_types", "data_xml") to "xml",
                     TableColumn("content_types", "data_json_with_extra_fields") to "details"
                 )

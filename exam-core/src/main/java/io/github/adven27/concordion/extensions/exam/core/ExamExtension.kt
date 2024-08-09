@@ -29,6 +29,7 @@ import net.javacrumbs.jsonunit.providers.Jackson2ObjectMapperProvider
 import org.concordion.api.extension.ConcordionExtender
 import org.concordion.api.extension.ConcordionExtension
 import org.concordion.api.listener.ExampleEvent
+import org.concordion.internal.FailFastException
 import org.hamcrest.Matcher
 import org.xmlunit.diff.DefaultNodeMatcher
 import org.xmlunit.diff.ElementSelectors.byName
@@ -155,7 +156,7 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
         if (enableLoggingFormatterExtension) {
             LoggingFormatterExtension().addTo(ex)
         }
-//        ex.withThrowableListener(ErrorListener())
+        ex.withThrowableListener { if (it.throwable is FailFastException) throw it.throwable }
         if (focusOnError) {
             ex.withSpecificationProcessingListener(FocusOnErrorsListener())
         }

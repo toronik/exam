@@ -1,92 +1,107 @@
+include::.asciidoctorconfig[]
 = DB Check Failures
 
 [#before]
 .Before each example
 ****
-.Given table `PRODUCT`
-[e-db-set=product]
+Given table
+
+.product
+[{db-set}]
 ,===
 id, name, price, created_At
 
-1, Model A, 1.70, {{at}}
-2, Model B, 2.00, {{at '-1h'}}
+1, Model A, 1.70, {t0}
+2, Model B, 2.00, {1h-}
 ,===
 ****
 
 [.ExpectedToFail]
 .Surplus rows
 ====
-.Wrong expectation
-[e-db-check=product]
+Wrong expectation
+
+.product
+[{db-check}]
 ,===
 id, name, price, created_At
 
-1, Model A, 1.70, {{at}}
+1, Model A, 1.70, {t0}
 ,===
 ====
 
 [.ExpectedToFail]
 .Surplus rows: await
 ====
-.Wrong expectation
-[e-db-check=product,e-await=1s]
+Wrong expectation
+
+.product
+[{db-check},e-await=1s]
 ,===
 id, name, price, created_At
 
-1, Model A, 1.70, {{at}}
+1, Model A, 1.70, {t0}
 ,===
 ====
 
 [.ExpectedToFail]
 .Missing rows
 ====
-.Wrong expectation
-[e-db-check=product]
+Wrong expectation
+
+.product
+[{db-check}]
 ,===
 id, name, price, created_At
 
-1, Model A, 1.70, {{at}}
-2, Model B, 2.00, {{at '-1h'}}
-3, Model C, 3.00, {{at '1h'}}
+1, Model A, 1.70, {t0}
+2, Model B, 2.00, {1h-}
+3, Model C, 3.00, {1h}
 ,===
 ====
 
 [.ExpectedToFail]
 .Missing rows: await
 ====
-.Wrong expectation
-[e-db-check=product,e-await="1s,500ms"]
+Wrong expectation
+
+.product
+[{db-check},e-await="1s,500ms"]
 ,===
 id, name, price, created_At
 
-1, Model A, 1.70, {{at}}
-2, Model B, 2.00, {{at '-1h'}}
-3, Model C, 3.00, {{at '1h'}}
+1, Model A, 1.70, {t0}
+2, Model B, 2.00, {1h-}
+3, Model C, 3.00, {1h}
 ,===
 ====
 
 [.ExpectedToFail]
 .Wrong content
 ====
-.Wrong expectation
-[e-db-check=product]
+Wrong expectation
+
+.product
+[{db-check}]
 ,===
 id, name, price, created_At
 
-1, {{number}}, 0, {{within '10s'}}
-2, Model B, {{string}}, {{within '10s'}}
+1, {{number}}, 0, {just}
+2, Model B, {{string}}, {just}
 ,===
 ====
 
 [.ExpectedToFail]
 .Wrong content: await
 ====
-.Wrong expectation
-[e-db-check=product,e-await="1s,,500ms"]
+Wrong expectation
+
+.product
+[{db-check},e-await="1s,,500ms"]
 ,===
 id, name, price, created_At
 
-1, {{number}}, 0, {{within '10s'}}
-2, Model B, {{string}}, {{within '10s'}}
+1, {{number}}, 0, {just}
+2, Model B, {{string}}, {just}
 ,===
 ====
