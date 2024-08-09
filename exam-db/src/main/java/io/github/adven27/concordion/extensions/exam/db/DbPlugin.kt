@@ -6,10 +6,10 @@ import io.github.adven27.concordion.extensions.exam.core.ExamPlugin
 import io.github.adven27.concordion.extensions.exam.core.html.pre
 import io.github.adven27.concordion.extensions.exam.core.html.span
 import io.github.adven27.concordion.extensions.exam.db.commands.DbCleanCommand
-import io.github.adven27.concordion.extensions.exam.db.commands.set.DbSetCommand
 import io.github.adven27.concordion.extensions.exam.db.commands.DbShowCommand
 import io.github.adven27.concordion.extensions.exam.db.commands.ExamMatchersAwareValueComparer
 import io.github.adven27.concordion.extensions.exam.db.commands.check.DbCheckCommand
+import io.github.adven27.concordion.extensions.exam.db.commands.set.DbSetCommand
 import mu.KLogging
 import org.concordion.api.Command
 import org.concordion.api.Element

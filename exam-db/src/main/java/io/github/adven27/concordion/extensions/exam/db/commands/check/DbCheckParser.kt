@@ -21,7 +21,7 @@ class DbCheckParser(val dbTester: DbTester) : DbCheckCommand.Parser, BaseParser(
                 ds = context[DS],
                 await = context.awaitConfig,
                 compareOperation = compareStrategy(context),
-                orderBy = orderBy(context),
+                orderBy = orderBy(context)
             )
 
             isBlock(context) -> DataSetExpectation(
@@ -29,7 +29,7 @@ class DbCheckParser(val dbTester: DbTester) : DbCheckCommand.Parser, BaseParser(
                 ds = context[DS],
                 await = context.awaitConfig,
                 compareOperation = compareStrategy(context),
-                orderBy = orderBy(context),
+                orderBy = orderBy(context)
             )
 
             isTable(context) -> TableExpectation(

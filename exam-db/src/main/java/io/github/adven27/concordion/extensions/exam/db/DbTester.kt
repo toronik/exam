@@ -224,7 +224,11 @@ open class DbTester @JvmOverloads constructor(
                     sortedTable(actual.getTable(table), sortCols, dbUnitConfig.overrideRowSortingComparer),
                     columns(expectedTable, sortCols).toTypedArray()
                 )
-                expectedTable = sortedTable(CompositeTable(actualTable.tableMetaData, expectedTable), sortCols, dbUnitConfig.overrideRowSortingComparer)
+                expectedTable = sortedTable(
+                    table = CompositeTable(actualTable.tableMetaData, expectedTable),
+                    columns = sortCols,
+                    rowComparator = dbUnitConfig.overrideRowSortingComparer
+                )
                 if (compareOperation == CompareOperation.CONTAINS) {
                     actualTable = ContainsFilterTable(actualTable, expectedTable, excludeCols.toList())
                 }

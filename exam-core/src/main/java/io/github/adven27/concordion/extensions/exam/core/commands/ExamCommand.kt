@@ -53,9 +53,7 @@ abstract class ExamCommand<M, R>(
             }
             listener.executeCompleted(ExecuteEvent(commandCall.element))
         }.onFailure {
-            if (inBeforeExample(commandCall)) {
-                throw FailFastException("Failed before example", it)
-            } else throw it
+            if (inBeforeExample(commandCall)) throw FailFastException("Failed before example", it) else throw it
         }
     }
 
