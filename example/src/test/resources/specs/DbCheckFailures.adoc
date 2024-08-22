@@ -1,4 +1,3 @@
-include::.asciidoctorconfig[]
 = DB Check Failures
 
 [#before]

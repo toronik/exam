@@ -3,20 +3,20 @@
 [#before]
 .Before each example
 ****
-[e-mq-clean]#myQueue# is empty.
+[{mq-clean}]#myQueue# is empty.
 ****
 
 [.ExpectedToFail]
 .Surplus messages
 ====
 .Got message
-[source,json,e-mq-set=myQueue]
+[source,json,{mq-set}myQueue]
 ----
 { "a": 1, "b": "some" }
 ----
 
 .Expected no messages
-[caption=, e-mq-check=myQueue]
+[{mq-check}myQueue]
 |===
 |===
 ====
@@ -25,13 +25,13 @@
 .Surplus messages: await
 ====
 .Got message
-[source,json,e-mq-set=myQueue]
+[source,json,{mq-set}myQueue]
 ----
 { "a": 1, "b": "some" }
 ----
 
 .Expected no messages
-[caption=, e-mq-check=myQueue,e-await=1s]
+[{mq-check-await}myQueue]
 |===
 |===
 ====
@@ -42,7 +42,7 @@
 Got no messages.
 
 .Expected single message
-[cols="a", caption=, e-mq-check=myQueue]
+[{mq-check}myQueue]
 |===
 |[source,json]
 ----
@@ -57,7 +57,7 @@ Got no messages.
 Got no messages.
 
 .Expected single message
-[cols="a", caption=, e-mq-check=myQueue,e-await=1s]
+[{mq-check-await}myQueue]
 |===
 |[source,json]
 ----
@@ -70,13 +70,13 @@ Got no messages.
 .Wrong payload
 ====
 .Got message
-[source,json,e-mq-set=myQueue]
+[source,json,{mq-set}myQueue]
 ----
 { "a": 1, "b": "some" }
 ----
 
 .Wrong message body expectations
-[cols="a", caption=, e-mq-check=myQueue]
+[{mq-check}myQueue]
 |===
 |[source,json]
 ----
@@ -89,19 +89,17 @@ Got no messages.
 .Wrong headers or params
 ====
 .Got messages:
-[cols="a", grid=rows, frame=ends, caption=, e-mq-set=myQueue]
+[{mq-set}myQueue]
 |===
 |
-[.params]
 .Params
-[cols="h,1", caption=]
+[{mq-params}]
 ,===
 key, some-kafka-message-key
 ,===
 
-[.headers]
 .Headers
-[cols="h,1", caption=]
+[{mq-headers}]
 ,===
 h1, {{isoDate (at '-1d')}}
 h2, 2
@@ -113,17 +111,15 @@ h2, 2
 ----
 
 |
-[.params]
 .Params
-[cols="h,1", caption=]
+[{mq-params}]
 ,===
 key, some-kafka-message-key
 partition, 1
 ,===
 
-[.headers]
 .Headers
-[cols="h,1", caption=]
+[{mq-headers}]
 ,===
 h1, {{isoDate (at '-1d')}}
 ,===
@@ -135,19 +131,17 @@ h1, {{isoDate (at '-1d')}}
 |===
 
 .Wrong expectations in headers and params
-[cols="a", grid=rows, frame=ends, caption=, e-mq-check=myQueue]
+[{mq-check}myQueue]
 |===
 | Wrong headers expectaion
-[.params]
 .Params
-[cols="h,1", caption=]
+[{mq-params}]
 ,===
 key, some-kafka-message-key
 ,===
 
-[.headers]
 .Headers
-[cols="h,1", caption=]
+[{mq-headers}]
 ,===
 h1, {{isoDate (at)}}
 h2, 3
@@ -159,17 +153,15 @@ h2, 3
 ----
 
 | Wrong params expectation
-[.params]
 .Params
-[cols="h,1", caption=]
+[{mq-params}]
 ,===
 key, wrong
 partition, 2
 ,===
 
-[.headers]
 .Headers
-[cols="h,1", caption=]
+[{mq-headers}]
 ,===
 h1, {{isoDate (at '-1d')}}
 ,===
@@ -185,15 +177,15 @@ h1, {{isoDate (at '-1d')}}
 .Big message
 ====
 .Got message
-[source,json,e-mq-set=myQueue,role=mh-200]
+[source,json,{mq-set}myQueue,{mh-200}]
 ----
 include::../data/mq/big.json[]
 ----
 
 .Wrong expectations
-[cols="a", caption=, e-mq-check=myQueue]
+[{mq-check}myQueue]
 |===
-|[source,json,role=mh-100]
+|[source,json,{mh-100}]
 ----
 include::../data/mq/msg.json/[]
 ----

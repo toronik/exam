@@ -1,7 +1,9 @@
 :table-caption!:
-:mq-params: .params
-:mq-set: cols="a", grid=rows, frame=ends, e-mq-set=
-:mq-check: e-mq-check=, e-await=1s, cols=a
+:mq-params: cols="h,1", role=params
+:mq-headers: cols="h,1", role=headers
+:mq-set: cols=a, grid=rows, frame=ends, e-mq-set=
+:mq-check: cols=a, grid=rows, frame=ends, e-mq-check=
+:mq-check-await: cols=a, grid=rows, frame=ends, e-await=1s, e-mq-check=
 :mq-clean: e-mq-clean
 :db-check: e-db-check=
 :db-set: e-db-set=
@@ -11,6 +13,7 @@
 :set: e-set=
 :run: role=e-run
 :nil: {{NULL}}
+:jsonIgnoreExtraFields: e-verifier=jsonIgnoreExtraFields
 :just: {{within '10s'}}
 :t0: {{at}}
 :2d-: {{at '-2d'}}
@@ -18,3 +21,5 @@
 :2h-: {{at '-2h'}}
 :1h-: {{at '-1h'}}
 :1h: {{at '1h'}}
+:mh-100: role=mh-100
+:mh-200: role=mh-200

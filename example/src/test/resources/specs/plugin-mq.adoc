@@ -95,17 +95,15 @@ include::plugin-mq.adoc[tags=mq-set-1-h]
 .Sending message with headers and params to {queue2}
 [e-mq-set={queue2}]
 --
-[.params]
 .Params
-[cols="h,1", caption=]
+[{mq-params}]
 ,===
 key, some-kafka-message-key
 partition, 1
 ,===
 
-[.headers]
 .Headers
-[cols="h,1", caption=]
+[{mq-headers}]
 ,===
 h1, 1
 h2, 2
@@ -128,7 +126,7 @@ include::plugin-mq.adoc[tags=mq-set-many]
 ====
 //tag::mq-set-many[]
 .Sending several messages to myQueue
-[cols="a", grid=rows, frame=ends, caption=, e-mq-set=myQueue]
+[{mq-set}myQueue]
 |===
 | Message without headers:
 [source,json]
@@ -138,17 +136,15 @@ include::../data/mq/msg.json/[msg=(map v1='a' v2='b')]
 
 | Message with headers and params which could be used by `MqTester`
 
-[.params]
 .Params
-[cols="h,1", caption=]
+[{mq-params}]
 ,===
 key, some-kafka-message-key
 partition, 1
 ,===
 
-[.headers]
 .Headers
-[cols="h,1", caption=]
+[{mq-headers}]
 ,===
 h1, {{isoDate (at '-1d')}}
 h2, 2
@@ -182,7 +178,7 @@ include::plugin-mq.adoc[tags=mq-check]
 ====
 //tag::mq-check[]
 .Check messages in myQueue
-[cols="a", grid=rows, frame=ends, caption=, e-mq-check=myQueue]
+[{mq-check}myQueue]
 |===
 | Expected message ignore headers:
 
@@ -193,15 +189,12 @@ include::../data/mq/msg.json/[msg=(map v1='a' v2='b')]
 
 | Expected message containing headers and params:
 
-[.params]
-.Params
-[cols="h,1", caption=]
+[{mq-params}]
 ,===
 key, some-kafka-message-key
 ,===
 
-[.headers]
-[cols="h,1"]
+[{mq-headers}]
 ,===
 h1, {{isoDate (at '-1d')}}
 ,===
@@ -223,7 +216,7 @@ include::plugin-mq.adoc[tags=mq-check-empty]
 ====
 //tag::mq-check-empty[]
 .Check myQueue is empty
-[caption=, e-mq-check=myQueue]
+[{mq-check}myQueue]
 |===
 |===
 //end::mq-check-empty[]
@@ -244,7 +237,7 @@ include::plugin-mq.adoc[tags=mq-check-custom]
 ====
 [.given]
 .myQueue has message
-[source,json,e-mq-set=myQueue]
+[source,json,{mq-set}myQueue]
 include::../data/mq/msg.json[]
 
 [.then]
@@ -252,11 +245,11 @@ include::../data/mq/msg.json[]
 
 //tag::mq-check-custom[]
 .Check with registered `jsonIgnoreExtraFields` verifier
-[cols="a", grid=rows, frame=ends, caption=, e-mq-check=myQueue]
+[{mq-check}myQueue]
 |===
 | Expected ISO-formatted `date` and ignore extra fields:
 
-[source,json,e-verifier=jsonIgnoreExtraFields]
+[source,json,{jsonIgnoreExtraFields}]
 ----
 {"date":  "{{isoDate}}"}
 ----
@@ -276,10 +269,10 @@ include::plugin-mq.adoc[tags=mq-clean]
 
 ====
 //tag::mq-clean[]
-Queues are empty: [e-mq-clean]_myQueue, myAnotherQueue_
+Queues are empty: [{mq-clean}]_myQueue, myAnotherQueue_
 //end::mq-clean[]
 ====
 
 === Details
 
-- link:MqCheckFailures.adoc[How failures look like?, role=e-run]
+- link:MqCheckFailures.adoc[How failures look like?, {run}]

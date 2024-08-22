@@ -169,7 +169,7 @@ Content-Type: application/json
 [%header,cols="4,2,0",e-verify-rows="#i : #interactions"]
 |===
 |[e-eq=#i.req.raw]#Request#
-|[e-verifier=jsonIgnoreExtraFields e-eq=#i.resp.body]#Response#
+|[{jsonIgnoreExtraFields} e-eq=#i.resp.body]#Response#
 |[e-eq=#i.resp.statusCode]#Status#
 
 |[pre language-http]`GET /mirror/request?p=1 HTTP/1.1
@@ -213,7 +213,7 @@ Content-Type: application/json
 ----
 
 .Check with registered `jsonIgnoreExtraFields` verifier
-[source,httprequest,e-verifier=jsonIgnoreExtraFields]
+[source,httprequest,{jsonIgnoreExtraFields}]
 ----
 200
 Content-Type: application/json

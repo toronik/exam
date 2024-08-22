@@ -17,6 +17,7 @@ import org.concordion.api.extension.ConcordionExtension
 import org.concordion.internal.ConcordionBuilder.getBaseOutputDir
 import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.InputStream
 import java.io.InputStreamReader
 import kotlin.time.measureTimedValue
 
@@ -29,9 +30,11 @@ open class AdocExtension : ConcordionExtension {
         private const val SPECS_ADOC_RESOURCES_DIR = "SPECS_ADOC_RESOURCES_DIR"
         private const val SPECS_ADOC_BASE_DIR = "SPECS_ADOC_BASE_DIR"
         private const val SPECS_ADOC_VERSION = "SPECS_ADOC_VERSION"
+        private const val SPECS_TOC_LEVELS = "SPECS_TOC_LEVELS"
         val RESOURCES_DIR: String = System.getProperty(SPECS_ADOC_RESOURCES_DIR, "./src/test/resources")
         val BASE_DIR: String = System.getProperty(SPECS_ADOC_BASE_DIR, "/specs")
         val ADOC_VERSION: String = System.getProperty(SPECS_ADOC_VERSION, "<Set system property $SPECS_ADOC_VERSION>")
+        val TOC_LEVELS: String = System.getProperty(SPECS_TOC_LEVELS, "4")
         val ADOC: Asciidoctor = Asciidoctor.Factory.create().apply {
             System.setProperty("jruby.compat.version", "RUBY1_9")
             System.setProperty("jruby.compile.mode", "OFF")
@@ -58,7 +61,7 @@ open class AdocExtension : ConcordionExtension {
                     .attributes(
                         mapOf(
                             "table-caption!" to "",
-                            "toclevels" to "4",
+                            "toclevels" to TOC_LEVELS,
                             "diagram-cachedir" to getBaseOutputDir().path,
                             "imagesoutdir" to getBaseOutputDir().path + BASE_DIR,
                             "version" to ADOC_VERSION
@@ -74,15 +77,14 @@ open class AdocExtension : ConcordionExtension {
         addStyles(ex)
         ex.withSpecificationType("adoc") { i, n ->
             measureTimedValue {
-                ByteArrayInputStream(
-                    CACHE.getOrPut(n) { ADOC.convert(InputStreamReader(i).readText(), ADOC_OPTS).toByteArray() }
-                )
-            }.let {
-                logger.info { "$n converted in " + it.duration }
-                it.value
-            }
+                ByteArrayInputStream(CACHE.getOrPut(n) { ADOC.convert(text(i), ADOC_OPTS).toByteArray() })
+            }.also { logger.info { "$n converted in " + it.duration } }.value
         }
     }
+
+    private fun text(i: InputStream) = "include::${"/specs/.asciidoctorconfig".findResource().path}[]" +
+        System.lineSeparator() +
+        InputStreamReader(i).readText()
 
     private fun addStyles(ex: ConcordionExtender) {
         ex.linkedCss(BASE_CM, "enable-codemirror.css")
@@ -184,7 +186,7 @@ open class AdocExtension : ConcordionExtension {
             val resDir = "/src/test/resources"
             val vars = attributes
                 .filterKeys { it !in nativeOptions }
-                .map { (k, v) -> "$k=$v" }
+                .map { (k, v) -> "$k=${if (v.toString().startsWith("(")) v else "'$v'"}" }
                 .joinToString(" ", prefix = " ")
             reader.pushInclude(
                 "{{file '${f.absolutePath.substringAfter(resDir)}'$vars}}",

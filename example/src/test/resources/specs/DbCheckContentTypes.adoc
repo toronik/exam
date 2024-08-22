@@ -4,7 +4,7 @@
 .Before each example
 ****
 .content_types
-[%header,format=csv, e-db-set=]
+[%header,format=csv, {db-set}]
 |===
 include::../data/db/content_types.csv[]
 |===
@@ -20,7 +20,7 @@ include::DbCheckContentTypes.adoc[tags=db-check-ct]
 ====
 //tag::db-check-ct[]
 .content_types
-[%header, cols="1a,1a,1a", e-db-check=, e-orderBy="id"]
+[%header, cols="1a,1a,1a", {db-check}, {orderBy}id]
 |===
 |data_json |data_json_with_extra_fields |data_xml
 
@@ -57,7 +57,7 @@ include::DbCheckContentTypes.adoc[tags=db-check-ct]
 .Failures
 ====
 .content_types
-[%header, cols="1a,1a", e-db-check=, e-orderBy="id"]
+[cols="a,a", {db-check}, {orderBy}id]
 |===
 |data_json  |data_xml
 

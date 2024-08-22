@@ -1,4 +1,3 @@
-include::.asciidoctorconfig[]
 = DbUnit operations
 
 https://dbunit.sourceforge.net/dbunit/components.html#databaseoperation[DbUnit operations] allows to append, update and delete rows.
