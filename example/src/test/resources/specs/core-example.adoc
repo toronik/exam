@@ -12,27 +12,23 @@ include::core-example.adoc[tags=e]
 
 =====
 //tag::e[]
-[#before]
+[{before}]
 .Before each example
 ****
-Split the full name [e-execute=#result = split(#TEXT)]_Jane Smith_
+Split the full name [{exec}#result = split(#TEXT)]_Jane Smith_
 ****
 
 .Dummy
 ====
-Result contains first name [e-eq=#result.first]_Jane_
-and last name [e-eq=#result.second]_Smith_
+Result contains first name [{eq}#result.first]_Jane_
+and last name [{eq}#result.second]_Smith_
 ====
 
-[.ExpectedToFail]
+[{ExpectedToFail}]
 .Dummy
 ====
-[.when]
-Wrong expectations
-
-[.then]
-Result contains first name [e-eq=#result.first]_Wrong_
-and last name [e-eq=#result.second]_Wrong_
+When:: Wrong expectations
+Then:: Result contains first name [{eq}#result.first]_Wrong_ and last name [{eq}#result.second]_Wrong_
 ====
 //end::e[]
 =====

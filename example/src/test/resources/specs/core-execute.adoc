@@ -8,9 +8,9 @@ include::core-execute.adoc[tags=exec1]
 
 ====
 //tag::exec1[]
-The full name [e-execute=#result = split(#TEXT)]_Jane Smith_
-will be broken into first name [e-eq=#result.first]_Jane_
-and last name [e-eq=#result.second]_Smith_
+The full name [{exec}#result = split(#TEXT)]_Jane Smith_
+will be broken into first name [{eq}#result.first]_Jane_
+and last name [{eq}#result.second]_Smith_
 //end::exec1[]
 ====
 
@@ -27,9 +27,9 @@ include::core-execute.adoc[tags=exec2]
 
 ====
 //tag::exec2[]
-[role=e-execute=#greeting = greetingFor(#firstName)]
-The greeting "[e-eq=#greeting]#Hello Bob!#"
-should be given to user [e-set=#firstName]#Bob# when he logs in.
+[{exec-on-paragraph}#greeting = greetingFor(#firstName)]
+The greeting "[{eq}#greeting]#Hello Bob!#"
+should be given to user [{set}#firstName]#Bob# when he logs in.
 //end::exec2[]
 ====
 =====
@@ -42,19 +42,18 @@ include::core-execute.adoc[tags=eq-lower]
 
 ====
 //tag::eq-lower[]
-[.given]
-Variable `someVar` = [e-set=someVar]`123`
-
-[.then]
+Given:: Variable `someVar` = [{set}someVar]`123`
+Then::
++
 .Lowercase test
-[%header, cols="1,1,2a,2a,3,3", e-execute="#r = lowercase(#param)"]
+[%header, cols="1,1,2a,2a,3,3", {exec}"#r = lowercase(#param)"]
 |===
-|[e-set=param]#Param#
-|[e-eq=#r.text]#Text#
-|[e-eq-json=#r.json]#JSON#
-|[e-eq-xml=#r.xml]#XML#
-|[e-echo=#r.json]#Echo JSON#
-|[e-echo=#r.xml]#Echo XML#
+|[{set}param]#Param#
+|[{eq}#r.text]#Text#
+|[{eq-json}#r.json]#JSON#
+|[{eq-xml}#r.xml]#XML#
+|[{echo}#r.json]#Echo JSON#
+|[{echo}#r.xml]#Echo XML#
 
 |[.json]`ABC {{someVar}}`
 |abc {{someVar}}
@@ -88,9 +87,9 @@ include::core-execute.adoc[tags=core-empty]
 ====
 //tag::core-empty[]
 .Empty string test
-[e-execute="#result = getEmptyString()"]
+[{exec}#result = getEmptyString()]
 ,===
-[e-eq=#result]#Text#, [e-eq-json=#result]#JSON#, [e-eq-xml=#result]#XML#
+[{eq}#result]#Text#, [{eq-json}#result]#JSON#, [{eq-xml}#result]#XML#
 
 ,,
 ,===

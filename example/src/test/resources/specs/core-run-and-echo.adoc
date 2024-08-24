@@ -6,7 +6,7 @@ include::core-run-and-echo.adoc[tags=r]
 
 ====
 //tag::r[]
-link:Nested.adoc[Some nested spec, role=e-run]
+link:Nested.adoc[Some nested spec, {run}]
 //end::r[]
 ====
 
@@ -18,6 +18,6 @@ include::core-run-and-echo.adoc[tags=ec]
 
 ====
 //tag::ec[]
-Echo _firstName_: [e-echo=#firstName]_{empty}_
+Echo _firstName_: [{echo}#firstName]_{empty}_
 //end::ec[]
 ====

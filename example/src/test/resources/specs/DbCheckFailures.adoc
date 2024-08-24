@@ -1,6 +1,6 @@
 = DB Check Failures
 
-[#before]
+[{before}]
 .Before each example
 ****
 Given table
@@ -15,7 +15,7 @@ id, name, price, created_At
 ,===
 ****
 
-[.ExpectedToFail]
+[{ExpectedToFail}]
 .Surplus rows
 ====
 Wrong expectation
@@ -29,13 +29,13 @@ id, name, price, created_At
 ,===
 ====
 
-[.ExpectedToFail]
+[{ExpectedToFail}]
 .Surplus rows: await
 ====
 Wrong expectation
 
 .product
-[{db-check},e-await=1s]
+[{db-check-await}]
 ,===
 id, name, price, created_At
 
@@ -43,7 +43,7 @@ id, name, price, created_At
 ,===
 ====
 
-[.ExpectedToFail]
+[{ExpectedToFail}]
 .Missing rows
 ====
 Wrong expectation
@@ -59,13 +59,13 @@ id, name, price, created_At
 ,===
 ====
 
-[.ExpectedToFail]
+[{ExpectedToFail}]
 .Missing rows: await
 ====
 Wrong expectation
 
 .product
-[{db-check},e-await="1s,500ms"]
+[{db-check},{await}"1s,500ms"]
 ,===
 id, name, price, created_At
 
@@ -75,7 +75,7 @@ id, name, price, created_At
 ,===
 ====
 
-[.ExpectedToFail]
+[{ExpectedToFail}]
 .Wrong content
 ====
 Wrong expectation
@@ -85,22 +85,22 @@ Wrong expectation
 ,===
 id, name, price, created_At
 
-1, {{number}}, 0, {just}
-2, Model B, {{string}}, {just}
+1, {any-num}, 0, {just}
+2, Model B, {any-str}, {just}
 ,===
 ====
 
-[.ExpectedToFail]
+[{ExpectedToFail}]
 .Wrong content: await
 ====
 Wrong expectation
 
 .product
-[{db-check},e-await="1s,,500ms"]
+[{db-check},{await}"1s,,500ms"]
 ,===
 id, name, price, created_At
 
-1, {{number}}, 0, {just}
-2, Model B, {{string}}, {just}
+1, {any-num}, 0, {just}
+2, Model B, {any-str}, {just}
 ,===
 ====

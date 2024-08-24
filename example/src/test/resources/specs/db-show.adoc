@@ -19,19 +19,19 @@ include::db-show.adoc[tags=db-show]
 ====
 //tag::db-show[]
 .Show all and generate dataset
-[e-db-show=person, e-saveTo=/data/db/person.xml]
+[{db-show}person, {db-show-save-to}/data/db/person.xml]
 ,===
 ,===
 
 .Show specific columns
-[e-db-show=person]
+[{db-show}person]
 ,===
 id, name
 
 ,===
 
 .Show specific rows
-[e-db-show=person, e-where="name='Bob'"]
+[{db-show}person, {db-where}"name='Bob'"]
 ,===
 id, name
 

@@ -22,7 +22,7 @@ include::db-check.adoc[tags=db-check]
 ====
 //tag::db-check[]
 .customer
-[e-db-check=]
+[{db-check}]
 |===
 |name |balance |is_active |comment |created_at
 
@@ -40,7 +40,7 @@ include::db-check.adoc[tags=db-check-csv]
 ====
 //tag::db-check-csv[]
 .product
-[%header,e-db-check=]
+[%header,{db-check}]
 ,===
 //include::../data/db/product.csv[]
 include::../data/db/product.csv[]
@@ -57,7 +57,7 @@ include::db-check.adoc[tags=db-check-matcher]
 ====
 //tag::db-check-matcher[]
 .product
-[e-db-check=]
+[{db-check}]
 |===
 |name |price |rating |disabled |created_at |meta_json
 
@@ -76,11 +76,11 @@ include::db-check.adoc[tags=db-check-matcher]
 |{"id": "{{regex '\\w'}}", "code": "{{ignore}}"}
 |===
 
-nameB = [e-eq=#nameB]`Model B`
-priceA = [e-eq=#priceA]`100.50`
-ratingB = [e-eq=#ratingB]`(null)`
-disabledA = [e-eq=#disabledA]`false`
-createdB = [e-eq=#createdB]`{{format (at) 'yyyy-MM-dd HH:mm:ss.SSS'}}`
+nameB = [{eq}#nameB]`Model B`
+priceA = [{eq}#priceA]`100.50`
+ratingB = [{eq}#ratingB]`(null)`
+disabledA = [{eq}#disabledA]`false`
+createdB = [{eq}#createdB]`{{format (at) 'yyyy-MM-dd HH:mm:ss.SSS'}}`
 //end::db-check-matcher[]
 ====
 
@@ -93,7 +93,7 @@ include::db-check.adoc[tags=db-check-ordered]
 ====
 //tag::db-check-ordered[]
 .product
-[e-db-check=, e-orderBy='rating, id']
+[{db-check}, {db-orderBy}'rating, id']
 ,===
 name, rating
 
@@ -121,7 +121,7 @@ Then:
 
 //tag::db-check-empty[]
 .product
-[e-db-check=]
+[{db-check}]
 |===
 |===
 //end::db-check-empty[]
@@ -138,12 +138,12 @@ include::db-check.adoc[tags=db-check-ds-single]
 --
 
 ====
-[e-set=a1 hide]#1#
-[e-set=a2 hide]#2#
+[{set}a1 hide]#1#
+[{set}a2 hide]#2#
 //tag::db-check-ds-single[]
 
 .Dataset
-[,xml,e-db-check=]
+[,xml,{db-check}]
 ----
 <?xml version='1.0' encoding='UTF-8'?>
 <dataset>
@@ -163,7 +163,7 @@ include::db-check.adoc[tags=db-check-ds-several]
 ====
 //tag::db-check-ds-several[]
 .Dataset
-[e-db-check=]
+[{db-check}]
 --
 .carl.xml
 [,xml]

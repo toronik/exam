@@ -1,25 +1,3 @@
-:table-caption!:
-:mq-params: cols="h,1", role=params
-:mq-headers: cols="h,1", role=headers
-:mq-set: cols=a, grid=rows, frame=ends, e-mq-set=
-:mq-check: cols=a, grid=rows, frame=ends, e-mq-check=
 :mq-check-await: cols=a, grid=rows, frame=ends, e-await=1s, e-mq-check=
-:mq-clean: e-mq-clean
-:db-check: e-db-check=
-:db-set: e-db-set=
-:db-clean: e-db-clean
-:orderBy: e-orderBy=
-:http: e-http=
-:set: e-set=
-:run: role=e-run
-:nil: {{NULL}}
-:jsonIgnoreExtraFields: e-verifier=jsonIgnoreExtraFields
-:just: {{within '10s'}}
-:t0: {{at}}
-:2d-: {{at '-2d'}}
-:1d-: {{at '-1d'}}
-:2h-: {{at '-2h'}}
-:1h-: {{at '-1h'}}
-:1h: {{at '1h'}}
-:mh-100: role=mh-100
-:mh-200: role=mh-200
+:db-check-await: e-await=1s, e-db-check=
+:http-await: e-await=1s, e-http=

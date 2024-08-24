@@ -82,9 +82,12 @@ open class AdocExtension : ConcordionExtension {
         }
     }
 
-    private fun text(i: InputStream) = "include::${"/specs/.asciidoctorconfig".findResource().path}[]" +
-        System.lineSeparator() +
-        InputStreamReader(i).readText()
+    private fun text(i: InputStream) =
+        (ExamExtension::class.java.classLoader.getResource(".asciidoctorconfig")?.readText() ?: "") +
+            System.lineSeparator() +
+            ExamExtension::class.java.getResource("/specs/.asciidoctorconfig")?.path?.let { "include::$it[]" } +
+            System.lineSeparator() +
+            InputStreamReader(i).readText()
 
     private fun addStyles(ex: ConcordionExtender) {
         ex.linkedCss(BASE_CM, "enable-codemirror.css")

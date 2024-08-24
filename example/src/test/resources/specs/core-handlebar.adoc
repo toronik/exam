@@ -16,9 +16,10 @@ include::core-handlebar.adoc[tags=hb-t]
 
 ====
 //tag::hb-t[]
-[.given]
+Given::
++
 .`dataJson`:
-[source,json,e-set=dataJson]
+[source,json,{set}dataJson]
 {
   "string": "some string",
   "number": 123,
@@ -27,9 +28,10 @@ include::core-handlebar.adoc[tags=hb-t]
   "regex": "123"
 }
 
-[.then]
+Then::
++
 .`dataJson` matches:
-[source,json,e-eq-json=#dataJson]
+[source,json,{eq-json}#dataJson]
 {
   "string": "{{string}}",
   "number": "{{number}}",
@@ -50,14 +52,14 @@ include::core-handlebar.adoc[tags=hb-m-s]
 ====
 //tag::hb-m-s[]
 .Check and set
-[%header, e-execute="#r = lowercase(#param)"]
+[{exec}#r = lowercase(#param)]
 |===
-|[e-set=param]#Param# |[e-eq=#r.text]#Text#
+|[{set}param]#Param# |[{eq}#r.text]#Text#
 
-|ABC |{{string}}>>str1
-|DEF |{{ignore}}>>str2
+|ABC |{any-str}>>str1
+|DEF |{any}>>str2
 |===
-Actual value is matched and set to variable: str1 = [e-eq=#str1]`abc`, str2 = [e-eq=#str2]`def`
+Actual value is matched and set to variable: str1 = [{eq}#str1]`abc`, str2 = [{eq}#str2]`def`
 //end::hb-m-s[]
 ====
 
@@ -69,9 +71,10 @@ include::core-handlebar.adoc[tags=hb-dt]
 
 ====
 //tag::hb-dt[]
-[.given]
+Given::
++
 .`dtJson`:
-[source,json,e-set=dtJson]
+[source,json,{set}dtJson]
 --
 {
   "customFormat": "{{format (at) "yyyy/MM/dd'T'HH:mm.ss"}}",
@@ -90,9 +93,10 @@ include::core-handlebar.adoc[tags=hb-dt]
   "beforeSpecifiedDate": "{{iso (at)}}"
 }
 --
-[.then]
+Then::
++
 .`dtJson` matches:
-[source,json,e-eq=#dtJson,e-verifier=json]
+[source,json,{eq}#dtJson,{verifier}json]
 --
 {
 "customFormat": "{{formattedAs 'yyyy/MM/dd\'T\'HH:mm.ss'}}",

@@ -11,21 +11,21 @@ include::core-verify-rows.adoc[tags=vr]
 ====
 //tag::vr[]
 .Set up users
-[e-execute=setUpUser(#TEXT)]
+[{exec}setUpUser(#TEXT)]
 1. john.lennon
 2. ringo.starr
 
 .Add more users
-[e-execute=setUpUser(#TEXT)]
+[{exec}setUpUser(#TEXT)]
 - george.harrison
 - paul.mccartney
 
-Searching for [e-set=searchString]*arr* will return:
+Searching for [{set}searchString]*arr* will return:
 
 .Search result
-[e-verify-rows="#username : search(#searchString)", e-match-strategy=BestMatch]
+[{verify-rows-best-match}#username : search(#searchString)]
 ,===
-[e-eq=#username]#Matching Usernames#
+[{eq}#username]#Matching Usernames#
 
 george.harrison
 ringo.starr

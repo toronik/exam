@@ -10,7 +10,7 @@ include::core-set.adoc[tags=set]
 
 ====
 //tag::set[]
-The greeting for user [e-set=firstName]_Bob_ will be: [e-eq=greetingFor(#firstName)]_Hello Bob!_
+The greeting for user [{set}firstName]_Bob_ will be: [{eq}greetingFor(#firstName)]_Hello Bob!_
 //end::set[]
 ====
 
@@ -24,11 +24,9 @@ include::core-set.adoc[tags=tmp]
 
 ====
 //tag::tmp[]
-[.when]
-Set `someText` =  [e-set=someText]`some text`
-and set `template` = [e-set=template]`someText: {{someText}}, current timestamp: {{iso (at)}}`
-[.then]
-`template` equals [e-eq=#template]`someText: {{someText}}, current timestamp: {{iso (at)}}`
+When:: Set `someText` = [{set}someText]`some text`
+and set `template` = [{set}template]`someText: {{someText}}, current timestamp: {{iso (at)}}`
+Then:: `template` equals [{eq}#template]`someText: {{someText}}, current timestamp: {{iso (at)}}`
 //end::tmp[]
 ====
 
@@ -40,11 +38,10 @@ include::core-set.adoc[tags=obj]
 
 ====
 //tag::obj[]
-[.when]
-Set `mapObject` = [e-set=mapObject]`{{map a='1' b='2'}}`
-[.then]
-`mapObject.a` equals [e-eq=#mapObject.a]`1` +
-`mapObject.b` equals [e-eq=#mapObject.b]`2`
+When:: Set `mapObject` = [{set}mapObject]`{{map a='1' b='2'}}`
+Then::
+`mapObject.a` equals [{eq}#mapObject.a]`1` +
+`mapObject.b` equals [{eq}#mapObject.b]`2`
 //end::obj[]
 ====
 
@@ -60,10 +57,8 @@ include::../data/core/file.txt[]
 
 ====
 //tag::fl[]
-[.when]
-Set `fileTemplate` = [e-set=fileTemplate]`{{file '/data/core/file.txt' v='123'}}`
-[.then]
-`fileTemplate` equals [e-eq=#fileTemplate]`File template: v = 123, someText = some text`
+When:: Set `fileTemplate` = [{set}fileTemplate]`{{file '/data/core/file.txt' v='123'}}`
+Then:: `fileTemplate` equals [{eq}#fileTemplate]`File template: v = 123, someText = some text`
 //end::fl[]
 ====
 
@@ -76,11 +71,11 @@ include::core-set.adoc[tags=set-code]
 ====
 //tag::set-code[]
 .Given `someJson`:
-[source,json,e-set=someJson]
+[source,json,{set}someJson]
 ----
 { "a" : 1 }
 ----
-Then `someJson` equals [e-eq-json=#someJson]`{ "a" : 1 }`
+Then `someJson` equals [{eq-json}#someJson]`{ "a" : 1 }`
 //end::set-code[]
 ====
 
@@ -92,9 +87,7 @@ include::core-set.adoc[tags=hidden]
 
 ====
 //tag::hidden[]
-[.when]
-Set `hidden` = [e-set=hidden hide]#1#
-[.then]
-`hidden` equals [e-eq=#hidden]`1`
+When:: Set `hidden` = [{set}hidden hide]#1#
+Then:: `hidden` equals [{eq}#hidden]`1`
 //end::hidden[]
 ====

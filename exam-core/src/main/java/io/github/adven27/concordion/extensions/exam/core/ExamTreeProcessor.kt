@@ -2,6 +2,7 @@ package io.github.adven27.concordion.extensions.exam.core
 
 import mu.KLogging
 import org.asciidoctor.ast.Cell
+import org.asciidoctor.ast.DescriptionList
 import org.asciidoctor.ast.Document
 import org.asciidoctor.ast.StructuralNode
 import org.asciidoctor.ast.Table
@@ -31,6 +32,7 @@ open class ExamTreeProcessor : Treeprocessor() {
                 b.style == "e-execute" -> propagateToAttrs(b, executeBlock())?.let { blocks[i] = it }
                 b.style == "open" -> processNode(b).also { propagateToAttrs(b, openBlock())?.let { blocks[i] = it } }
                 b is AstList -> propagateToAttrs(b, listBlock())?.let { blocks[i] = it }
+                b is DescriptionList -> b.items.map { it.description }.map(::processNode)
                 b.blocks.isNotEmpty() -> processNode(b)
                 b is Table -> b.body.flatMap { it.cells }.map { c -> (c as Cell).innerDocument?.let(::processNode) }
                     .also { propagateToAttrs(b, tableBlock())?.let { blocks[i] = it } }

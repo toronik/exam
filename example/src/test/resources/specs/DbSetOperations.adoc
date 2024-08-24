@@ -2,7 +2,7 @@
 
 https://dbunit.sourceforge.net/dbunit/components.html#databaseoperation[DbUnit operations] allows to append, update and delete rows.
 
-[#before]
+[{before}]
 .Before each example
 ****
 Given:
@@ -29,7 +29,7 @@ When append row:
 
 //tag::db-insert[]
 .product
-[e-db-set=, e-operation=insert]
+[{db-set-insert}]
 ,===
 id, name, price
 
@@ -40,7 +40,7 @@ id, name, price
 Then row added:
 
 .product
-[e-db-check=]
+[{db-check}]
 ,===
 id, name, price
 
@@ -62,7 +62,7 @@ When update row
 
 //tag::db-update[]
 .product
-[e-db-set=, e-operation=update]
+[{db-set-update}]
 ,===
 id, name, price
 
@@ -73,7 +73,7 @@ id, name, price
 Then second row updated
 
 .product
-[e-db-check=]
+[{db-check}]
 ,===
 id, name, price
 
@@ -94,7 +94,7 @@ When delete row
 
 //tag::db-delete[]
 .product
-[e-db-set=, e-operation=delete]
+[{db-set-delete}]
 ,===
 id
 
@@ -105,7 +105,7 @@ id
 Then second row deleted
 
 .product
-[e-db-check=]
+[{db-check}]
 ,===
 id, name, price
 

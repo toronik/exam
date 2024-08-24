@@ -16,6 +16,6 @@ NOTE: Tables will be cleaned up in the order opposite to declaration, hence the 
 
 ====
 //tag::db-clean[]
-Clean tables: [e-db-clean]#person, person_fields#
+Clean tables: [{db-clean}]#person, person_fields#
 //end::db-clean[]
 ====

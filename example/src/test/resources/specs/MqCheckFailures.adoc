@@ -1,12 +1,12 @@
 = Message Queue Check Failures
 
-[#before]
+[{before}]
 .Before each example
 ****
 [{mq-clean}]#myQueue# is empty.
 ****
 
-[.ExpectedToFail]
+[{ExpectedToFail}]
 .Surplus messages
 ====
 .Got message
@@ -21,7 +21,7 @@
 |===
 ====
 
-[.ExpectedToFail]
+[{ExpectedToFail}]
 .Surplus messages: await
 ====
 .Got message
@@ -36,7 +36,7 @@
 |===
 ====
 
-[.ExpectedToFail]
+[{ExpectedToFail}]
 .Missing messages
 ====
 Got no messages.
@@ -51,7 +51,7 @@ Got no messages.
 |===
 ====
 
-[.ExpectedToFail]
+[{ExpectedToFail}]
 .Missing messages: await
 ====
 Got no messages.
@@ -66,7 +66,7 @@ Got no messages.
 |===
 ====
 
-[.ExpectedToFail]
+[{ExpectedToFail}]
 .Wrong payload
 ====
 .Got message
@@ -173,7 +173,7 @@ h1, {{isoDate (at '-1d')}}
 |===
 ====
 
-[.ExpectedToFail]
+[{ExpectedToFail}]
 .Big message
 ====
 .Got message

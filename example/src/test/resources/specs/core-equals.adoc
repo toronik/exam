@@ -14,7 +14,7 @@ include::core-equals.adoc[tags=eq-text]
 ====
 //tag::eq-text[]
 Given `greeting()` method returns `Hello World!`
-expected result is: [e-eq=greeting()]_Hello World!_
+expected result is: [{eq}greeting()]_Hello World!_
 //end::eq-text[]
 ====
 
@@ -25,10 +25,10 @@ include::core-equals.adoc[tags=eq-json]
 ====
 //tag::eq-json[]
 Given `someJson()` method returns `{"result": 1}`
-expected result is: [e-verifier=json e-eq=someJson()]_{"result": "{{number}}" }_. +
-Short version: [e-eq-json=someJson()]_{"result": "{{number}}"}_. +
+expected result is: [{verifier}json {eq}someJson()]_{"result": "{any-num}" }_. +
+Short version: [{eq-json}someJson()]_{"result": "{any-num}"}_. +
 On listing:
-[source,json,e-eq-json=someJson()]
+[source,json,{eq-json}someJson()]
 --
 {"result": "{{number}}"}
 --
@@ -42,10 +42,10 @@ include::core-equals.adoc[tags=eq-xml]
 ====
 //tag::eq-xml[]
 Given `someXml()` method returns `<result>1</result>`
-expected result is: [e-verifier=xml e-eq=someXml()]_<result>{{number}}</result>_. +
-Short version: [e-eq-xml=someXml()]_<result>{{number}}</result>_. +
+expected result is: [{verifier}xml {eq}someXml()]_<result>{any-num}</result>_. +
+Short version: [{eq-xml}someXml()]_<result>{any-num}</result>_. +
 On listing:
-[source,xml,e-eq-xml=someXml()]
+[source,xml,{eq-xml}someXml()]
 --
 <result>{{number}}</result>
 --

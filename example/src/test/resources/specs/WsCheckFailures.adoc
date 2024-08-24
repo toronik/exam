@@ -1,9 +1,9 @@
 = Web Service Check Failures
 
-[.ExpectedToFail]
+[{ExpectedToFail}]
 .Failed checks
 ====
-[e-http=]
+[{http}]
 --
 [source,httprequest]
 ----
@@ -21,7 +21,7 @@ Content-Type: application/json
 {"POST":"/mirror/request?p=1","body":{"a": "{{field}}", "b": 1 }}
 ----
 
-[.where]
+[{http-where}]
 ,===
 ,code, phrase, header, field
 
@@ -33,10 +33,10 @@ Wrong body,   200, OK,    , wrong
 --
 ====
 
-[.ExpectedToFail]
+[{ExpectedToFail}]
 .Failed checks: await
 ====
-[e-http=,e-await=1s]
+[{http-await}]
 --
 [source,httprequest]
 ----
@@ -54,7 +54,7 @@ Content-Type: application/json
 {"POST":"/mirror/request?p=1","body":{"a": "{{field}}", "b": 1 }}
 ----
 
-[.where]
+[{http-where}]
 ,===
 ,code, phrase, header, field
 

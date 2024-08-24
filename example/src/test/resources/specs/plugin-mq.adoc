@@ -235,13 +235,13 @@ include::plugin-mq.adoc[tags=mq-check-custom]
 -----
 
 ====
-[.given]
+Given::
++
 .myQueue has message
 [source,json,{mq-set}myQueue]
 include::../data/mq/msg.json[]
 
-[.then]
-{blank}
+Then:: {blank}
 
 //tag::mq-check-custom[]
 .Check with registered `jsonIgnoreExtraFields` verifier

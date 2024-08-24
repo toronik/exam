@@ -14,15 +14,9 @@ Core commands enable abstract interactions and verifying capabilities.
 - `<<handlebars>>`
 
 include::core-equals.adoc[]
-
 include::core-set.adoc[]
-
 include::core-execute.adoc[]
-
 include::core-verify-rows.adoc[]
-
 include::core-run-and-echo.adoc[]
-
 include::core-example.adoc[]
-
 include::core-handlebar.adoc[]

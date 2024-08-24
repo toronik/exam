@@ -44,7 +44,7 @@ include::plugin-ws.adoc[tags=ws-http]
 ====
 //tag::ws-http[]
 .HTTP API check
-[e-http=]
+[{http}]
 --
 .Given request:
 [source,httprequest]
@@ -87,10 +87,10 @@ include::plugin-ws.adoc[tags=ws-soap]
 ====
 //tag::ws-soap[]
 .SOAP in collapsible blocks
-[e-http=]
+[{http}]
 --
 .SOAP request
-[%collapsible]
+[{collapse}]
 =====
 [source,httprequest]
 ----
@@ -102,7 +102,7 @@ include::../data/ws/soap.xml[]
 =====
 
 .SOAP response
-[%collapsible]
+[{collapse}]
 =====
 [source,httprequest]
 ----
@@ -124,7 +124,7 @@ include::plugin-ws.adoc[tags=ws-where]
 ====
 //tag::ws-where[]
 .Data-driven check
-[e-http=]
+[{http}]
 --
 .Request
 [source,httprequest]
@@ -137,7 +137,7 @@ include::plugin-ws.adoc[tags=ws-where]
 {{file resp}}
 ----
 
-[.where]
+[{http-where}]
 ,===
 ,req, resp
 
@@ -159,18 +159,18 @@ include::plugin-ws.adoc[tags=ws-http-v]
 ====
 //tag::ws-http-v[]
 .Put interactions to variable
-[source,httprequest,e-http=interactions]
+[source,httprequest,{http}interactions]
 ----
 GET /mirror/request?p=1
 Content-Type: application/json
 ----
 
 .Check interactions
-[%header,cols="4,2,0",e-verify-rows="#i : #interactions"]
+[%header,cols="4,2,0",{verify-rows}"#i : #interactions"]
 |===
-|[e-eq=#i.req.raw]#Request#
-|[{jsonIgnoreExtraFields} e-eq=#i.resp.body]#Response#
-|[e-eq=#i.resp.statusCode]#Status#
+|[{eq}#i.req.raw]#Request#
+|[{jsonIgnoreExtraFields} {eq}#i.resp.body]#Response#
+|[{eq}#i.resp.statusCode]#Status#
 
 |[pre language-http]`GET /mirror/request?p=1 HTTP/1.1
 Host: localhost:8888
@@ -202,7 +202,7 @@ include::plugin-ws.adoc[tags=ws-custom]
 ====
 //tag::ws-custom[]
 .Custom content type verifier
-[e-http=]
+[{http}]
 --
 [source,httprequest]
 ----

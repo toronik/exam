@@ -1,0 +1,77 @@
+:table-caption!:
+:json: source,json,subs="+attributes"
+:ExpectedToFail: .ExpectedToFail
+:before: #before
+
+:mq-params: cols="h,1", role=params
+:mq-headers: cols="h,1", role=headers
+:mq-set: cols=a, grid=rows, frame=ends, e-mq-set=
+:mq-check: cols=a, grid=rows, frame=ends, e-mq-check=
+:mq-check-await: cols=a, grid=rows, frame=ends, e-await=6s, e-mq-check=
+:mq-contains: e-contains=
+:mq-any-order: e-contains='any-order'
+:mq-clean: e-mq-clean
+
+:db-datasource: e-ds=
+:db-show: e-db-show=
+:db-show-save-to: e-saveTo=
+:db-check: e-db-check=
+:db-check-await: e-await=6s, e-db-check=
+:db-orderBy: e-orderBy=
+:db-where: e-where=
+:db-set: e-db-set=
+:db-set-insert: e-operation=insert, e-db-set=
+:db-set-update: e-operation=update, e-db-set=
+:db-set-delete: e-operation=delete, e-db-set=
+:db-set-refresh: e-operation=refresh, e-db-set=
+:db-operation: e-operation=
+:db-operation-insert: e-operation=insert
+:db-operation-update: e-operation=update
+:db-operation-delete: e-operation=delete
+:db-operation-refresh: e-operation=refresh
+:db-clean: e-db-clean
+
+:http: e-http=
+:http-await: e-await=6s, e-http=
+:http-where: .where
+
+:set: e-set=
+:eq: e-eq=
+:eq-json: e-eq-json=
+:eq-xml: e-eq-xml=
+:verifier: e-verifier=
+:await: e-await=
+:jsonIgnoreExtraFields: e-verifier=jsonIgnoreExtraFields
+:echo: e-echo=
+:exec: e-execute=
+:exec-on-paragraph: role=e-execute=
+:verify-rows: e-verify-rows=
+:verify-rows-strategy: e-match-strategy=
+:verify-rows-best-match: e-match-strategy=BestMatch, e-verify-rows=
+:run: role=e-run
+:nil: {{NULL}}
+:t0: {{at}}
+:3d-: {{at '-3d'}}
+:2d-: {{at '-2d'}}
+:1d-: {{at '-1d'}}
+:3h-: {{at '-3h'}}
+:2h-: {{at '-2h'}}
+:1h-: {{at '-1h'}}
+:1h: {{at '1h'}}
+:2h: {{at '2h'}}
+:3h: {{at '3h'}}
+:1d: {{at '1d'}}
+:2d: {{at '2d'}}
+:3d: {{at '3d'}}
+:mh-100: role=mh-100
+:mh-200: role=mh-200
+:collapse: %collapsible
+:just: {{within '10s'}}
+:any-num: {{number}}
+:any-str: {{string}}
+:any-bool: {{bool}}
+:any-datetime: {{iso}}
+:any-date: {{isoDate}}
+:any-not-null: {{notNull}}
+:any-uuid: {{uuid}}
+:any: {{ignore}}
