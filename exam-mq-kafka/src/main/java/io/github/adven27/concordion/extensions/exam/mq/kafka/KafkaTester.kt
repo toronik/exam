@@ -129,7 +129,7 @@ open class KafkaConsumeOnlyTester @JvmOverloads constructor(
         .associate { TopicPartition(topic, it) to OffsetSpec.latest() }
 
     private fun getPartitionsFor(topic: String) = adminClient.describeTopics(listOf(topic))
-        .values().values.flatMap { it.toPartitions() }
+        .topicNameValues().values.flatMap { it.toPartitions() }
 
     private fun KafkaFuture<TopicDescription>.toPartitions() =
         this[KAFKA_FETCHING_TIMEOUT, TimeUnit.SECONDS].partitions().map { it.partition() }
