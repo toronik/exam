@@ -3,6 +3,7 @@ buildscript {
     ext.klogging_version = '3.0.5'
     ext.jacksonKt_version = '2.17.1'
     ext.libVersion = '2026.0.0'
+    ext.libGroup = 'io.github.toronik'
     repositories {
         mavenCentral()
         maven {
@@ -22,7 +23,7 @@ plugins {
     id "org.jlleitschuh.gradle.ktlint" version "12.1.1"
 }
 
-group = 'io.github.adven27'
+group = libGroup
 version = libVersion
 
 allprojects {
@@ -49,7 +50,7 @@ subprojects {
         android = false
     }
 
-    group = 'io.github.adven27'
+    group = libGroup
     version = libVersion
 
     sourceCompatibility = 17

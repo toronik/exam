@@ -16,12 +16,12 @@
 
 ```groovy
 // Typical microservices setup (Web API + DB + MQ) testing:
-testImplementation "io.github.adven27:exam-ms:<version>"
+testImplementation "io.github.toronik:exam-ms:<version>"
 
 //same as:
-//testImplementation "io.github.adven27:exam-ws:<version>"
-//testImplementation "io.github.adven27:exam-db:<version>"
-//testImplementation "io.github.adven27:exam-mq:<version>"
+//testImplementation "io.github.toronik:exam-ws:<version>"
+//testImplementation "io.github.toronik:exam-db:<version>"
+//testImplementation "io.github.toronik:exam-mq:<version>"
 ```
 ### 2) Use
 
