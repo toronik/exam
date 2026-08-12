@@ -23,6 +23,7 @@ import java.time.Duration
 import java.time.Duration.ofMillis
 import java.time.Duration.ofSeconds
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.SECONDS
 
 @Suppress("unused", "LongParameterList", "MagicNumber")
 open class KafkaConsumeAndSendTester @JvmOverloads constructor(
@@ -102,15 +103,30 @@ open class KafkaConsumeOnlyTester @JvmOverloads constructor(
     override fun start() {
         consumerProperties[ConsumerConfig.GROUP_ID_CONFIG] = "kafka-tester-$topic"
         consumerProperties[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
-        consumer = KafkaConsumer<String, String>(consumerProperties).apply {
-            assign(partitionsFor(topic).map { TopicPartition(it.topic(), it.partition()) })
-        }
+        consumer = KafkaConsumer<String, String>(consumerProperties).apply { assign(awaitPartitions()) }
         adminClient = AdminClient.create(consumerProperties)
         logger.info("Consumer started with properties:\n{}", consumerProperties)
     }
 
     override fun stop() {
         consumer.close(ofSeconds(4))
+    }
+
+    private fun KafkaConsumer<String, String>.awaitPartitions(): List<TopicPartition> {
+        val deadline = System.currentTimeMillis() + SECONDS.toMillis(KAFKA_FETCHING_TIMEOUT)
+        do {
+            val partitions = partitionsFor(topic).orEmpty()
+            if (partitions.isNotEmpty()) {
+                return partitions.map { TopicPartition(it.topic(), it.partition()) }
+            }
+            logger.debug("Topic {} has no partitions yet, waiting for metadata...", topic)
+            Thread.sleep(POLL_MILLIS)
+        } while (System.currentTimeMillis() < deadline)
+        error(
+            "Topic $topic has no partitions after $KAFKA_FETCHING_TIMEOUT s. " +
+                "A topic created on demand is not visible to the first metadata request, " +
+                "so declare it in the test environment."
+        )
     }
 
     override fun purge() = logger.debug("Purging topic {}...", topic).also {
