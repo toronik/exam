@@ -3,6 +3,7 @@ buildscript {
     ext.klogging_version = '3.0.5'
     ext.jacksonKt_version = '2.17.1'
     ext.libVersion = '2026.0.0'
+    ext.libGroup = 'io.github.toronik'
     repositories {
         mavenCentral()
         maven {
@@ -17,12 +18,12 @@ buildscript {
 }
 
 plugins {
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
 //    id "org.jlleitschuh.gradle.ktlint-idea" version "11.6.1"
     id "org.jlleitschuh.gradle.ktlint" version "12.1.1"
 }
 
-group = 'io.github.adven27'
+group = libGroup
 version = libVersion
 
 allprojects {
@@ -49,7 +50,7 @@ subprojects {
         android = false
     }
 
-    group = 'io.github.adven27'
+    group = libGroup
     version = libVersion
 
     sourceCompatibility = 17
@@ -97,8 +98,8 @@ tasks.register('publishMaven') {
 nexusPublishing {
     repositories {
         sonatype {
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
         }
     }
 }
