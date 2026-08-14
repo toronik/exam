@@ -12,7 +12,7 @@ import io.github.adven27.concordion.extensions.exam.core.html.codeHighlight
 import io.github.adven27.concordion.extensions.exam.core.html.div
 import io.github.adven27.concordion.extensions.exam.core.html.errorMessage
 import io.github.adven27.concordion.extensions.exam.core.html.rootCause
-import io.github.adven27.concordion.extensions.exam.core.html.rootCauseMessage
+import io.github.adven27.concordion.extensions.exam.core.html.rootCauseDiagnostics
 import io.github.adven27.concordion.extensions.exam.core.html.span
 import io.github.adven27.concordion.extensions.exam.core.html.tag
 import io.github.adven27.concordion.extensions.exam.core.html.trWithTDs
@@ -208,7 +208,7 @@ class ErrorListener : ThrowableCaughtListener {
     override fun throwableCaught(event: ThrowableCaughtEvent) {
         val (id, errorMessage) = errorMessage(
             header = "Error while executing command",
-            message = event.throwable.rootCauseMessage(),
+            message = event.throwable.rootCauseDiagnostics(),
             help = help(event),
             html = PARSED_COMMANDS[event.element.getAttributeValue("cmdId")]?.let {
                 div("while executing:")(
