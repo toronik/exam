@@ -10,6 +10,12 @@ open class AgentReportAccumulator {
     private var outputDir: Path? = null
     private val hookRegistered = AtomicBoolean(false)
 
+    /** Set once the output directory is known; before that there is nothing to point a reader at. */
+    val reportFile: Path? get() = outputDir?.resolve(REPORT_NAME)
+
+    /** Last result recorded on this thread, kept only to recognise a repeat of it. */
+    private val onThisThread = ThreadLocal<SpecResult?>()
+
     fun configure(outputDir: Path) {
         this.outputDir = outputDir
         if (hookRegistered.compareAndSet(false, true)) {
@@ -18,6 +24,11 @@ open class AgentReportAccumulator {
     }
 
     open fun add(result: SpecResult) {
+        // A fixture that also registers the extension by hand gets two listeners on one extender,
+        // and a retried example is processed twice; both would double-count. Identical results in a
+        // row on one thread are the same processing, not two runs of it.
+        if (onThisThread.get() == result) return
+        onThisThread.set(result)
         results.add(result)
     }
 
@@ -27,9 +38,13 @@ open class AgentReportAccumulator {
         val all = results.toList()
         val report = AgentReportRenderer.render(all)
         dir.toFile().mkdirs()
-        val file = dir.resolve("agent-report.md")
+        val file = dir.resolve(REPORT_NAME)
         file.writeText(report)
         val failed = all.count { it.status != Status.PASS }
-        println("\n[exam] Agent report: $file ($failed failed / ${all.size} total)")
+        println("\n" + AgentReportHint.forConsole(file, failed, all.size))
+    }
+
+    private companion object {
+        const val REPORT_NAME = "agent-report.md"
     }
 }
