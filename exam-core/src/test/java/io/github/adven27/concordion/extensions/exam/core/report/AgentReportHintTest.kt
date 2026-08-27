@@ -30,6 +30,14 @@ class AgentReportHintTest {
     }
 
     @Test
+    fun `the instruction warns that expected-to-fail examples inflate the counts`() {
+        val message = AgentReportHint.forFailure(CONCORDION_SAYS, failing(), report)
+
+        assertThat(message).contains("expected-to-fail")
+        assertThat(message).contains("not by itself a regression")
+    }
+
+    @Test
     fun `long values are cut and point at the report for the rest`() {
         val long = "x".repeat(300)
         val spec = specWith(Failure("http", "POST /books", "boom", long, "y", "error-1"))

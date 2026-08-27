@@ -92,7 +92,9 @@ object AgentReportHint {
         "failed: 0 you are done. Then one \"# Failed\" section per example, each with",
         "Command, Error (the verdict from the checking library), Expected, Actual and",
         "Details. Details is an anchor into the HTML one directory deeper, e.g.",
-        "specs/Foo.html#error-42 - open that only when the truncated values are not enough."
+        "specs/Foo.html#error-42 - open that only when the truncated values are not enough.",
+        "The counts include examples marked expected-to-fail, which the build treats as passing:",
+        "a non-zero failed: is not by itself a regression - check those markers before reporting one."
     )
 
     /**
