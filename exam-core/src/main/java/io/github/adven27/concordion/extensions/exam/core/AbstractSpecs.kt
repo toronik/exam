@@ -1,5 +1,7 @@
 package io.github.adven27.concordion.extensions.exam.core
 
+import io.github.adven27.concordion.extensions.exam.core.report.AgentReportExtension
+import io.github.adven27.concordion.extensions.exam.core.report.AgentReportHintRule
 import org.concordion.api.AfterSuite
 import org.concordion.api.BeforeSuite
 import org.concordion.api.ConcordionResources
@@ -8,6 +10,8 @@ import org.concordion.api.extension.Extension
 import org.concordion.api.extension.Extensions
 import org.concordion.api.option.ConcordionOptions
 import org.concordion.integration.junit4.ConcordionRunner
+import org.junit.Rule
+import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 
 @Suppress("unused", "TooManyFunctions")
@@ -20,6 +24,22 @@ abstract class AbstractSpecs {
 
     @Extension
     private val exam = if (EXAM == null) this.init().also { EXAM = it } else EXAM
+
+    /**
+     * Every fixture gets the agent-readable report without asking for it. Registering it here
+     * rather than leaving it to `@Extensions` is deliberate: a report nobody knows about is a
+     * report nobody reads, and the copies of this annotation that were meant to be added by hand
+     * were, in practice, added to three fixtures out of hundreds.
+     */
+    @Extension
+    private val agentReport = AgentReportExtension()
+
+    /**
+     * Rewrites Concordion's "See output HTML for details" into what actually failed plus where the
+     * rest of the run is. Public and a getter because that is how JUnit collects rules.
+     */
+    @get:Rule
+    val agentReportHint: TestRule = AgentReportHintRule()
 
     @BeforeSuite
     fun specsSetUp() {
