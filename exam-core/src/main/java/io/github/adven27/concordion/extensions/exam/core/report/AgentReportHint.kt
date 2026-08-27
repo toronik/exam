@@ -81,7 +81,7 @@ object AgentReportHint {
         add("Every failure of this run is in ONE markdown file. Read it instead of the HTML:")
         add("    $report")
         addAll(LAYOUT)
-        ciArtifactPath(report)?.let {
+        ciArtifactPath(report, System.getenv(CI_ROOT))?.let {
             add("In CI this file is in the job's artifacts at:")
             add("    $it")
         }
@@ -101,13 +101,13 @@ object AgentReportHint {
      * The path a CI artifact browser or API expects: relative to the checkout, not to the module
      * the test JVM happened to run in. Absent outside CI, where the absolute path above is enough.
      */
-    private fun ciArtifactPath(report: Path): String? =
-        System.getenv("CI_PROJECT_DIR")
-            ?.takeIf { it.isNotBlank() }
-            ?.let { runCatching { Path.of(it).toAbsolutePath().relativize(report.toAbsolutePath()) }.getOrNull() }
-            ?.takeIf { !it.startsWith("..") }
-            ?.toString()
+    internal fun ciArtifactPath(report: Path, checkout: String?): String? = checkout
+        ?.takeIf { it.isNotBlank() }
+        ?.let { runCatching { Path.of(it).toAbsolutePath().relativize(report.toAbsolutePath()) }.getOrNull() }
+        ?.takeIf { !it.startsWith("..") }
+        ?.toString()
 
+    private const val CI_ROOT = "CI_PROJECT_DIR"
     private const val MAX_LEN = 200
     private const val MAX_FAILURES = 3
     private const val RULE = "----------------------------------------------------------------------"

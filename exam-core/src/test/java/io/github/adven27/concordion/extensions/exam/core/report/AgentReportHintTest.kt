@@ -112,6 +112,26 @@ class AgentReportHintTest {
         assertThat(console).contains("[exam] Every failure of this run is in ONE markdown file.")
     }
 
+    @Test
+    fun `in CI the artifact path is the one relative to the checkout, not to the module`() {
+        val inCi = Path.of("/builds/isd/pks/books-api/stream/specs/build/reports/specs/agent-report.md")
+
+        val path = AgentReportHint.ciArtifactPath(inCi, "/builds/isd/pks/books-api")
+
+        assertThat(path).isEqualTo("stream/specs/build/reports/specs/agent-report.md")
+    }
+
+    @Test
+    fun `outside CI there is no artifact path to give`() {
+        assertThat(AgentReportHint.ciArtifactPath(report, null)).isNull()
+        assertThat(AgentReportHint.ciArtifactPath(report, "  ")).isNull()
+    }
+
+    @Test
+    fun `a report outside the checkout is not passed off as an artifact of it`() {
+        assertThat(AgentReportHint.ciArtifactPath(report, "/builds/isd/other")).isNull()
+    }
+
     private fun failing() = specWith(
         Failure("db-check", "TABLE books", "Expected 3 rows, but was 2", "3", "2", "error-7")
     )
