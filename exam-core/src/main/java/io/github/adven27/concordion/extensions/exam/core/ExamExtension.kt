@@ -8,6 +8,7 @@ import com.github.jknack.handlebars.ValueResolver
 import com.github.jknack.handlebars.context.JavaBeanValueResolver
 import com.github.jknack.handlebars.context.MapValueResolver
 import com.github.jknack.handlebars.context.MethodValueResolver
+import io.github.adven27.concordion.extensions.exam.core.commands.ExamCommand
 import io.github.adven27.concordion.extensions.exam.core.handlebars.EvaluatorValueResolver
 import io.github.adven27.concordion.extensions.exam.core.handlebars.HANDLEBARS
 import io.github.adven27.concordion.extensions.exam.core.json.DefaultObjectMapperProvider
@@ -149,6 +150,7 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
         val registry = CommandRegistry()
         plugins.forEach { registry.register(it.commands()) }
 
+        registry.commands().forEach { (name, command) -> (command as? ExamCommand<*, *>)?.registeredName = name }
         registry.commands().filter { "example" != it.key }.forEach { ex.withCommand(NS, it.key, it.value) }
 
         TopButtonExtension().addTo(ex)

@@ -3,8 +3,13 @@
     <turboFilter class="io.github.adven27.concordion.extensions.exam.core.logger.ExamDelegatingFilter"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- Console only: the FILE and HTML appenders below keep every event. -->
+        <filter class="io.github.adven27.concordion.extensions.exam.core.logger.ConsoleQuietFilter"/>
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} %magenta([%10thread]) %highlight(%-5level) %cyan(%logger{36}.%M) - %msg%n
+            <!-- %nopex: a verification mismatch is a message, not an incident. Its stack trace
+                 is plumbing, it repeats per await attempt, and it is kept in full by the FILE and
+                 HTML appenders below. -->
+            <pattern>%d{HH:mm:ss.SSS} %magenta([%10thread]) %highlight(%-5level) %cyan(%logger{36}.%M) - %msg%nopex%n
             </pattern>
         </encoder>
     </appender>
