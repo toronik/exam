@@ -23,8 +23,29 @@ internal val EXAM_COMMANDS = setOf(
  */
 internal class ExampleParser(private val commandNames: Set<String> = EXAM_COMMANDS) {
 
-    fun examples(root: Element): List<ExampleResult> =
-        findElements(root) { it.getAttributeValue("data-summary-success") != null }.map { example(it) }
+    fun examples(root: Element): List<ExampleResult> {
+        val exampleElements = findElements(root) { it.getAttributeValue("data-summary-success") != null }
+        return exampleElements.map { example(it) } + listOfNotNull(outsideAnyExample(root, exampleElements))
+    }
+
+    /**
+     * A check written outside any example still fails the build - JUnit reports it under the
+     * fixture's `[Outer]` pseudo-test. It carries none of the summary attributes an example gets, so
+     * collecting only examples dropped it from the report entirely, and a reader sent to the report
+     * for "every failure of this run" would not find the one that broke their build.
+     *
+     * Named after the JUnit test, so the name a reader saw fail is the name they can search for.
+     */
+    private fun outsideAnyExample(root: Element, examples: List<Element>): ExampleResult? {
+        // By container id, not by walking up to an ancestor: Concordion's Element is a wrapper, and
+        // getParentElement() hands back a fresh one each call, so identity says nothing here.
+        val claimed = examples.flatMap { errorContainers(it) }.mapNotNull { it.getAttributeValue("id") }.toSet()
+        return errorContainers(root)
+            .filter { it.getAttributeValue("id") !in claimed }
+            .map { extractFromErrorContainer(it) }
+            .takeIf { it.isNotEmpty() }
+            ?.let { ExampleResult(OUTER, Status.FAIL, it, null) }
+    }
 
     fun example(el: Element): ExampleResult {
         val name = el.getFirstChildElement("h3")?.text
@@ -59,8 +80,11 @@ internal class ExampleParser(private val commandNames: Set<String> = EXAM_COMMAN
         else -> Status.PASS
     }
 
+    private fun errorContainers(el: Element) =
+        findElements(el) { it.getAttributeValue("id")?.startsWith("error-") == true }
+
     private fun extractFailures(el: Element): List<Failure> {
-        val errorContainers = findElements(el) { it.getAttributeValue("id")?.startsWith("error-") == true }
+        val errorContainers = errorContainers(el)
 
         return if (errorContainers.isNotEmpty()) {
             errorContainers.map { extractFromErrorContainer(it) }
@@ -181,6 +205,8 @@ internal class ExampleParser(private val commandNames: Set<String> = EXAM_COMMAN
     }
 
     private companion object {
+        /** What JUnit calls the part of a spec that lies outside any example. */
+        const val OUTER = "[Outer]"
         const val NS = "http://exam.extension.io"
         val HTTP_METHODS = listOf("GET ", "POST ", "PUT ", "DELETE ", "PATCH ")
         val CSS_COMMAND_PATTERNS = listOf("http", "mq-check", "db-check", "eq")

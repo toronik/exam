@@ -103,13 +103,13 @@ Then::
 "isoDate": "{{isoDate}}",
 "iso": "{{iso}}",
 
-"customFormatAndWithinNow": "{{formattedAndWithin 'yyyy/MM/dd\'T\'HH:mm.ss' '25s'}}",
+"customFormatAndWithinNow": "{{formattedAndWithin 'yyyy/MM/dd\'T\'HH:mm.ss' '5m'}}",
 "isoDateAndWithinNow": "{{isoDate '1d'}}",
-"isoAndWithinNow": "{{iso '25s'}}",
+"isoAndWithinNow": "{{iso '5m'}}",
 
-"customFormatAndWithinSpecifiedDate": "{{formattedAndWithin 'yyyy/MM/dd\'T\'HH:mm.ss' '25s' (now)}}",
+"customFormatAndWithinSpecifiedDate": "{{formattedAndWithin 'yyyy/MM/dd\'T\'HH:mm.ss' '5m' (now)}}",
 "isoDateAndWithinSpecifiedDate": "{{isoDate '1d' (now)}}",
-"isoAndWithinSpecifiedDate": "{{iso '25s' (now)}}",
+"isoAndWithinSpecifiedDate": "{{iso '5m' (now)}}",
 
 "afterSpecifiedDate": "{{after (at '-1h')}}",
 "beforeSpecifiedDate": "{{before (at '+1h')}}"
