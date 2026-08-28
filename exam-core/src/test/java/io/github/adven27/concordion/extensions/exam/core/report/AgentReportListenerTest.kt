@@ -120,6 +120,33 @@ class AgentReportListenerTest {
 
     // --- DOM Builder ---
 
+    @Test
+    fun `a failure outside any example is reported under the name JUnit gives it`() {
+        val root = buildDom {
+            example("happy path", successes = 1) {}
+            looseFailure("error-outer", "Text mismatch\nExpected: \"Janet\"\nbut: was \"Jane\"")
+        }
+        fire(root, "/specs/Loose.html")
+
+        val spec = collected[0]
+        assertThat(spec.status).isEqualTo(Status.FAIL)
+        assertThat(spec.examples.map { it.name }).containsExactly("happy path", "[Outer]")
+        assertThat(spec.examples.last().failures).singleElement()
+            .satisfies({ assertThat(it.message).contains("but: was \"Jane\"") })
+    }
+
+    @Test
+    fun `a failure inside an example is not counted twice as an outer one`() {
+        val root = buildDom {
+            example("http check", failures = 1) {
+                errorContainer("error-123") { preFailure("boom") }
+            }
+        }
+        fire(root, "/specs/Http.html")
+
+        assertThat(collected[0].examples.map { it.name }).containsExactly("http check")
+    }
+
     private fun buildDom(block: DomBuilder.() -> Unit): Element {
         val root = Element("html")
         val body = Element("body")
@@ -129,6 +156,13 @@ class AgentReportListenerTest {
     }
 
     private class DomBuilder(private val parent: Element) {
+        /** An error container that belongs to no example - the `[Outer]` part of a spec. */
+        fun looseFailure(id: String, message: String) {
+            val container = Element("div").apply { addAttribute("id", id) }
+            EB(container).preFailure(message)
+            parent.appendChild(container)
+        }
+
         fun example(name: String, successes: Int = 0, failures: Int = 0, exceptions: Int = 0, block: EB.() -> Unit) {
             val div = Element("div").apply {
                 addAttribute("id", name.replace(" ", "-"))
