@@ -3,7 +3,9 @@ package io.github.adven27.concordion.extensions.exam.core.html
 import org.junit.Test
 import org.xmlunit.builder.DiffBuilder
 import org.xmlunit.diff.Diff
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class HtmlTest {
     @Test
@@ -59,6 +61,16 @@ class HtmlTest {
             """.trimIndent()
         )
         assertFalse(diff.hasDifferences(), diff.toString())
+    }
+
+    @Test
+    fun rootCauseDiagnosticsNamesTheClassAndKeepsTheTopFrames() {
+        val error = RuntimeException("wrapper", IllegalStateException(NullPointerException()))
+
+        val diagnostics = error.rootCauseDiagnostics(maxFrames = 3)
+
+        assertTrue(diagnostics.startsWith("java.lang.NullPointerException"))
+        assertEquals(3, diagnostics.lines().count { it.trimStart().startsWith("at ") })
     }
 
     private fun diff(actual: Html, expected: String): Diff {

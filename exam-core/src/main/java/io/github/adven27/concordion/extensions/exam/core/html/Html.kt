@@ -440,6 +440,10 @@ fun Throwable.rootCause(): Throwable {
 
 fun Throwable.rootCauseMessage() = this.rootCause().let { it.message ?: it.toString() }
 
+fun Throwable.rootCauseDiagnostics(maxFrames: Int = 10) = rootCause().let { root ->
+    root.stackTrace.take(maxFrames).joinToString(prefix = root.toString(), separator = "") { "\n    at $it" }
+}
+
 fun nu.xom.Element.addCcAttr(name: String, value: String) {
     if (value.isNotEmpty()) {
         addAttribute(Attribute(name, value).apply { setNamespace("c", ConcordionBuilder.NAMESPACE_CONCORDION_2007) })
