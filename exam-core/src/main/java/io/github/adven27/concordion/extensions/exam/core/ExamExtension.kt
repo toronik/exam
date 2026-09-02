@@ -9,8 +9,12 @@ import com.github.jknack.handlebars.context.JavaBeanValueResolver
 import com.github.jknack.handlebars.context.MapValueResolver
 import com.github.jknack.handlebars.context.MethodValueResolver
 import io.github.adven27.concordion.extensions.exam.core.commands.ExamCommand
+import io.github.adven27.concordion.extensions.exam.core.fanout.Duplicate
 import io.github.adven27.concordion.extensions.exam.core.fanout.ExampleFanout
+import io.github.adven27.concordion.extensions.exam.core.fanout.Invariance
 import io.github.adven27.concordion.extensions.exam.core.fanout.Outline
+import io.github.adven27.concordion.extensions.exam.core.fanout.Perturbation
+import io.github.adven27.concordion.extensions.exam.core.fanout.Reorder
 import io.github.adven27.concordion.extensions.exam.core.fanout.Row
 import io.github.adven27.concordion.extensions.exam.core.fanout.VariantGroupExtension
 import io.github.adven27.concordion.extensions.exam.core.handlebars.EvaluatorValueResolver
@@ -48,6 +52,7 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
     private var nodeMatcher: NodeMatcher = defaultNodeMatcher
     private var skipDecider: SkipDecider = SkipDecider.NoSkip()
     private var outline: Outline = Outline()
+    private var invariance: Invariance = Invariance()
 
     /**
      * Attach xmlunit/jsonunit matchers.
@@ -155,6 +160,18 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
         return this
     }
 
+    /**
+     * What `[{stable-under}]` may name, over and above duplication and reordering. A perturbation
+     * rewrites the deliveries of a case while the document is parsed, so one of its own is how a
+     * project says what else its system has to be indifferent to - a restart between deliveries,
+     * for instance, which only the fixture knows how to perform.
+     */
+    @Suppress("unused")
+    fun withPerturbations(vararg perturbations: Perturbation): ExamExtension {
+        invariance = Invariance(listOf(Duplicate, Reorder) + perturbations)
+        return this
+    }
+
     @Suppress("unused")
     fun withLoggingFilter(loggerLevel: Map<String, String>): ExamExtension {
         loggingFilter = LoggerLevelFilter(loggerLevel)
@@ -179,7 +196,7 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
         }
         ex.withExampleListener(ExamExampleListener(skipDecider))
         // Before the listener that parses commands, so that every clone gets commands of its own.
-        ex.withDocumentParsingListener(ExampleFanout(outline))
+        ex.withDocumentParsingListener(ExampleFanout(outline, invariance))
         // After FocusOnErrorsListener: a group decides what to show of its own cases.
         VariantGroupExtension().addTo(ex)
         ex.withDocumentParsingListener(ExamDocumentParsingListener(registry))

@@ -12,6 +12,7 @@ Core commands enable abstract interactions and verifying capabilities.
 - `<<e-echo>>`
 - `<<e-example>>`
 - `<<e-outline>>`
+- `<<e-stable-under>>`
 - `<<handlebars>>`
 
 include::core-equals.adoc[]
@@ -21,4 +22,5 @@ include::core-verify-rows.adoc[]
 include::core-run-and-echo.adoc[]
 include::core-example.adoc[]
 include::core-outline.adoc[]
+include::core-invariance.adoc[]
 include::core-handlebar.adoc[]

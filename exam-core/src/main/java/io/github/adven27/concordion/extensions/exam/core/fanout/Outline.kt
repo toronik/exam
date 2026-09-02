@@ -48,7 +48,7 @@ class Outline @JvmOverloads constructor(
         (referenced - declared).ifNotEmpty { throw FanoutError.MissingColumns(exampleName, it) }
         return Fanout(
             variants = rows.map { RowVariant(nameBy(it), it) },
-            matrix = table.deepCopy().also { copy -> copy.removeAttribute(copy.getAttribute(OUTLINE_ROWS, NS)) },
+            header = table.deepCopy().also { copy -> copy.removeAttribute(copy.getAttribute(OUTLINE_ROWS, NS)) },
             notices = (declared - referenced - nameColumns).let {
                 if (it.isEmpty()) emptyList() else listOf(FanoutError.UnusedColumns(exampleName, it).message!!)
             }

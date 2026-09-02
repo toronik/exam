@@ -1,0 +1,67 @@
+=== stable under [[e-stable-under]]
+
+An example marked `[\{stable-under}]` is run once per *perturbation* named in the marker, and every
+case has to end the same way the example does. The perturbations are things that happen to a
+delivery in a system nobody has ordered to be exactly-once: `duplicate` performs every delivery of
+the case twice, `reorder` performs them in the opposite order.
+
+This is a different kind of statement from `<<e-outline,an outline>>`. An outline says these cases
+differ; invariance says *the outcome does not depend on how the deliveries arrived* - a property of
+the system, checked by putting the same body through a changed world and demanding the same answer.
+Today an author who wants to say it has to copy the whole example and rewrite the deliveries by
+hand, which is why hardly anybody says it.
+
+.Usage
+[source,asciidoc]
+--
+include::core-invariance.adoc[tags=stable]
+--
+
+Nothing is intercepted at run time: a perturbation rewrites the deliveries of the case while the
+document is parsed, so the doubled step is in the report to be read, and the reader of a failure is
+told what the case was put through. Setting up and checking are left alone - what is in question is
+the delivery, not the expectation. A delivery whose repetition is honest, a counter that is meant to
+count twice, is marked `[\{stable-except}]` and left as it stands.
+
+=====
+//tag::stable[]
+.Remembering a name
+[{stable-under} duplicate reorder]
+====
+Given:: [{exec}remember(#TEXT)]`Bob` and [{exec}remember(#TEXT)]`Ann` are remembered
+Then:: `Bob` is remembered [{eq}timesRemembered('Bob')]`1` time,
+and [{eq}namesRemembered()]`2` names are remembered in all
+//end::stable[]
+====
+=====
+
+A green run of a `[\{stable-under}]` example proves nothing on its own - the same body passing again
+is what one would expect of a body that ignores its input. What makes the marker worth anything is
+that a body which is *not* invariant goes red under the perturbation. The next example is such a
+body: registering a user appends to a list, so performing the delivery twice registers him twice. It
+is marked `{ExpectedToFail}`, which is what keeps it in the suite: were duplication to quietly stop
+happening, this example would pass, and an example that was expected to fail and did not is a broken
+build.
+
+=====
+//tag::not-stable[]
+.Registering a user is not stable under duplication
+[{stable-under} duplicate ExpectedToFail]
+====
+Given:: user [{exec}setUpUser(#TEXT)]`Bob` is registered
+Then:: `Bob` is registered [{eq}timesRegistered('Bob')]`1` time
+//end::not-stable[]
+====
+=====
+
+.What a marker is refused for
+[%collapsible]
+====
+- a perturbation Exam does not know - the known ones are listed in the failure
+- an example with nothing to perturb: a case whose deliveries a perturbation could not touch
+verifies nothing the plain example does not, and the group says so in its header
+
+A project adds a perturbation of its own through `withPerturbations(...)`: a restart between
+deliveries, an outage of a dependency - anything the system is supposed to be indifferent to and
+only the fixture knows how to perform.
+====

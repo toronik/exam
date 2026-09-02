@@ -12,7 +12,7 @@ import java.util.UUID
 
 internal const val GROUP = "exam-fanout"
 internal const val GROUP_NAME = "exam-fanout-name"
-internal const val GROUP_MATRIX = "exam-fanout-matrix"
+internal const val GROUP_HEADER = "exam-fanout-header"
 internal const val GROUP_FLATTEN = "exam-fanout-flatten"
 internal const val TAB = "nav-link"
 internal const val PANE = "tab-pane"
@@ -32,7 +32,7 @@ internal const val EXPECTED_TO_FAIL = "ExpectedToFail"
  * map of outcomes - a badge per case - and only one body is on screen, filled in with the values of
  * the case selected. Ten more rows add ten buttons, not ten screens.
  */
-internal class VariantGroup(name: String, matrix: Element?, notices: List<String>) {
+internal class VariantGroup(name: String, header: Element?, notices: List<String>) {
     private val id = "e${UUID.randomUUID()}"
     private val tabs = el("ul", CLASS to "nav nav-tabs", "role" to "tablist")
     private val panes = el("div", CLASS to "tab-content")
@@ -42,7 +42,7 @@ internal class VariantGroup(name: String, matrix: Element?, notices: List<String
         el("div", CLASS to "card-header")(
             el("span", CLASS to "$GROUP_NAME fw-semibold").text(name),
             el("button", CLASS to "btn btn-sm btn-link $GROUP_FLATTEN", "type" to "button").text("all cases at once"),
-            matrix?.let { el("div", CLASS to GROUP_MATRIX)(it) },
+            header?.let { if (GROUP_HEADER in it.classes()) it else el("div", CLASS to GROUP_HEADER)(it) },
             *notices.map { el("div", CLASS to "alert alert-warning").text(it) }.toTypedArray()
         ),
         tabs,

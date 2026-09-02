@@ -22,7 +22,7 @@ interface Variant {
  */
 data class Fanout(
     val variants: List<Variant>,
-    val matrix: Element? = null,
+    val header: Element? = null,
     val notices: List<String> = emptyList()
 )
 
@@ -62,10 +62,10 @@ class ExampleFanout(private val sources: List<FanoutSource>) : DocumentParsingLi
         val name = block.exampleName() ?: throw FanoutError.MissingTitle(source.notation, block.textSnippet())
         if (block.descendantsMarked(source.marker).isNotEmpty()) throw FanoutError.Nested(source.notation, name)
 
-        val (variants, matrix, notices) = source.fanout(block, name)
+        val (variants, header, notices) = source.fanout(block, name)
         if (variants.isEmpty()) throw FanoutError.NoVariants(source.notation, name)
 
-        val group = VariantGroup(name, matrix, notices)
+        val group = VariantGroup(name, header, notices)
         val taken = mutableSetOf<String>()
         variants.forEach { variant ->
             group.add(variant.name, block.cloneFor(variant, source.marker, name, taken))

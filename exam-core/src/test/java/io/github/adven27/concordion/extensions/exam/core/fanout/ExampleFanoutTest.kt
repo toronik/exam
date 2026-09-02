@@ -260,7 +260,7 @@ class ExampleFanoutTest {
         assertThat(group.descendantsMarked(TAB).map { it.value }).containsExactly("rub", "usd")
         assertThat(group.descendantsMarked(PANE))
             .allMatch { pane -> EXAMPLE_BLOCK in pane.getChildElements("div")[0].classes() }
-        assertThat(group.descendantsMarked(GROUP_MATRIX).single().query(".//table").elements()).hasSize(1)
+        assertThat(group.descendantsMarked(GROUP_HEADER).single().query(".//table").elements()).hasSize(1)
     }
 
     @Test
@@ -269,7 +269,7 @@ class ExampleFanoutTest {
 
         fanout(doc)
 
-        assertThat(doc.marked(GROUP_MATRIX).single().tableMarked(OUTLINE_ROWS)).isNull()
+        assertThat(doc.marked(GROUP_HEADER).single().tableMarked(OUTLINE_ROWS)).isNull()
     }
 
     @Test

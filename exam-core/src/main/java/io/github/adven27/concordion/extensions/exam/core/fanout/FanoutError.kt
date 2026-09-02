@@ -50,6 +50,17 @@ sealed class FanoutError(message: String) : IllegalStateException(message) {
         "The [{rows}] header of example \"$example\" has a column with a blank name"
     )
 
+    class UnknownPerturbation(example: String, name: String, available: Set<String>) : FanoutError(
+        "Example \"$example\" is asked to be stable under \"$name\", which is not a perturbation" +
+            " Exam knows: ${available.listed()}"
+    )
+
+    /** Not thrown: a perturbation that has nothing to do is a case that proves nothing, and silence about it is worse. */
+    class NothingToPerturb(example: String, name: String, deliveries: Int) : FanoutError(
+        "Example \"$example\" has $deliveries deliveries to perturb, so its \"$name\" case verifies" +
+            " nothing the unperturbed example does not"
+    )
+
     class DuplicateColumnNames(example: String, names: Set<String>) : FanoutError(
         "The [{rows}] header of example \"$example\" has duplicate column names: ${names.listed()}"
     )

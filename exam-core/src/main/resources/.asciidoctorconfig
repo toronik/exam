@@ -78,3 +78,5 @@
 
 :outline: role=e-outline
 :rows: e-outline-rows=
+:stable-under: role=e-stable-under
+:stable-except: role=e-stable-except
