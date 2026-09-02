@@ -9,13 +9,10 @@ import com.github.jknack.handlebars.context.JavaBeanValueResolver
 import com.github.jknack.handlebars.context.MapValueResolver
 import com.github.jknack.handlebars.context.MethodValueResolver
 import io.github.adven27.concordion.extensions.exam.core.commands.ExamCommand
-import io.github.adven27.concordion.extensions.exam.core.fanout.Duplicate
 import io.github.adven27.concordion.extensions.exam.core.fanout.ExampleFanout
 import io.github.adven27.concordion.extensions.exam.core.fanout.Invariance
 import io.github.adven27.concordion.extensions.exam.core.fanout.Outline
 import io.github.adven27.concordion.extensions.exam.core.fanout.Perturbation
-import io.github.adven27.concordion.extensions.exam.core.fanout.Reorder
-import io.github.adven27.concordion.extensions.exam.core.fanout.Row
 import io.github.adven27.concordion.extensions.exam.core.fanout.VariantGroupExtension
 import io.github.adven27.concordion.extensions.exam.core.handlebars.EvaluatorValueResolver
 import io.github.adven27.concordion.extensions.exam.core.handlebars.HANDLEBARS
@@ -151,26 +148,32 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
     }
 
     /**
-     * How an `[{outline}]` clone is named. The name is what the report shows for the case, so a
-     * spec whose rows are not described by a `case` column should say here what describes them.
+     * How `[{outline}]` reads its cases: what names a clone, and which columns only name it.
      */
     @Suppress("unused")
-    fun withOutline(nameBy: (Row) -> String): ExamExtension {
-        outline = Outline(nameBy)
+    fun withOutline(outline: Outline): ExamExtension {
+        this.outline = outline
         return this
     }
 
     /**
-     * What `[{stable-under}]` may name, over and above duplication and reordering. A perturbation
-     * rewrites the deliveries of a case while the document is parsed, so one of its own is how a
-     * project says what else its system has to be indifferent to - a restart between deliveries,
-     * for instance, which only the fixture knows how to perform.
+     * What `[{stable-under}]` may name, and which commands a perturbation may touch.
      */
     @Suppress("unused")
-    fun withPerturbations(vararg perturbations: Perturbation): ExamExtension {
-        invariance = Invariance(listOf(Duplicate, Reorder) + perturbations)
+    fun withInvariance(invariance: Invariance): ExamExtension {
+        this.invariance = invariance
         return this
     }
+
+    /**
+     * What else this system has to be indifferent to, over and above duplication and reordering. A
+     * perturbation rewrites the deliveries of a case while the document is parsed, so one of its own
+     * is how a project says what only its fixture knows how to do - restart the application between
+     * deliveries, take a dependency away.
+     */
+    @Suppress("unused")
+    fun withPerturbations(vararg perturbations: Perturbation): ExamExtension =
+        withInvariance(invariance.and(*perturbations))
 
     @Suppress("unused")
     fun withLoggingFilter(loggerLevel: Map<String, String>): ExamExtension {
