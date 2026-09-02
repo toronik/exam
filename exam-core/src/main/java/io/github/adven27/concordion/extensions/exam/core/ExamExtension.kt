@@ -9,6 +9,9 @@ import com.github.jknack.handlebars.context.JavaBeanValueResolver
 import com.github.jknack.handlebars.context.MapValueResolver
 import com.github.jknack.handlebars.context.MethodValueResolver
 import io.github.adven27.concordion.extensions.exam.core.commands.ExamCommand
+import io.github.adven27.concordion.extensions.exam.core.fanout.ExampleFanout
+import io.github.adven27.concordion.extensions.exam.core.fanout.Outline
+import io.github.adven27.concordion.extensions.exam.core.fanout.Row
 import io.github.adven27.concordion.extensions.exam.core.handlebars.EvaluatorValueResolver
 import io.github.adven27.concordion.extensions.exam.core.handlebars.HANDLEBARS
 import io.github.adven27.concordion.extensions.exam.core.json.DefaultObjectMapperProvider
@@ -43,6 +46,7 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
     private var enableLoggingFormatterExtension: Boolean = true
     private var nodeMatcher: NodeMatcher = defaultNodeMatcher
     private var skipDecider: SkipDecider = SkipDecider.NoSkip()
+    private var outline: Outline = Outline()
 
     /**
      * Attach xmlunit/jsonunit matchers.
@@ -140,6 +144,16 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
         return this
     }
 
+    /**
+     * How an `[{outline}]` clone is named. The name is what the report shows for the case, so a
+     * spec whose rows are not described by a `case` column should say here what describes them.
+     */
+    @Suppress("unused")
+    fun withOutline(nameBy: (Row) -> String): ExamExtension {
+        outline = Outline(nameBy)
+        return this
+    }
+
     @Suppress("unused")
     fun withLoggingFilter(loggerLevel: Map<String, String>): ExamExtension {
         loggingFilter = LoggerLevelFilter(loggerLevel)
@@ -163,6 +177,8 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
             ex.withSpecificationProcessingListener(FocusOnErrorsListener())
         }
         ex.withExampleListener(ExamExampleListener(skipDecider))
+        // Before the listener that parses commands, so that every clone gets commands of its own.
+        ex.withDocumentParsingListener(ExampleFanout(outline))
         ex.withDocumentParsingListener(ExamDocumentParsingListener(registry))
     }
 

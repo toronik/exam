@@ -71,6 +71,10 @@ open class Specs : AbstractSpecs() {
     }
 
     private val users = mutableListOf<String>()
+
+    /** Counts its own calls, so an outline clone can state which run of the block it is. */
+    fun outlineRun() = ++outlineRuns
+
     fun split(s: String) = s.split(" ").let { it[0] to it[1] }
     fun greetingFor(s: String) = "Hello $s!"
     fun greeting() = "Hello World!"
@@ -90,6 +94,11 @@ open class Specs : AbstractSpecs() {
     val miscHelpers: String = MiscHelpers.entries.joinToString("\n") { it.describe() }
 
     companion object {
+        /**
+         * Static on purpose: a fixture is instantiated per example, so a counter that has to survive
+         * from one clone of an outline to the next cannot be instance state.
+         */
+        private var outlineRuns = 0
         private lateinit var SUT: ConfigurableApplicationContext
         val ENV: ApplicationEnvironment = ApplicationEnvironment().apply { up() }
 
