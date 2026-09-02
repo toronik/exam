@@ -75,7 +75,23 @@ class LogbackAdaptor : LoggingAdaptor {
         return resourcePath.substring(0, pos) + shortenFileName(resourcePath.substring(pos), 60)
     }
 
-    private fun shortenFileName(fileName: String, maxLength: Int): String {
+    /**
+     * Shortening loses what tells two names apart - abbreviating to initials makes
+     * "… - a person" and "… - a crowd" the same file - so a shortened name carries a stamp of the
+     * one it was made from. Names that fit are untouched. It matters now that fanning an example out
+     * makes long, similar example names routine: two cases of one scenario shared a log file, and
+     * the log of a failure is where its diagnosis starts.
+     */
+    private fun shortenFileName(fileName: String, maxLength: Int): String =
+        if (fileName.length <= maxLength) {
+            fileName
+        } else {
+            abbreviate(fileName, maxLength - STAMP_LENGTH) + stamp(fileName)
+        }
+
+    private fun stamp(fileName: String) = "~%04x".format(fileName.hashCode() and 0xffff)
+
+    private fun abbreviate(fileName: String, maxLength: Int): String {
         return if (fileName.length <= maxLength) {
             fileName
         } else {
@@ -105,6 +121,7 @@ class LogbackAdaptor : LoggingAdaptor {
     }
 
     companion object {
+        private const val STAMP_LENGTH = 5
         private val testStack: Stack<String?> = Stack()
         private val baseFolder = concordionBaseOutputDir
 

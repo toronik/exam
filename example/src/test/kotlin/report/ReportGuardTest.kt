@@ -57,6 +57,15 @@ class ReportGuardTest {
     }
 
     @Test
+    fun `no two examples share a log file, which is where a diagnosis starts`() {
+        val logs = html().query("//a[contains(@href, 'LogViewer.html')]").elements()
+            .map { it.getAttributeValue("href") }
+
+        assertThat(logs).isNotEmpty().doesNotHaveDuplicates()
+        logs.forEach { assertThat(File(dir, "specs/$it")).exists() }
+    }
+
+    @Test
     fun `a group has as many tabs as it has cases, and says so`() {
         val groups = groups()
 
