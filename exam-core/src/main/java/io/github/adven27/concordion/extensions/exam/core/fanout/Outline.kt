@@ -20,8 +20,17 @@ data class Row(val values: Map<String, String>) {
     operator fun get(column: String): String? = values[column]
 }
 
-/** Default naming of a clone: the `case` column if there is one, otherwise the whole row. */
-fun caseOrAllValues(row: Row): String = row[CASE] ?: row.values.values.joinToString(" / ")
+/** How long a name assembled out of row values may get before it stops being a name. */
+private const val MAX_NAME = 40
+
+/**
+ * Default naming of a clone: the `case` column if there is one, otherwise the row itself, cut short.
+ * The name is a tab label, an example id and part of a log file name, so a six column matrix must
+ * not turn into all six values.
+ */
+fun caseOrAllValues(row: Row): String = row[CASE] ?: row.values.values.joinToString(" / ").let {
+    if (it.length <= MAX_NAME) it else it.take(MAX_NAME - 1).trimEnd() + "…"
+}
 
 /**
  * Variants of an `[{outline}]` example, taken from its `[{rows}]` table. One clone per data row,
@@ -45,13 +54,13 @@ class Outline @JvmOverloads constructor(
         // Read once per block, from the body only: the table is data, and a `{nil}` cell arrives as
         // the text `{{NULL}}` - shaped exactly like a column reference.
         val referenced = referencedIn(block.textExcluding(table), declared)
-        (referenced - declared).ifNotEmpty { throw FanoutError.MissingColumns(exampleName, it) }
         return Fanout(
             variants = rows.map { RowVariant(nameBy(it), it) },
             header = table.deepCopy().also { copy -> copy.removeAttribute(copy.getAttribute(OUTLINE_ROWS, NS)) },
-            notices = (declared - referenced - nameColumns).let {
-                if (it.isEmpty()) emptyList() else listOf(FanoutError.UnusedColumns(exampleName, it).message!!)
-            }
+            notices = listOfNotNull(
+                notice(referenced - declared) { FanoutError.MissingColumns(exampleName, it) },
+                notice(declared - referenced - nameColumns) { FanoutError.UnusedColumns(exampleName, it) }
+            )
         )
     }
 
@@ -147,3 +156,6 @@ private fun List<String>.duplicates() = groupingBy { it }.eachCount().filterValu
 private inline fun Set<String>.ifNotEmpty(action: (Set<String>) -> Unit) {
     if (isNotEmpty()) action(this)
 }
+
+private inline fun notice(names: Set<String>, error: (Set<String>) -> FanoutError) =
+    names.takeIf { it.isNotEmpty() }?.let { error(it).message }

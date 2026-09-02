@@ -83,7 +83,7 @@ object Reorder : Perturbation {
  * expectation.
  */
 class Invariance @JvmOverloads constructor(
-    perturbations: List<Perturbation> = listOf(Duplicate, Reorder),
+    private val perturbations: List<Perturbation> = listOf(Duplicate, Reorder),
     private val deliveries: Set<String> = DELIVERIES
 ) : FanoutSource {
     private val available = perturbations.associateBy { it.name }
@@ -92,18 +92,32 @@ class Invariance @JvmOverloads constructor(
     override val notation = "[{stable-under}]"
 
     override fun fanout(block: Element, exampleName: String): Fanout {
-        val asked = block.classes() - marker - EXAMPLE_BLOCK - STATUSES
-        asked.firstOrNull { it !in available }
-            ?.let { throw FanoutError.UnknownPerturbation(exampleName, it, available.keys) }
+        // Known names only: a block may legitimately carry a styling role, and calling that an
+        // unknown perturbation would refuse a document over a css class.
+        val asked = block.classes().filter { it in available }
+        if (asked.isEmpty()) {
+            throw FanoutError.UnknownPerturbation(
+                exampleName,
+                block.classes() - marker - EXAMPLE_BLOCK - STATUSES,
+                available.keys
+            )
+        }
         val found = block.deliveries(deliveries).size
+        // An unused column is a smell; a perturbation with nothing to perturb is an impossible
+        // request. The case would come out green having verified nothing, which is the shape this
+        // whole feature refuses to render.
+        asked.map { available.getValue(it) }
+            .firstOrNull { !it.applies(found) }
+            ?.let { throw FanoutError.NothingToPerturb(exampleName, it.name, found) }
         return Fanout(
             variants = asked.map { Perturbed(available.getValue(it), deliveries) },
             header = el("div", CLASS to GROUP_HEADER).text("stable under: ${asked.joinToString(", ")}"),
-            notices = asked.map { available.getValue(it) }
-                .filterNot { it.applies(found) }
-                .map { FanoutError.NothingToPerturb(exampleName, it.name, found).message!! }
+            consumed = asked.toSet()
         )
     }
+
+    /** The same, plus what a project knows how to do to its own system. */
+    fun and(vararg extra: Perturbation) = Invariance(perturbations + extra, deliveries)
 
     private class Perturbed(private val perturbation: Perturbation, private val deliveries: Set<String>) : Variant {
         override val name = perturbation.name

@@ -23,7 +23,9 @@ interface Variant {
 data class Fanout(
     val variants: List<Variant>,
     val header: Element? = null,
-    val notices: List<String> = emptyList()
+    val notices: List<String> = emptyList(),
+    /** Css classes the marker used up, stripped off the clones so they do not leak into the report. */
+    val consumed: Set<String> = emptySet()
 )
 
 /**
@@ -61,21 +63,25 @@ class ExampleFanout(private val sources: List<FanoutSource>) : DocumentParsingLi
     private fun fanOut(block: Element, source: FanoutSource) {
         val name = block.exampleName() ?: throw FanoutError.MissingTitle(source.notation, block.textSnippet())
         if (block.descendantsMarked(source.marker).isNotEmpty()) throw FanoutError.Nested(source.notation, name)
+        // Two markers would fan the block out twice, the second time inside the panes of the first.
+        sources.filter { it !== source && it.marker in block.classes() }
+            .takeIf { it.isNotEmpty() }
+            ?.let { throw FanoutError.ManyMarkers(name, listOf(source.notation) + it.map { s -> s.notation }) }
 
-        val (variants, header, notices) = source.fanout(block, name)
+        val (variants, header, notices, consumed) = source.fanout(block, name)
         if (variants.isEmpty()) throw FanoutError.NoVariants(source.notation, name)
 
         val group = VariantGroup(name, header, notices)
         val taken = mutableSetOf<String>()
         variants.forEach { variant ->
-            group.add(variant.name, block.cloneFor(variant, source.marker, name, taken))
+            group.add(variant.name, block.cloneFor(variant, consumed + source.marker, name, taken))
         }
         val parent = block.parent as Element
         parent.insertChild(group.element, parent.indexOf(block))
         parent.removeChild(block)
     }
 
-    private fun Element.cloneFor(variant: Variant, marker: String, name: String, taken: MutableSet<String>) =
+    private fun Element.cloneFor(variant: Variant, marker: Set<String>, name: String, taken: MutableSet<String>) =
         deepCopy().apply {
             classes(classes() - marker)
             variant.applyTo(this)

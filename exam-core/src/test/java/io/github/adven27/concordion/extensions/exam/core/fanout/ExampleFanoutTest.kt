@@ -132,12 +132,12 @@ class ExampleFanoutTest {
     }
 
     @Test
-    fun `a cyrillic column reference is seen, so a missing one is reported`() {
+    fun `a cyrillic reference is seen, so a missing column is said out loud`() {
         val doc = doc(outline("<p>{{количество}}</p>", rows(listOf("case", "qty"), listOf("rub", "100"))))
 
-        assertThatThrownBy { fanout(doc) }
-            .isInstanceOf(FanoutError.MissingColumns::class.java)
-            .hasMessageContaining("количество")
+        fanout(doc)
+
+        assertThat(doc.notices()).anySatisfy({ assertThat(it).contains("количество") })
     }
 
     @Test
@@ -192,12 +192,29 @@ class ExampleFanoutTest {
     }
 
     @Test
-    fun `a placeholder with no column of its own fails at parsing, with the names listed`() {
-        val doc = doc(outline("<p>{{qty}} {{rate}}</p>", rows(listOf("case", "qty"), listOf("rub", "100"))))
+    fun `a placeholder with no column is left to the evaluator, and said out loud`() {
+        val doc = doc(outline("<p>{{qty}} {{someVar}}</p>", rows(listOf("case", "qty"), listOf("rub", "100"))))
 
-        assertThatThrownBy { fanout(doc) }
-            .isInstanceOf(FanoutError.MissingColumns::class.java)
-            .hasMessageContaining("rate")
+        fanout(doc)
+
+        assertThat(doc.exampleBlocksMarked(EXAMPLE_BLOCK).single().value).contains("{{someVar}}")
+        assertThat(doc.notices()).singleElement().satisfies({ assertThat(it).contains("someVar") })
+    }
+
+    @Test
+    fun `two fanout markers on one block are refused, since each would fan out inside the other`() {
+        val doc = doc(
+            outline(
+                "<p>qty={{qty}}</p>",
+                rows(listOf("case", "qty"), listOf("rub", "100")),
+                marker = "$OUTLINE $STABLE_UNDER duplicate"
+            )
+        )
+
+        assertThatThrownBy { ExampleFanout(Outline(), Invariance()).beforeParsing(doc) }
+            .isInstanceOf(FanoutError.ManyMarkers::class.java)
+            .hasMessageContaining("[{outline}]")
+            .hasMessageContaining("[{stable-under}]")
     }
 
     @Test
@@ -214,7 +231,7 @@ class ExampleFanoutTest {
 
         assertThatThrownBy { fanout(doc) }
             .isInstanceOf(FanoutError.RowSizeMismatch::class.java)
-            .hasMessageContaining("1 cells")
+            .hasMessageContaining("1 cell")
     }
 
     @Test

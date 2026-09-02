@@ -81,12 +81,31 @@ class InvarianceTest {
     }
 
     @Test
-    fun `a case that could not be perturbed says so, instead of passing for a verified property`() {
+    fun `a case that could not be perturbed is refused, instead of passing for a verified property`() {
         val doc = doc(example("reorder", send("only one")))
+
+        assertThatThrownBy { fanout(doc) }
+            .isInstanceOf(FanoutError.NothingToPerturb::class.java)
+            .hasMessageContaining("1 delivery")
+    }
+
+    @Test
+    fun `a styling role is not mistaken for a perturbation`() {
+        val doc = doc(example("duplicate mh-100", send("m")))
 
         fanout(doc)
 
-        assertThat(doc.notices()).singleElement().satisfies({ assertThat(it).contains("reorder") })
+        assertThat(doc.cases()).hasSize(1)
+        assertThat(doc.cases().single().sends()).containsExactly("m", "m")
+    }
+
+    @Test
+    fun `perturbation names do not leak into the classes of the case`() {
+        val doc = doc(example("duplicate reorder", "${send("first")}${send("second")}"))
+
+        fanout(doc)
+
+        assertThat(doc.cases().map { it.classes() }).allMatch { it == setOf(EXAMPLE_BLOCK) }
     }
 
     @Test
