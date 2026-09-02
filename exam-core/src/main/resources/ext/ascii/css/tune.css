@@ -40,7 +40,8 @@
 }
 
 /* Search and print see nothing that is display:none, so a group can be flattened - by the button in
-   its header, and always on paper. */
+   its header, and always on paper. The class names here are VariantGroup.kt: GROUP, FLAT,
+   GROUP_FLATTEN. */
 .exam-fanout.exam-flat .nav-tabs,
 .exam-fanout.exam-flat .exam-fanout-flatten {
     display: none;

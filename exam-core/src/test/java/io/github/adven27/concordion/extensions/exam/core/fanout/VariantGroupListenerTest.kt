@@ -60,10 +60,48 @@ class VariantGroupListenerTest {
         VariantGroupListener().afterProcessingSpecification(event(group))
 
         val card = marked(group, GROUP).single()
-        assertThat(card.getAttributeValue("data-summary-cases")).isEqualTo("2")
-        assertThat(card.getAttributeValue("data-summary-success")).isEqualTo("3")
-        assertThat(card.getAttributeValue("data-summary-failure")).isEqualTo("1")
+        assertThat(card.getAttributeValue("data-fanout-cases")).isEqualTo("2")
+        assertThat(card.getAttributeValue("data-fanout-success")).isEqualTo("3")
+        assertThat(card.getAttributeValue("data-fanout-failure")).isEqualTo("1")
         assertThat(marked(group, "card-header").single().text).contains("1 of 2 cases failed")
+    }
+
+    @Test
+    fun `a group wears no attribute the agent report enumerates examples by`() {
+        val group = group(case("rub", failures = 0), case("usd", failures = 1))
+
+        VariantGroupListener().afterProcessingSpecification(event(group))
+
+        assertThat(marked(group, GROUP).single().getAttributeValue("data-summary-success")).isNull()
+    }
+
+    @Test
+    fun `a group counts its own cases, not the cases of a group nested in one of them`() {
+        val group = group(case("rub", failures = 0, nested = group(case("inner", failures = 1)).toXML()))
+
+        VariantGroupListener().afterProcessingSpecification(event(group))
+
+        val outer = marked(group, GROUP).first()
+        assertThat(outer.getAttributeValue("data-fanout-cases")).isEqualTo("1")
+        assertThat(outer.getAttributeValue("data-fanout-failure")).isEqualTo("0")
+    }
+
+    @Test
+    fun `a case that failed as it was expected to is not called a pass`() {
+        val group = group(case("rub", failures = 1, status = EXPECTED_TO_FAIL))
+
+        VariantGroupListener().afterProcessingSpecification(event(group))
+
+        assertThat(marked(group, "card-header").single().text).contains("1 case failed as expected")
+    }
+
+    @Test
+    fun `a status that is not the plain one is said out loud on the tab, as on an example card`() {
+        val group = group(case("rub", failures = 0, status = "Ignored"))
+
+        VariantGroupListener().afterProcessingSpecification(event(group))
+
+        assertThat(marked(group, TAB).single().text.trim()).isEqualTo("rubIgnored")
     }
 
     @Test
@@ -84,13 +122,19 @@ class VariantGroupListenerTest {
         .filter { ACTIVE in it.getAttributeValue("class").orEmpty().split(" ") }
         .map { it.getAttributeValue("id")?.removePrefix("pane-") ?: it.text.trim().take(3) }
 
-    private fun case(name: String, failures: Int, successes: Int = 1, status: String = "ExpectedToPass") = """
+    private fun case(
+        name: String,
+        failures: Int,
+        successes: Int = 1,
+        status: String = "ExpectedToPass",
+        nested: String = ""
+    ) = """
         <div class="$PANE" id="pane-$name">
           <div class="$EXAMPLE_BLOCK exam-example mb-3" data-type="example" data-summary-success="$successes"
                data-summary-ignore="0" data-summary-failure="$failures" data-summary-exception="0"
                data-summary-status="$status">
             <div class="title" data-bs-toggle="collapse"><a class="bd-example-title">$name</a></div>
-            <div class="$EXAMPLE_BLOCK collapse"><p>body of $name</p></div>
+            <div class="$EXAMPLE_BLOCK collapse"><p>body of $name</p>$nested</div>
           </div>
         </div>
     """.trimIndent() to """
