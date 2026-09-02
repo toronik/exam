@@ -75,6 +75,14 @@ private fun Element.isAncestorOf(node: Node): Boolean {
     return false
 }
 
+internal fun el(tag: String, vararg attrs: Pair<String, String>): Element =
+    Element(tag).apply { attrs.forEach { (name, value) -> addAttribute(Attribute(name, value)) } }
+
+internal operator fun Element.invoke(vararg children: Node?): Element =
+    apply { children.filterNotNull().forEach { appendChild(it) } }
+
+internal fun Element.text(text: String): Element = apply { appendChild(text) }
+
 /** Something to point at in an error message about a block that has no name to be called by. */
 internal fun Element.textSnippet(maxLength: Int = 60): String =
     value.trim().replace(Regex("\\s+"), " ").take(maxLength)

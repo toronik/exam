@@ -251,6 +251,48 @@ class ExampleFanoutTest {
     }
 
     @Test
+    fun `the clones become the cases of one group, with the matrix in its header`() {
+        val doc = doc(outline("<p>qty={{qty}}</p>", rows(listOf("case", "qty"), listOf("rub", "100"), listOf("usd", "10"))))
+
+        fanout(doc)
+
+        val group = doc.marked(GROUP).single()
+        assertThat(group.descendantsMarked(TAB).map { it.value }).containsExactly("rub", "usd")
+        assertThat(group.descendantsMarked(PANE))
+            .allMatch { pane -> EXAMPLE_BLOCK in pane.getChildElements("div")[0].classes() }
+        assertThat(group.descendantsMarked(GROUP_MATRIX).single().query(".//table").elements()).hasSize(1)
+    }
+
+    @Test
+    fun `the matrix in the header is data, not another outline`() {
+        val doc = doc(outline("<p>qty={{qty}}</p>", rows(listOf("case", "qty"), listOf("rub", "100"))))
+
+        fanout(doc)
+
+        assertThat(doc.marked(GROUP_MATRIX).single().tableMarked(OUTLINE_ROWS)).isNull()
+    }
+
+    @Test
+    fun `the first case is active before anything has run, so a report without javascript still shows a body`() {
+        val doc = doc(outline("<p>qty={{qty}}</p>", rows(listOf("case", "qty"), listOf("rub", "100"), listOf("usd", "10"))))
+
+        fanout(doc)
+
+        assertThat(doc.marked(PANE).map { it.classes() }).containsExactly(setOf(PANE, ACTIVE), setOf(PANE))
+        assertThat(doc.marked(TAB).map { it.classes() }).containsExactly(setOf(TAB, ACTIVE), setOf(TAB))
+    }
+
+    @Test
+    fun `a warning about the markup is shown in the header of the group it is about`() {
+        val doc = doc(outline("<p>qty={{qty}}</p>", rows(listOf("case", "qty", "rate"), listOf("rub", "100", "90"))))
+
+        fanout(doc)
+
+        val notice = doc.query("//div[contains(@class, 'card-header')]/div[@class='alert alert-warning']").elements()
+        assertThat(notice).singleElement().satisfies({ assertThat(it.value).contains("rate") })
+    }
+
+    @Test
     fun `an unmarked example block is left alone`() {
         val doc = doc(outline("<p>plain</p>", rows = "", marker = ""))
 
@@ -260,6 +302,8 @@ class ExampleFanoutTest {
     }
 
     private fun fanout(doc: Document) = ExampleFanout(Outline()).beforeParsing(doc)
+
+    private fun Document.marked(cls: String) = rootElement.descendantsMarked(cls)
 
     private fun Document.notices() = query("//div[@class='alert alert-warning']").elements().map { it.value }
 

@@ -12,6 +12,7 @@ import io.github.adven27.concordion.extensions.exam.core.commands.ExamCommand
 import io.github.adven27.concordion.extensions.exam.core.fanout.ExampleFanout
 import io.github.adven27.concordion.extensions.exam.core.fanout.Outline
 import io.github.adven27.concordion.extensions.exam.core.fanout.Row
+import io.github.adven27.concordion.extensions.exam.core.fanout.VariantGroupExtension
 import io.github.adven27.concordion.extensions.exam.core.handlebars.EvaluatorValueResolver
 import io.github.adven27.concordion.extensions.exam.core.handlebars.HANDLEBARS
 import io.github.adven27.concordion.extensions.exam.core.json.DefaultObjectMapperProvider
@@ -179,6 +180,8 @@ class ExamExtension(private vararg var plugins: ExamPlugin) : ConcordionExtensio
         ex.withExampleListener(ExamExampleListener(skipDecider))
         // Before the listener that parses commands, so that every clone gets commands of its own.
         ex.withDocumentParsingListener(ExampleFanout(outline))
+        // After FocusOnErrorsListener: a group decides what to show of its own cases.
+        VariantGroupExtension().addTo(ex)
         ex.withDocumentParsingListener(ExamDocumentParsingListener(registry))
     }
 

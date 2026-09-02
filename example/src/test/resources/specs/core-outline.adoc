@@ -1,16 +1,16 @@
 === outline [[e-outline]]
 
-An example marked `[{outline}]` together with a `[{rows}]` table of variants becomes *one example per
-data row*: the block is cloned, every clone is named after its row, the table is cut out of the clone
-and the row values are put into its body.
+An example marked `[\{outline}]` together with a `[\{rows}]` table of variants becomes *one example
+per data row*: the block is cloned, every clone is named after its row, the table is cut out of the
+clone and the row values are put into its body.
 
-What `<<e-execute,e-execute on a table>>` does for a fixture call, `[{outline}]` does for a whole
+What `<<e-execute,e-execute on a table>>` does for a fixture call, `[\{outline}]` does for a whole
 example. The difference is what gets repeated: `e-execute` repeats a call and compares cell by cell,
-`[{outline}]` repeats a body of arbitrary commands - `e-db-set`, `e-mq-set`, `e-http`, checks - and
+`[\{outline}]` repeats a body of arbitrary commands - `e-db-set`, `e-mq-set`, `e-http`, checks - and
 every clone is a concordion example of its own, with its own status in the report, its own
-`[{before}]`, its own `{ExpectedToFail}` and its own line in `withFocusOnFailed`. Use `e-execute`
-when the inputs of a function vary, `[{outline}]` when the data of a scenario varies and the steps
-stay the same.
+`[\{before}]`, its own `[\{ExpectedToFail}]` and its own line in `withFocusOnFailed`. Use
+`e-execute` when the inputs of a function vary, `[\{outline}]` when the data of a scenario varies
+and the steps stay the same.
 
 .Usage
 [source,asciidoc]
@@ -44,7 +44,7 @@ The example above is what proves the fanout rather than describing it: `outlineR
 calls, so the run numbers `1` and `2` hold only if the very same block was executed twice, in the
 order of the rows, each time with its own value substituted.
 
-NOTE: A column name must not collide with a document attribute: `{{run}}` contains `{run}`, which
+NOTE: A column name must not collide with a document attribute: `{\{run}}` contains `\{run}`, which
 asciidoctor substitutes before Exam ever sees the document.
 
 Row values are substituted into the text of the clone - the report has to show the case, not the
@@ -74,16 +74,30 @@ a crowd, World
 //end::outline-file[]
 =====
 
+==== What the report shows
+
+The cases of one outline are one thing in the report, not a row of unrelated cards: the matrix of
+variants sits in the header of the group - it is the shortest statement of what the cases differ in,
+and it is cut out of the clones themselves - and the bodies are tabs. The tab strip is the map of
+outcomes, one badge per case, and only one body is on screen: the template exists once, filled in
+with the values of the case selected, so ten more rows add ten buttons instead of ten screens. The
+case opened by default is the first one that needs attention, the first case if none does.
+
+Search and print see nothing that is hidden, so *all cases at once* in the header lays the group
+flat; printing does it without being asked. A link to a single case - the ones the console and the
+agent report print - opens the tab that case is in.
+
 .Markup that cannot be run is refused while the document is parsed, never quietly skipped
 [%collapsible]
 ====
-- `[{outline}]` without a `[{rows}]` table, or with a table that has a header and no data
+- `[\{outline}]` without a `[\{rows}]` table, or with a table that has a header and no data
 - a `{{placeholder}}` in the body with no column of that name - the missing names are listed
 - a data row of a different width than the header, a blank column name, duplicate column names
-- a nested `[{outline}]`
-- an `[{outline}]` block without a title: a titled block is what Exam turns into an example, so an
+- a nested `[\{outline}]`
+- an `[\{outline}]` block without a title: a titled block is what Exam turns into an example, so an
 untitled one has nothing to clone
 
-A column no body reads is a warning in the report instead - it is a smell (a matrix of unrelated
-cases), not a break. Columns that only name the case, `case` by default, are not counted as unused.
+A column no body reads is a warning in the header of the group instead - it is a smell (a matrix of
+unrelated cases), not a break. Columns that only name the case, `case` by default, are not counted
+as unused.
 ====

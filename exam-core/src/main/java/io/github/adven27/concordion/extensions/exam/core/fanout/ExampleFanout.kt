@@ -1,6 +1,5 @@
 package io.github.adven27.concordion.extensions.exam.core.fanout
 
-import nu.xom.Attribute
 import nu.xom.Document
 import nu.xom.Element
 import org.concordion.api.listener.DocumentParsingListener
@@ -17,10 +16,15 @@ interface Variant {
 }
 
 /**
- * What a [FanoutSource] made of one marked block: the clones to produce and anything the reader of
- * the report should be told about the markup that produced them.
+ * What a [FanoutSource] made of one marked block: the clones to produce, what tells the cases apart
+ * (shown in the header of the group, since it is cut out of the clones themselves) and anything the
+ * reader of the report should be told about the markup that produced them.
  */
-data class Fanout(val variants: List<Variant>, val notices: List<String> = emptyList())
+data class Fanout(
+    val variants: List<Variant>,
+    val matrix: Element? = null,
+    val notices: List<String> = emptyList()
+)
 
 /**
  * Turns one marked example block into the variants it stands for. Outline reads them off a table of
@@ -58,16 +62,16 @@ class ExampleFanout(private val sources: List<FanoutSource>) : DocumentParsingLi
         val name = block.exampleName() ?: throw FanoutError.MissingTitle(source.notation, block.textSnippet())
         if (block.descendantsMarked(source.marker).isNotEmpty()) throw FanoutError.Nested(source.notation, name)
 
-        val (variants, notices) = source.fanout(block, name)
+        val (variants, matrix, notices) = source.fanout(block, name)
         if (variants.isEmpty()) throw FanoutError.NoVariants(source.notation, name)
 
-        val parent = block.parent as Element
-        var at = parent.indexOf(block)
-        notices.forEach { parent.insertChild(warning(it), at++) }
+        val group = VariantGroup(name, matrix, notices)
         val taken = mutableSetOf<String>()
         variants.forEach { variant ->
-            parent.insertChild(block.cloneFor(variant, source.marker, name, taken), at++)
+            group.add(variant.name, block.cloneFor(variant, source.marker, name, taken))
         }
+        val parent = block.parent as Element
+        parent.insertChild(group.element, parent.indexOf(block))
         parent.removeChild(block)
     }
 
@@ -85,10 +89,5 @@ class ExampleFanout(private val sources: List<FanoutSource>) : DocumentParsingLi
         var suffix = 2
         while ("$candidate #$suffix" in taken) suffix++
         return "$candidate #$suffix"
-    }
-
-    private fun warning(text: String) = Element("div").apply {
-        addAttribute(Attribute(CLASS, "alert alert-warning"))
-        appendChild(text)
     }
 }
