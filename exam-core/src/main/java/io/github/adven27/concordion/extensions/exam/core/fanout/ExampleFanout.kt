@@ -48,7 +48,8 @@ interface FanoutSource {
  *
  * Cloning is a DOM operation done while the document is being parsed, before any command runs, so
  * every clone is a first class example: its own status in the report, its own `[{before}]`,
- * `@BeforeExample`, `ExpectedToFail` and `withFocusOnFailed`. Nothing has to be done about the
+ * `@BeforeExample` and `ExpectedToFail`, and it is folded away or left open on its own account when
+ * `withFocusOnFailed` collapses what passed. Nothing has to be done about the
  * `ResultRecorder` and nothing depends on the order extensions are registered in - by this point
  * `ConcordionPostprocessor` (an asciidoctor postprocessor, a whole stage earlier) has already
  * turned titled blocks into examples.

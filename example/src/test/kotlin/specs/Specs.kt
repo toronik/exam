@@ -81,14 +81,18 @@ open class Specs : AbstractSpecs() {
     fun someJson() = "{\"result\": 1}"
     fun someXml() = "<result>1</result>"
     fun setUpUser(s: String) = users.add(s)
-    fun timesRegistered(name: String) = users.count { it == name }
 
     private val names = mutableSetOf<String>()
+    private val delivered = mutableListOf<String>()
 
     /** Idempotent on purpose: a set forgets that it was told twice, and forgets in what order. */
     fun remember(name: String) = names.add(name)
     fun timesRemembered(name: String) = names.count { it == name }
     fun namesRemembered() = names.size
+
+    /** Not idempotent on purpose, and a list of its own: delivered twice is remembered twice. */
+    fun deliver(name: String) = delivered.add(name)
+    fun timesDelivered(name: String) = delivered.count { it == name }
     fun search(s: String) = users.filter { it.contains(s) }
     fun lowercase(name: String): Result = name.lowercase().let {
         Result(it, """{ "result": "$it" }""", """<result>$it</result>""")

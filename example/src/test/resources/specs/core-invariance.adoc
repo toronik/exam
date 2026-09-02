@@ -1,27 +1,17 @@
 === stable under [[e-stable-under]]
 
-An example marked `[\{stable-under}]` is run once per *perturbation* named in the marker, and every
-case has to end the same way the example does. The perturbations are things that happen to a
-delivery in a system nobody has ordered to be exactly-once: `duplicate` performs every delivery of
-the case twice, `reorder` performs them in the opposite order.
+An example marked `[\{stable-under}]` runs once per perturbation named in the marker, and every case
+has to end the way the example does. `duplicate` performs every delivery of the case twice, `reorder`
+performs them in the opposite order.
 
-This is a different kind of statement from `<<e-outline,an outline>>`. An outline says these cases
-differ; invariance says *the outcome does not depend on how the deliveries arrived* - a property of
-the system, checked by putting the same body through a changed world and demanding the same answer.
-Today an author who wants to say it has to copy the whole example and rewrite the deliveries by
-hand, which is why hardly anybody says it.
+<<e-outline,An outline>> says that these cases differ; this says that the outcome does not depend on
+how the deliveries arrived.
 
 .Usage
 [source,asciidoc]
 --
 include::core-invariance.adoc[tags=stable]
 --
-
-Nothing is intercepted at run time: a perturbation rewrites the deliveries of the case while the
-document is parsed, so the doubled step is in the report to be read, and the reader of a failure is
-told what the case was put through. Setting up and checking are left alone - what is in question is
-the delivery, not the expectation. A delivery whose repetition is honest, a counter that is meant to
-count twice, is marked `[\{stable-except}]` and left as it stands.
 
 =====
 //tag::stable[]
@@ -30,38 +20,82 @@ count twice, is marked `[\{stable-except}]` and left as it stands.
 ====
 Given:: [{exec}remember(#TEXT)]`Bob` and [{exec}remember(#TEXT)]`Ann` are remembered
 Then:: `Bob` is remembered [{eq}timesRemembered('Bob')]`1` time,
-and [{eq}namesRemembered()]`2` names are remembered in all
+and [{eq}namesRemembered()]`2` names in all
 //end::stable[]
 ====
 =====
 
-A green run of a `[\{stable-under}]` example proves nothing on its own - the same body passing again
-is what one would expect of a body that ignores its input. What makes the marker worth anything is
-that a body which is *not* invariant goes red under the perturbation. The next example is such a
-body: registering a user appends to a list, so performing the delivery twice registers him twice. It
-is marked `{ExpectedToFail}`, which is what keeps it in the suite: were duplication to quietly stop
-happening, this example would pass, and an example that was expected to fail and did not is a broken
-build.
+What is perturbed is *the deliveries of the document*, not the behaviour of the system. So `reorder`
+over one `[\{mq-set}]` table of three messages reorders nothing - that is one delivery; time cannot
+be perturbed at all; and over `[\{exec}]` the property checked is that calling the fixture twice is
+safe, which is weaker than a broker delivering twice. A delivery is anything executed that is not
+excepted - `e-mq-set`, `e-execute` and `e-http` by default - and the line is not clean by command
+name: `e-http` both sends and checks, `e-execute` also sets things up.
+
+A repetition that is honest is excepted: everything inside a `[\{stable-except}]` block is left as it
+stands.
+
+=====
+//tag::except[]
+.Delivered once on purpose
+[{stable-under} duplicate]
+====
+[{exec}remember(#TEXT)]`Ann` is remembered.
+
+[{stable-except}]
+--
+[{exec}deliver(#TEXT)]`Bob` is delivered, once and only once.
+--
+
+`Ann` is remembered [{eq}timesRemembered('Ann')]`1` time
+and `Bob` delivered [{eq}timesDelivered('Bob')]`1` time.
+//end::except[]
+====
+=====
+
+A green case proves little on its own: the same body passing again is what one expects of a body that
+ignores its input. The guard is a body that is *not* invariant - delivering a name appends it - kept
+in the suite by `{ExpectedToFail}`. Were duplication to stop happening, this example would pass, and
+an example expected to fail that did not is a broken build.
 
 =====
 //tag::not-stable[]
-.Registering a user is not stable under duplication
+.Delivering a name twice delivers it twice
 [{stable-under} duplicate ExpectedToFail]
 ====
-Given:: user [{exec}setUpUser(#TEXT)]`Bob` is registered
-Then:: `Bob` is registered [{eq}timesRegistered('Bob')]`1` time
+Given:: [{exec}deliver(#TEXT)]`Bob` is delivered
+Then:: `Bob` is delivered [{eq}timesDelivered('Bob')]`1` time
 //end::not-stable[]
 ====
 =====
 
-.What a marker is refused for
-[%collapsible]
-====
-- a perturbation Exam does not know - the known ones are listed in the failure
-- an example with nothing to perturb: a case whose deliveries a perturbation could not touch
-verifies nothing the plain example does not, and the group says so in its header
+.Refused, and how to add a perturbation of your own
+[{collapse}]
+=====
+A marker naming no perturbation Exam knows is refused with the known ones listed, and so is a
+perturbation with nothing to perturb: a case that verifies nothing the example already verifies must
+not be published as a verified property.
 
-A project adds a perturbation of its own through `withPerturbations(...)`: a restart between
-deliveries, an outage of a dependency - anything the system is supposed to be indifferent to and
-only the fixture knows how to perform.
-====
+What only the fixture can do - restart the application, take a dependency away - is a `Perturbation`
+of the project's own, registered with `withPerturbations(...)`:
+
+[source,kotlin]
+----
+object Restart : Perturbation {
+    override val name = "restart"
+    override val effect = "the application was restarted between the deliveries of this case"
+    override fun applies(deliveries: Int) = deliveries > 1
+    override fun perturb(deliveries: List<Element>) = deliveries.drop(1).forEach { delivery ->
+        (delivery.parent as Element).let { parent ->
+            parent.insertChild(
+                Element("div").apply { addExamAttr("execute", "restartSut()") },
+                parent.indexOf(delivery)
+            )
+        }
+    }
+}
+----
+
+`restartSut()` is a method of the fixture, so nothing about restarting a system leaks into the
+framework.
+=====
