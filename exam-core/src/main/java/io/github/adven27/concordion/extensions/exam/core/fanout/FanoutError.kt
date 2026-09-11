@@ -28,8 +28,8 @@ sealed class FanoutError(message: String) : IllegalStateException(message) {
         "Example \"$example\" is marked [{outline}] but has no [{rows}] table"
     )
 
-    class EmptyRows(example: String) : FanoutError(
-        "The [{rows}] table of example \"$example\" has a header but not a single data row"
+    class EmptyRows(example: String, notation: String) : FanoutError(
+        "The $notation table of example \"$example\" has a header but not a single data row"
     )
 
     class ManyMarkers(example: String, notations: List<String>) : FanoutError(
@@ -53,8 +53,8 @@ sealed class FanoutError(message: String) : IllegalStateException(message) {
         "The [{rows}] columns of example \"$example\" are not used by its body: ${names.listed()}"
     )
 
-    class RowSizeMismatch(example: String, row: Int, expected: Int, actual: Int) : FanoutError(
-        "Data row #$row of the [{rows}] table of example \"$example\" has ${count(actual, "cell", "cells")}" +
+    class RowSizeMismatch(example: String, notation: String, row: Int, expected: Int, actual: Int) : FanoutError(
+        "Data row #$row of the $notation table of example \"$example\" has ${count(actual, "cell", "cells")}" +
             " instead of $expected, as in the header"
     )
 
@@ -63,9 +63,49 @@ sealed class FanoutError(message: String) : IllegalStateException(message) {
     )
 
     class UnknownPerturbation(example: String, unrecognized: Set<String>, available: Set<String>) : FanoutError(
-        "Example \"$example\" is marked [{stable-under}] but names no perturbation Exam knows" +
-            (if (unrecognized.isEmpty()) "" else " (found ${unrecognized.listed()})") +
-            ". Known: ${available.listed()}"
+        "Example \"$example\" asks to be stable under ${unrecognized.listed()}," +
+            " which Exam does not know. Known: ${available.listed()}"
+    )
+
+    class NoPerturbations(example: String, available: Set<String>) : FanoutError(
+        "Example \"$example\" is marked [{stable-under}] but names no perturbation, inline or in a" +
+            " [{perturbations}] table. Known: ${available.listed()}"
+    )
+
+    /**
+     * Rather than a precedence rule nobody would remember: two lists of perturbations for one example
+     * is a question about which of them runs, and a spec is not the place for that question.
+     */
+    class TwoWaysToPerturb(example: String) : FanoutError(
+        "Example \"$example\" names perturbations both in its marker and in a [{perturbations}] table." +
+            " Use one or the other"
+    )
+
+    class BlankPerturbation(example: String) : FanoutError(
+        "The [{perturbations}] table of example \"$example\" has a row with no perturbation in it"
+    )
+
+    class DuplicatePerturbations(example: String, names: Set<String>) : FanoutError(
+        "The [{perturbations}] table of example \"$example\" names ${names.listed()} more than once"
+    )
+
+    /**
+     * The first row of a table is its header here as it is in [{rows}]. A perturbation name standing
+     * in it is a header nobody wrote, and dropping it would silently lose the case it stands for.
+     */
+    class MissingPerturbationsHeader(example: String, first: String) : FanoutError(
+        "The first row of the [{perturbations}] table of example \"$example\" is its header, and" +
+            " \"$first\" is a perturbation. Give the table a header row"
+    )
+
+    /**
+     * The shape is deliberately a table rather than a list, so that a perturbation can one day be
+     * given arguments - `duplicate` three times, `delay` by thirty seconds. Until it can, a spec
+     * asking for them is told so instead of having them dropped.
+     */
+    class UnsupportedArguments(example: String, name: String, arguments: List<String>) : FanoutError(
+        "The [{perturbations}] table of example \"$example\" passes ${arguments.joinToString(", ")} to" +
+            " \"$name\", and arguments to a perturbation are not supported yet"
     )
 
     class NothingToPerturb(example: String, name: String, deliveries: Int) : FanoutError(

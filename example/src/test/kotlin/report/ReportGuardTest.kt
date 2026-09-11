@@ -80,17 +80,18 @@ class ReportGuardTest {
         }
     }
 
+    /** Covers both sources: the matrix of an outline and the table of perturbations. */
     @Test
-    fun `an outline has as many cases as its matrix has data rows`() {
-        val outlines = groups().mapNotNull { group ->
+    fun `a group whose cases come from a table has as many of them as the table has data rows`() {
+        val fromTable = groups().mapNotNull { group ->
             group.own("div", "card-header").flatMap { it.own("div", "exam-fanout-header") }
                 .flatMap { it.query(".//table").elements() }
                 .singleOrNull()
                 ?.let { group to it.query(".//tr").size() - 1 }
         }
 
-        assertThat(outlines).isNotEmpty()
-        outlines.forEach { (group, rows) ->
+        assertThat(fromTable).hasSizeGreaterThanOrEqualTo(3)
+        fromTable.forEach { (group, rows) ->
             assertThat(group.getAttributeValue("data-fanout-cases"))
                 .describedAs("cases of ${group.getAttributeValue("id")}")
                 .isEqualTo(rows.toString())

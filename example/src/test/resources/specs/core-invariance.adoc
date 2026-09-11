@@ -1,11 +1,12 @@
 === stable under [[e-stable-under]]
 
-An example marked `[\{stable-under}]` runs once per perturbation named in the marker, and every case
-has to end the way the example does. `duplicate` performs every delivery of the case twice, `reorder`
-performs them in the opposite order.
+An example marked `[\{stable-under}]` runs once per perturbation it names, and every case has to end
+the way the example does. `duplicate` performs every delivery of the case twice, `reorder` performs
+them in the opposite order.
 
 <<e-outline,An outline>> says that these cases differ; this says that the outcome does not depend on
-how the deliveries arrived.
+how the deliveries arrived. Both take their cases from a `[\{perturbations}]` or `[\{rows}]` table
+of the example, and both turn them into examples of their own.
 
 .Usage
 [source,asciidoc]
@@ -16,14 +17,34 @@ include::core-invariance.adoc[tags=stable]
 =====
 //tag::stable[]
 .Remembering a name
-[{stable-under} duplicate reorder]
+[{stable-under}]
 ====
 Given:: [{exec}remember(#TEXT)]`Bob` and [{exec}remember(#TEXT)]`Ann` are remembered
 Then:: `Bob` is remembered [{eq}timesRemembered('Bob')]`1` time,
 and [{eq}namesRemembered()]`2` names in all
+
+.perturbations
+[{perturbations}]
+,===
+perturbation
+duplicate
+reorder
+,===
 //end::stable[]
 ====
 =====
+
+One or two perturbations can be named in the marker instead, which is how the examples below are
+written:
+
+[source,asciidoc]
+----
+[{stable-under} duplicate reorder]
+----
+
+The table is the one to reach for when there are more of them, and it is where arguments will go when
+a perturbation takes any. Naming perturbations both ways at once is refused rather than resolved by a
+precedence rule nobody would remember.
 
 What is perturbed is *the deliveries of the document*, not the behaviour of the system. So `reorder`
 over one `[\{mq-set}]` table of three messages reorders nothing - that is one delivery; time cannot

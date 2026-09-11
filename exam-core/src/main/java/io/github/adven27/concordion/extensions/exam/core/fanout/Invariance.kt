@@ -10,6 +10,9 @@ const val STABLE_UNDER = "e-stable-under"
 /** Css class of the `[{stable-except}]` marker, declared as a role: `:stable-except: role=e-stable-except`. */
 const val STABLE_EXCEPT = "e-stable-except"
 
+/** Exam-namespaced attribute of the `[{perturbations}]` table, declared as `:perturbations: e-perturbations=`. */
+const val PERTURBATIONS = "perturbations"
+
 /** Commands that deliver something to the system, as opposed to setting it up or checking it. */
 val DELIVERIES = setOf("mq-set", "execute", "http")
 
@@ -92,16 +95,13 @@ class Invariance @JvmOverloads constructor(
     override val notation = "[{stable-under}]"
 
     override fun fanout(block: Element, exampleName: String): Fanout {
+        val table = block.tableMarked(PERTURBATIONS)
         // Known names only: a block may legitimately carry a styling role, and calling that an
         // unknown perturbation would refuse a document over a css class.
-        val asked = block.classes().filter { it in available }
-        if (asked.isEmpty()) {
-            throw FanoutError.UnknownPerturbation(
-                exampleName,
-                block.classes() - marker - EXAMPLE_BLOCK - STATUSES,
-                available.keys
-            )
-        }
+        val inline = block.classes().filter { it in available }
+        if (table != null && inline.isNotEmpty()) throw FanoutError.TwoWaysToPerturb(exampleName)
+
+        val asked = if (table == null) inline(block, exampleName) else fromTable(table, exampleName)
         val found = block.deliveries(deliveries).size
         // An unused column is a smell; a perturbation with nothing to perturb is an impossible
         // request. The case would come out green having verified nothing, which is the shape this
@@ -111,9 +111,51 @@ class Invariance @JvmOverloads constructor(
             ?.let { throw FanoutError.NothingToPerturb(exampleName, it.name, found) }
         return Fanout(
             variants = asked.map { Perturbed(available.getValue(it), deliveries) },
-            header = el("div", CLASS to GROUP_HEADER).text("stable under: ${asked.joinToString(", ")}"),
-            consumed = asked.toSet()
+            // The table itself is what the group shows, exactly as an outline shows its matrix; the
+            // inline form has nothing to show but the names.
+            header = table?.deepCopy()?.also { it.removeAttribute(it.getAttribute(PERTURBATIONS, NS)) }
+                ?: el("div", CLASS to GROUP_HEADER).text("stable under: ${asked.joinToString(", ")}"),
+            consumed = if (table == null) asked.toSet() else emptySet()
         )
+    }
+
+    private fun inline(block: Element, exampleName: String): List<String> {
+        val asked = block.classes().filter { it in available }
+        if (asked.isNotEmpty()) return asked
+        val unrecognized = block.classes() - marker - EXAMPLE_BLOCK - STATUSES
+        throw if (unrecognized.isEmpty()) {
+            FanoutError.NoPerturbations(exampleName, available.keys)
+        } else {
+            FanoutError.UnknownPerturbation(exampleName, unrecognized, available.keys)
+        }
+    }
+
+    /**
+     * The same shape an outline reads its cases from: a header row, then one row per perturbation.
+     * The name is the first column, and a row is allowed to be wider than that so arguments have
+     * somewhere to go the day they exist - until then a spec asking for them is told so.
+     */
+    private fun fromTable(table: Element, exampleName: String): List<String> {
+        val rows = table.cellRows()
+        if (rows.size < 2) throw FanoutError.EmptyRows(exampleName, "[{perturbations}]")
+        val header = rows.first()
+        header.firstOrNull { it in available }
+            ?.let { throw FanoutError.MissingPerturbationsHeader(exampleName, it) }
+        rows.drop(1).forEachIndexed { i, cells ->
+            if (cells.size != header.size) {
+                throw FanoutError.RowSizeMismatch(exampleName, "[{perturbations}]", i + 1, header.size, cells.size)
+            }
+            if (cells.size > 1) {
+                throw FanoutError.UnsupportedArguments(exampleName, cells.first(), cells.drop(1))
+            }
+        }
+        val named = rows.drop(1).map { it.first() }
+        if (named.any { it.isBlank() }) throw FanoutError.BlankPerturbation(exampleName)
+        (named.toSet() - available.keys).ifNotEmpty {
+            throw FanoutError.UnknownPerturbation(exampleName, it, available.keys)
+        }
+        named.duplicates().ifNotEmpty { throw FanoutError.DuplicatePerturbations(exampleName, it) }
+        return named
     }
 
     /** The same, plus what a project knows how to do to its own system. */
@@ -123,6 +165,9 @@ class Invariance @JvmOverloads constructor(
         override val name = perturbation.name
 
         override fun applyTo(clone: Element) {
+            // The list of perturbations belongs to the group, not to each of its cases - the same
+            // reason an outline cuts its matrix out of a clone.
+            clone.tableMarked(PERTURBATIONS)?.detach()
             perturbation.perturb(clone.deliveries(deliveries))
             clone.insertChild(el("div", CLASS to "alert alert-info").text(perturbation.effect), 0)
         }

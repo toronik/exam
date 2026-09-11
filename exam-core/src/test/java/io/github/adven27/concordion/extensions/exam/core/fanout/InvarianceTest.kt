@@ -126,6 +126,129 @@ class InvarianceTest {
         assertThat(doc.cases().single().getChildElements("div")[0].value).isEqualTo(Duplicate.effect)
     }
 
+    @Test
+    fun `perturbations can be named by a table, the way an outline names its cases`() {
+        val doc = doc(example("", send("first") + send("second") + perturbations("duplicate", "reorder")))
+
+        fanout(doc)
+
+        assertThat(doc.cases().map { it.exampleName() })
+            .containsExactly("Ingest — duplicate", "Ingest — reorder")
+        assertThat(doc.cases().first().sends()).containsExactly("first", "first", "second", "second")
+    }
+
+    @Test
+    fun `the table of perturbations is what the group shows, with its marker taken off`() {
+        val doc = doc(example("", send("m") + send("n") + perturbations("duplicate")))
+
+        fanout(doc)
+
+        val header = doc.rootElement.descendantsMarked(GROUP_HEADER).single()
+        assertThat(header.query(".//table").elements()).hasSize(1)
+        assertThat(header.tableMarked(PERTURBATIONS)).isNull()
+    }
+
+    @Test
+    fun `the table is cut out of the cases, as the matrix of an outline is`() {
+        val doc = doc(example("", send("m") + send("n") + perturbations("duplicate")))
+
+        fanout(doc)
+
+        assertThat(doc.cases().single().tableMarked(PERTURBATIONS)).isNull()
+    }
+
+    @Test
+    fun `naming perturbations twice over, inline and in a table, is refused rather than resolved`() {
+        val doc = doc(example("duplicate", send("m") + send("n") + perturbations("reorder")))
+
+        assertThatThrownBy { fanout(doc) }.isInstanceOf(FanoutError.TwoWaysToPerturb::class.java)
+    }
+
+    @Test
+    fun `a table with a header and no perturbation fails at parsing`() {
+        val doc = doc(example("", send("m") + perturbations()))
+
+        assertThatThrownBy { fanout(doc) }
+            .isInstanceOf(FanoutError.EmptyRows::class.java)
+            .hasMessageContaining("[{perturbations}]")
+    }
+
+    @Test
+    fun `a perturbation Exam does not know fails at parsing, wherever it is named`() {
+        val doc = doc(example("", send("m") + perturbations("outage")))
+
+        assertThatThrownBy { fanout(doc) }
+            .isInstanceOf(FanoutError.UnknownPerturbation::class.java)
+            .hasMessageContaining("outage")
+            .hasMessageContaining("duplicate")
+    }
+
+    @Test
+    fun `the same perturbation twice fails at parsing, instead of running the case twice`() {
+        val doc = doc(example("", send("m") + perturbations("duplicate", "duplicate")))
+
+        assertThatThrownBy { fanout(doc) }
+            .isInstanceOf(FanoutError.DuplicatePerturbations::class.java)
+            .hasMessageContaining("duplicate")
+    }
+
+    @Test
+    fun `a row naming nothing fails at parsing`() {
+        val doc = doc(example("", send("m") + perturbations("duplicate", " ")))
+
+        assertThatThrownBy { fanout(doc) }.isInstanceOf(FanoutError.BlankPerturbation::class.java)
+    }
+
+    @Test
+    fun `a table without a header would lose its first case, so it is refused`() {
+        val doc = doc(
+            example(
+                "",
+                send("m") + """<table e:perturbations=""><tbody>
+                    <tr><td>duplicate</td></tr>
+                    <tr><td>reorder</td></tr>
+                    </tbody></table>"""
+            )
+        )
+
+        assertThatThrownBy { fanout(doc) }
+            .isInstanceOf(FanoutError.MissingPerturbationsHeader::class.java)
+            .hasMessageContaining("duplicate")
+    }
+
+    @Test
+    fun `arguments have a place in the shape but no meaning yet, and are said to be missing`() {
+        val doc = doc(
+            example(
+                "",
+                send("m") + """<table e:perturbations=""><tbody>
+                    <tr><td>perturbation</td><td>times</td></tr>
+                    <tr><td>duplicate</td><td>3</td></tr>
+                    </tbody></table>"""
+            )
+        )
+
+        assertThatThrownBy { fanout(doc) }
+            .isInstanceOf(FanoutError.UnsupportedArguments::class.java)
+            .hasMessageContaining("3")
+    }
+
+    @Test
+    fun `a marker naming no perturbation at all is refused with the known ones listed`() {
+        val doc = doc(example("", send("m")))
+
+        assertThatThrownBy { fanout(doc) }
+            .isInstanceOf(FanoutError.NoPerturbations::class.java)
+            .hasMessageContaining("reorder")
+    }
+
+    private fun perturbations(vararg named: String) = """
+        <table e:perturbations=""><tbody>
+        <tr><td>perturbation</td></tr>
+        ${named.joinToString("\n") { "<tr><td>$it</td></tr>" }}
+        </tbody></table>
+    """.trimIndent()
+
     private object Outage : Perturbation {
         override val name = "outage"
         override val effect = "thrice, why not"

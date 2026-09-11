@@ -53,6 +53,11 @@ internal fun Element.tableMarked(marker: String): Element? =
 
 internal fun Element.deepCopy(): Element = copy() as Element
 
+/** Rows of a table as their trimmed cell values, header row included. Both sources read one. */
+internal fun Element.cellRows(): List<List<String>> = query(".//tr").elements().map { row ->
+    row.query(".//td | .//th").elements().map { it.value.trim() }
+}
+
 internal fun Element.detach() = parent?.let { (it as Element).removeChild(this) }
 
 /**
@@ -82,6 +87,12 @@ internal operator fun Element.invoke(vararg children: Node?): Element =
     apply { children.filterNotNull().forEach { appendChild(it) } }
 
 internal fun Element.text(text: String): Element = apply { appendChild(text) }
+
+internal fun List<String>.duplicates() = groupingBy { it }.eachCount().filterValues { it > 1 }.keys
+
+internal inline fun Set<String>.ifNotEmpty(action: (Set<String>) -> Unit) {
+    if (isNotEmpty()) action(this)
+}
 
 /** Something to point at in an error message about a block that has no name to be called by. */
 internal fun Element.textSnippet(maxLength: Int = 60): String =

@@ -65,20 +65,18 @@ class Outline @JvmOverloads constructor(
     }
 
     private fun rows(table: Element, exampleName: String): List<Row> {
-        val rows = table.query(".//tr").elements()
-        if (rows.size < 2) throw FanoutError.EmptyRows(exampleName)
-        val header = rows.first().cells()
+        val rows = table.cellRows()
+        if (rows.size < 2) throw FanoutError.EmptyRows(exampleName, notation)
+        val header = rows.first()
         if (header.any { it.isBlank() }) throw FanoutError.BlankColumnName(exampleName)
         // Duplicates would collapse in toMap(), the last value silently winning.
         header.duplicates().ifNotEmpty { throw FanoutError.DuplicateColumnNames(exampleName, it) }
-        return rows.drop(1).mapIndexed { i, row ->
-            row.cells().let { cells ->
-                // zip() would truncate to the shorter list, dropping data without a word.
-                if (cells.size != header.size) {
-                    throw FanoutError.RowSizeMismatch(exampleName, i + 1, header.size, cells.size)
-                }
-                Row(header.zip(cells).toMap())
+        return rows.drop(1).mapIndexed { i, cells ->
+            // zip() would truncate to the shorter list, dropping data without a word.
+            if (cells.size != header.size) {
+                throw FanoutError.RowSizeMismatch(exampleName, notation, i + 1, header.size, cells.size)
             }
+            Row(header.zip(cells).toMap())
         }
     }
 
@@ -148,14 +146,6 @@ private fun referencedIn(body: String, declared: Set<String>) = PLACEHOLDER.find
     .map { it.groupValues[1] }
     .filter { it in declared || it !in examHelpers }
     .toSet()
-
-private fun Element.cells() = query(".//td | .//th").elements().map { it.value.trim() }
-
-private fun List<String>.duplicates() = groupingBy { it }.eachCount().filterValues { it > 1 }.keys
-
-private inline fun Set<String>.ifNotEmpty(action: (Set<String>) -> Unit) {
-    if (isNotEmpty()) action(this)
-}
 
 private inline fun notice(names: Set<String>, error: (Set<String>) -> FanoutError) =
     names.takeIf { it.isNotEmpty() }?.let { error(it).message }
