@@ -156,7 +156,8 @@ class ExampleFanoutTest {
         fanout(doc)
 
         assertThat(doc.exampleBlocksMarked(EXAMPLE_BLOCK)).hasSize(1)
-        assertThat(doc.notices()).singleElement().satisfies({ assertThat(it).contains("rate").contains("Valuation") })
+        assertThat(doc.notices()).singleElement()
+            .satisfies({ assertThat(it).contains("rate").contains("Valuation").contains("[{rows}]") })
     }
 
     @Test
@@ -172,14 +173,19 @@ class ExampleFanoutTest {
     fun `an outline without a rows table fails at parsing`() {
         val doc = doc(outline("<p>qty={{qty}}</p>", rows = ""))
 
-        assertThatThrownBy { fanout(doc) }.isInstanceOf(FanoutError.NoRowsTable::class.java)
+        assertThatThrownBy { fanout(doc) }
+            .isInstanceOf(FanoutError.NoRowsTable::class.java)
+            .hasMessageContaining("[{outline}]")
+            .hasMessageContaining("[{rows}]")
     }
 
     @Test
     fun `an outline whose rows table has no data fails at parsing`() {
         val doc = doc(outline("<p>qty={{qty}}</p>", rows(listOf("case", "qty"))))
 
-        assertThatThrownBy { fanout(doc) }.isInstanceOf(FanoutError.EmptyRows::class.java)
+        assertThatThrownBy { fanout(doc) }
+            .isInstanceOf(FanoutError.EmptyRows::class.java)
+            .hasMessageContaining("[{rows}]")
     }
 
     @Test
@@ -188,6 +194,7 @@ class ExampleFanoutTest {
 
         assertThatThrownBy { fanout(doc) }
             .isInstanceOf(FanoutError.MissingTitle::class.java)
+            .hasMessageContaining("[{outline}]")
             .hasMessageContaining("qty=")
     }
 
@@ -198,7 +205,8 @@ class ExampleFanoutTest {
         fanout(doc)
 
         assertThat(doc.exampleBlocksMarked(EXAMPLE_BLOCK).single().value).contains("{{someVar}}")
-        assertThat(doc.notices()).singleElement().satisfies({ assertThat(it).contains("someVar") })
+        assertThat(doc.notices()).singleElement()
+            .satisfies({ assertThat(it).contains("someVar").contains("[{rows}]") })
     }
 
     @Test
@@ -222,7 +230,9 @@ class ExampleFanoutTest {
         val inner = outline("<p>{{qty}}</p>", rows(listOf("case", "qty"), listOf("usd", "10")))
         val doc = doc(outline("<p>{{qty}}</p>$inner", rows(listOf("case", "qty"), listOf("rub", "100"))))
 
-        assertThatThrownBy { fanout(doc) }.isInstanceOf(FanoutError.Nested::class.java)
+        assertThatThrownBy { fanout(doc) }
+            .isInstanceOf(FanoutError.Nested::class.java)
+            .hasMessageContaining("[{outline}]")
     }
 
     @Test
@@ -231,6 +241,7 @@ class ExampleFanoutTest {
 
         assertThatThrownBy { fanout(doc) }
             .isInstanceOf(FanoutError.RowSizeMismatch::class.java)
+            .hasMessageContaining("[{rows}]")
             .hasMessageContaining("1 cell")
     }
 
@@ -238,7 +249,9 @@ class ExampleFanoutTest {
     fun `a blank column name fails at parsing`() {
         val doc = doc(outline("<p>{{qty}}</p>", rows(listOf("case", " "), listOf("rub", "100"))))
 
-        assertThatThrownBy { fanout(doc) }.isInstanceOf(FanoutError.BlankColumnName::class.java)
+        assertThatThrownBy { fanout(doc) }
+            .isInstanceOf(FanoutError.BlankColumnName::class.java)
+            .hasMessageContaining("[{rows}]")
     }
 
     @Test
@@ -247,6 +260,7 @@ class ExampleFanoutTest {
 
         assertThatThrownBy { fanout(doc) }
             .isInstanceOf(FanoutError.DuplicateColumnNames::class.java)
+            .hasMessageContaining("[{rows}]")
             .hasMessageContaining("qty")
     }
 

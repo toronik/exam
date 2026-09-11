@@ -86,6 +86,7 @@ class InvarianceTest {
 
         assertThatThrownBy { fanout(doc) }
             .isInstanceOf(FanoutError.NothingToPerturb::class.java)
+            .hasMessageContaining("reorder")
             .hasMessageContaining("1 delivery")
     }
 
@@ -161,7 +162,9 @@ class InvarianceTest {
     fun `naming perturbations twice over, inline and in a table, is refused rather than resolved`() {
         val doc = doc(example("duplicate", send("m") + send("n") + perturbations("reorder")))
 
-        assertThatThrownBy { fanout(doc) }.isInstanceOf(FanoutError.TwoWaysToPerturb::class.java)
+        assertThatThrownBy { fanout(doc) }
+            .isInstanceOf(FanoutError.TwoWaysToPerturb::class.java)
+            .hasMessageContaining("[{perturbations}]")
     }
 
     @Test
@@ -189,6 +192,7 @@ class InvarianceTest {
 
         assertThatThrownBy { fanout(doc) }
             .isInstanceOf(FanoutError.DuplicatePerturbations::class.java)
+            .hasMessageContaining("[{perturbations}]")
             .hasMessageContaining("duplicate")
     }
 
@@ -196,7 +200,9 @@ class InvarianceTest {
     fun `a row naming nothing fails at parsing`() {
         val doc = doc(example("", send("m") + perturbations("duplicate", " ")))
 
-        assertThatThrownBy { fanout(doc) }.isInstanceOf(FanoutError.BlankPerturbation::class.java)
+        assertThatThrownBy { fanout(doc) }
+            .isInstanceOf(FanoutError.BlankPerturbation::class.java)
+            .hasMessageContaining("[{perturbations}]")
     }
 
     @Test
@@ -213,6 +219,7 @@ class InvarianceTest {
 
         assertThatThrownBy { fanout(doc) }
             .isInstanceOf(FanoutError.MissingPerturbationsHeader::class.java)
+            .hasMessageContaining("[{perturbations}]")
             .hasMessageContaining("duplicate")
     }
 
@@ -230,7 +237,26 @@ class InvarianceTest {
 
         assertThatThrownBy { fanout(doc) }
             .isInstanceOf(FanoutError.UnsupportedArguments::class.java)
+            .hasMessageContaining("[{perturbations}]")
             .hasMessageContaining("3")
+    }
+
+    @Test
+    fun `a row narrower than the header fails at parsing, and not as a request for arguments`() {
+        val doc = doc(
+            example(
+                "",
+                send("m") + """<table e:perturbations=""><tbody>
+                    <tr><td>perturbation</td><td>note</td></tr>
+                    <tr><td>duplicate</td></tr>
+                    </tbody></table>"""
+            )
+        )
+
+        assertThatThrownBy { fanout(doc) }
+            .isInstanceOf(FanoutError.RowSizeMismatch::class.java)
+            .hasMessageContaining("[{perturbations}]")
+            .hasMessageContaining("1 cell")
     }
 
     @Test
@@ -239,6 +265,7 @@ class InvarianceTest {
 
         assertThatThrownBy { fanout(doc) }
             .isInstanceOf(FanoutError.NoPerturbations::class.java)
+            .hasMessageContaining("[{stable-under}]")
             .hasMessageContaining("reorder")
     }
 

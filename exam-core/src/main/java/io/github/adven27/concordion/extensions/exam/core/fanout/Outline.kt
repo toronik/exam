@@ -12,6 +12,9 @@ const val OUTLINE = "e-outline"
 /** Exam-namespaced attribute of the `[{rows}]` table, declared as `:rows: e-outline-rows=`. */
 const val OUTLINE_ROWS = "outline-rows"
 
+/** How the variants table is written, for the errors about it: the block marker is a different thing. */
+private const val ROWS = "[{rows}]"
+
 /** Column that only names the case, by convention read by [caseOrAllValues] and not expected in the body. */
 const val CASE = "case"
 
@@ -66,7 +69,7 @@ class Outline @JvmOverloads constructor(
 
     private fun rows(table: Element, exampleName: String): List<Row> {
         val rows = table.cellRows()
-        if (rows.size < 2) throw FanoutError.EmptyRows(exampleName, notation)
+        if (rows.size < 2) throw FanoutError.EmptyRows(exampleName, ROWS)
         val header = rows.first()
         if (header.any { it.isBlank() }) throw FanoutError.BlankColumnName(exampleName)
         // Duplicates would collapse in toMap(), the last value silently winning.
@@ -74,7 +77,7 @@ class Outline @JvmOverloads constructor(
         return rows.drop(1).mapIndexed { i, cells ->
             // zip() would truncate to the shorter list, dropping data without a word.
             if (cells.size != header.size) {
-                throw FanoutError.RowSizeMismatch(exampleName, notation, i + 1, header.size, cells.size)
+                throw FanoutError.RowSizeMismatch(exampleName, ROWS, i + 1, header.size, cells.size)
             }
             Row(header.zip(cells).toMap())
         }
