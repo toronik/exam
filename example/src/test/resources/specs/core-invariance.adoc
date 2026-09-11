@@ -76,7 +76,7 @@ and `Bob` delivered [{eq}timesDelivered('Bob')]`1` time.
 
 A green case proves little on its own: the same body passing again is what one expects of a body that
 ignores its input. The guard is a body that is *not* invariant - delivering a name appends it - kept
-in the suite by `{ExpectedToFail}`. Were duplication to stop happening, this example would pass, and
+in the suite by `ExpectedToFail` in its marker. Were duplication to stop happening, this example would pass, and
 an example expected to fail that did not is a broken build.
 
 =====
