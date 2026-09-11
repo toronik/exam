@@ -99,6 +99,10 @@ class Invariance @JvmOverloads constructor(
         // Known names only: a block may legitimately carry a styling role, and calling that an
         // unknown perturbation would refuse a document over a css class.
         val named = block.classes().filter { it in available }
+        // Known names only, here as everywhere: a block may carry a styling role, and refusing a
+        // document over a css class would be worse. The price is the same one the inline form pays -
+        // a name Exam does not know is invisible, so `[{stable-under} outag]` next to a table is
+        // read as the table alone rather than as two ways of saying it.
         if (table != null && named.isNotEmpty()) throw FanoutError.TwoWaysToPerturb(exampleName)
 
         val asked = if (table == null) inline(block, named, exampleName) else fromTable(table, exampleName)

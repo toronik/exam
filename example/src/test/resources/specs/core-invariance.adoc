@@ -93,9 +93,15 @@ Then:: `Bob` is delivered [{eq}timesDelivered('Bob')]`1` time
 .Refused, and how to add a perturbation of your own
 [{collapse}]
 =====
-A marker naming no perturbation Exam knows is refused with the known ones listed, and so is a
-perturbation with nothing to perturb: a case that verifies nothing the example already verifies must
-not be published as a verified property.
+- a marker naming no perturbation at all, or none that Exam knows - the known ones are listed
+- a perturbation with nothing to perturb: a case that verifies nothing the example already verifies
+must not be published as a verified property
+- perturbations named twice over, in the marker and in a `[\{perturbations}]` table
+- a `[\{perturbations}]` table with a header and no data row, with a row naming nothing, with the
+same perturbation twice, or with a row of a width other than the header's
+- a table whose first row is a perturbation rather than a header, which the header convention would
+otherwise swallow
+- arguments to a perturbation: the table has room for them, they do not mean anything yet
 
 What only the fixture can do - restart the application, take a dependency away - is a `Perturbation`
 of the project's own, registered with `withPerturbations(...)`:
