@@ -30,8 +30,8 @@ perturbation
 duplicate
 reorder
 ,===
-//end::stable[]
 ====
+//end::stable[]
 =====
 
 One or two perturbations can be named in the marker instead, which is how the examples below are
@@ -70,8 +70,8 @@ stands.
 
 `Ann` is remembered [{eq}timesRemembered('Ann')]`1` time
 and `Bob` delivered [{eq}timesDelivered('Bob')]`1` time.
-//end::except[]
 ====
+//end::except[]
 =====
 
 A green case proves little on its own: the same body passing again is what one expects of a body that
@@ -86,8 +86,8 @@ an example expected to fail that did not is a broken build.
 ====
 Given:: [{exec}deliver(#TEXT)]`Bob` is delivered
 Then:: `Bob` is delivered [{eq}timesDelivered('Bob')]`1` time
-//end::not-stable[]
 ====
+//end::not-stable[]
 =====
 
 .Refused, and how to add a perturbation of your own

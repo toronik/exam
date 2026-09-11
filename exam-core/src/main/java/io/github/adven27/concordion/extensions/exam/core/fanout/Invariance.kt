@@ -98,10 +98,10 @@ class Invariance @JvmOverloads constructor(
         val table = block.tableMarked(PERTURBATIONS)
         // Known names only: a block may legitimately carry a styling role, and calling that an
         // unknown perturbation would refuse a document over a css class.
-        val inline = block.classes().filter { it in available }
-        if (table != null && inline.isNotEmpty()) throw FanoutError.TwoWaysToPerturb(exampleName)
+        val named = block.classes().filter { it in available }
+        if (table != null && named.isNotEmpty()) throw FanoutError.TwoWaysToPerturb(exampleName)
 
-        val asked = if (table == null) inline(block, exampleName) else fromTable(table, exampleName)
+        val asked = if (table == null) inline(block, named, exampleName) else fromTable(table, exampleName)
         val found = block.deliveries(deliveries).size
         // An unused column is a smell; a perturbation with nothing to perturb is an impossible
         // request. The case would come out green having verified nothing, which is the shape this
@@ -119,9 +119,8 @@ class Invariance @JvmOverloads constructor(
         )
     }
 
-    private fun inline(block: Element, exampleName: String): List<String> {
-        val asked = block.classes().filter { it in available }
-        if (asked.isNotEmpty()) return asked
+    private fun inline(block: Element, named: List<String>, exampleName: String): List<String> {
+        if (named.isNotEmpty()) return named
         val unrecognized = block.classes() - marker - EXAMPLE_BLOCK - STATUSES
         throw if (unrecognized.isEmpty()) {
             FanoutError.NoPerturbations(exampleName, available.keys)
