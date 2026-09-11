@@ -148,7 +148,7 @@ class Invariance @JvmOverloads constructor(
                 throw FanoutError.UnsupportedArguments(exampleName, cells.first(), cells.drop(1))
             }
         }
-        val named = rows.drop(1).map { it.first() }
+        val named = rows.drop(1).map { it.firstOrNull().orEmpty() }
         if (named.any { it.isBlank() }) throw FanoutError.BlankPerturbation(exampleName)
         (named.toSet() - available.keys).ifNotEmpty {
             throw FanoutError.UnknownPerturbation(exampleName, it, available.keys)
