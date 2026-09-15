@@ -75,3 +75,9 @@
 :any-not-null: {{notNull}}
 :any-uuid: {{uuid}}
 :any: {{ignore}}
+
+:outline: role=e-outline
+:rows: e-outline-rows=
+:stable-under: role=e-stable-under
+:stable-except: role=e-stable-except
+:perturbations: e-perturbations=

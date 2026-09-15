@@ -18,10 +18,23 @@ dependencies {
     testImplementation "io.github.adven27:env-db-postgresql:5.1.1"
     testImplementation 'org.concordion:concordion-timing-extension:1.1.0'
     testImplementation 'org.concordion:concordion-run-totals-extension:1.2.0'
+    testImplementation 'org.assertj:assertj-core:3.26.0'
 }
 
 tasks.named('test') {
     include '**/Specs.class'
     systemProperty 'concordion.output.dir', "$reporting.baseDir/specs"
     systemProperty "SPECS_ADOC_VERSION", libVersion
+}
+
+// Asserts about the report the specs above published, so it can only run once they have.
+tasks.register('reportGuard', Test) {
+    dependsOn tasks.named('test')
+    include '**/ReportGuardTest.class'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('reportGuard')
 }

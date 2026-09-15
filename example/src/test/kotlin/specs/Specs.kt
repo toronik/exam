@@ -71,12 +71,28 @@ open class Specs : AbstractSpecs() {
     }
 
     private val users = mutableListOf<String>()
+
+    /** Counts its own calls, so an outline clone can state which run of the block it is. */
+    fun outlineRun() = ++outlineRuns
+
     fun split(s: String) = s.split(" ").let { it[0] to it[1] }
     fun greetingFor(s: String) = "Hello $s!"
     fun greeting() = "Hello World!"
     fun someJson() = "{\"result\": 1}"
     fun someXml() = "<result>1</result>"
     fun setUpUser(s: String) = users.add(s)
+
+    private val names = mutableSetOf<String>()
+    private val delivered = mutableListOf<String>()
+
+    /** Idempotent on purpose: a set forgets that it was told twice, and forgets in what order. */
+    fun remember(name: String) = names.add(name)
+    fun timesRemembered(name: String) = names.count { it == name }
+    fun namesRemembered() = names.size
+
+    /** Not idempotent on purpose, and a list of its own: delivered twice is remembered twice. */
+    fun deliver(name: String) = delivered.add(name)
+    fun timesDelivered(name: String) = delivered.count { it == name }
     fun search(s: String) = users.filter { it.contains(s) }
     fun lowercase(name: String): Result = name.lowercase().let {
         Result(it, """{ "result": "$it" }""", """<result>$it</result>""")
@@ -90,6 +106,11 @@ open class Specs : AbstractSpecs() {
     val miscHelpers: String = MiscHelpers.entries.joinToString("\n") { it.describe() }
 
     companion object {
+        /**
+         * Static on purpose: a fixture is instantiated per example, so a counter that has to survive
+         * from one clone of an outline to the next cannot be instance state.
+         */
+        private var outlineRuns = 0
         private lateinit var SUT: ConfigurableApplicationContext
         val ENV: ApplicationEnvironment = ApplicationEnvironment().apply { up() }
 

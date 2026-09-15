@@ -28,3 +28,36 @@
     font-size: small;
     color: rgba(8, 68, 8, 0.5);
 }
+
+/* Variants of one fanned out example: the tab is what shows and hides a case, so the collapse of
+   the example inside a case is neutralized - two mechanisms over the same body only fight. */
+.exam-fanout .tab-pane > .exam-example > .exampleblock {
+    display: block;
+}
+
+.exam-fanout .exam-fanout-header table {
+    margin-bottom: 0;
+}
+
+/* Search and print see nothing that is display:none, so a group can be flattened - by the button in
+   its header, and always on paper. The class names here are VariantGroup.kt: GROUP, FLAT,
+   GROUP_FLATTEN. */
+.exam-fanout.exam-flat .nav-tabs,
+.exam-fanout.exam-flat .exam-fanout-flatten {
+    display: none;
+}
+
+.exam-fanout.exam-flat .tab-pane {
+    display: block;
+}
+
+@media print {
+    .exam-fanout .nav-tabs,
+    .exam-fanout .exam-fanout-flatten {
+        display: none;
+    }
+
+    .exam-fanout .tab-pane {
+        display: block;
+    }
+}

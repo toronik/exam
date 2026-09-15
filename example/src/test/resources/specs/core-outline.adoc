@@ -1,0 +1,87 @@
+=== outline [[e-outline]]
+
+An example marked `[\{outline}]` with a `[\{rows}]` table of variants becomes one example per data
+row: the block is cloned, every clone named after its row, the table cut out of the clone and the row
+values put into its body.
+
+`<<e-execute,e-execute on a table>>` repeats a fixture call and compares cell by cell; this repeats a
+body of arbitrary commands - `e-db-set`, `e-mq-set`, `e-http`, checks - and every clone is a
+concordion example of its own, with its own status, its own `[\{before}]` and its own
+`[\{ExpectedToFail}]`. Vary the inputs of a function with `e-execute`, the data of a scenario with
+`[\{outline}]`.
+
+.Usage
+[source,asciidoc]
+--
+include::core-outline.adoc[tags=outline]
+--
+
+=====
+//tag::outline[]
+.Outline
+[{outline}]
+====
+Run [{eq}outlineRun()]`{{order}}` of one and the same block,
+in which `who` is [{eq}#who]`{{who}}`.
+
+.variants
+[{rows}]
+,===
+case, order, who
+a person, 1, Bob
+a crowd, 2, World
+,===
+====
+//end::outline[]
+=====
+
+`outlineRun()` counts its own calls, so `1` and `2` hold only if one block ran twice, in the order of
+the rows, with its own value each time.
+
+Row values reach the *text* of a clone. In a command expression name the variable instead - `{{who}}`
+in a sentence, `#who` in `[\{eq}#who]` - because the values are also set as variables of the case,
+which is how they reach content it pulls in at run time:
+
+.Given file `/data/core/outline-row.txt`
+[source]
+include::../data/core/outline-row.txt[]
+
+=====
+//tag::outline-file[]
+.Outline values in included content
+[{outline}]
+====
+When:: `fromFile` = [{set}fromFile]`{{file '/data/core/outline-row.txt'}}`
+Then:: `fromFile` equals [{eq}#fromFile]`who = {{who}}`
+
+.variants
+[{rows}]
+,===
+case, who
+a person, Bob
+a crowd, World
+,===
+====
+//end::outline-file[]
+=====
+
+NOTE: A column name must not collide with a document attribute: `{\{run}}` contains `\{run}`, which
+asciidoctor substitutes before Exam sees the document.
+
+The cases of one outline are one group in the report: the matrix in its header, the bodies as tabs, a
+badge per case, the first case that needs attention open. *all cases at once* lays a group flat for
+search, printing does it unasked, and a link to one case opens its tab.
+
+.Refused while the document is parsed, never quietly skipped
+[{collapse}]
+=====
+- `[\{outline}]` without a `[\{rows}]` table, or a table with a header and no data
+- a data row of a width other than the header's, a blank or a duplicated column name
+- a nested `[\{outline}]`, or a second fanout marker on the same block
+- an `[\{outline}]` without a title: a titled block is what becomes an example, so an untitled one
+has nothing to clone
+
+Warnings in the header of the group, since neither is a break: a column no body reads (usually a
+matrix of unrelated cases), and a `{{name}}` that is no column of the table - it may be a variable of
+the spec, and a name that is a typo fails at run time anyway.
+=====
